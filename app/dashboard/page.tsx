@@ -92,10 +92,28 @@ const cards: Card[] = [
   },
 ];
 
-const statusConfig: Record<CardStatus, { label: string; dot: string; bg: string; text: string }> = {
-  collecting: { label: "Collecting", dot: "bg-[#D4845A]", bg: "bg-[#FEF3ED]", text: "text-[#D4845A]" },
-  delivered:  { label: "Delivered",  dot: "bg-[#7B9E87]", bg: "bg-[#EEF3EE]", text: "text-[#5A7D66]" },
-  draft:      { label: "Draft",      dot: "bg-[#C5B8AD]", bg: "bg-[#F5F4F2]", text: "text-[#8C7B6B]" },
+const statusConfig: Record<
+  CardStatus,
+  { label: string; dot: string; bg: string; text: string }
+> = {
+  collecting: {
+    label: "Collecting",
+    dot: "bg-[#D4845A]",
+    bg: "bg-[#FEF3ED]",
+    text: "text-[#D4845A]",
+  },
+  delivered: {
+    label: "Delivered",
+    dot: "bg-[#7B9E87]",
+    bg: "bg-[#EEF3EE]",
+    text: "text-[#5A7D66]",
+  },
+  draft: {
+    label: "Draft",
+    dot: "bg-[#C5B8AD]",
+    bg: "bg-[#F5F4F2]",
+    text: "text-[#8C7B6B]",
+  },
 };
 
 const tabs = ["All", "Collecting", "Delivered", "Drafts"];
@@ -108,11 +126,36 @@ const stats = [
 ];
 
 const activity = [
-  { icon: "🖊", text: "Amy L. signed Sarah Chen's Birthday card", time: "2 hours ago", color: "#E6F1FB" },
-  { icon: "🔗", text: "You shared the signing link for James Morley's Farewell card", time: "5 hours ago", color: "#EEF3EE" },
-  { icon: "🎉", text: "Priya Rajan's Congratulations card was delivered", time: "4 days ago", color: "#F0EBF8" },
-  { icon: "🖊", text: "Marcus W. signed Sarah Chen's Birthday card", time: "4 days ago", color: "#F5EAD8" },
-  { icon: "＋", text: "You created a Birthday card for Sarah Chen", time: "5 days ago", color: "#FEF3ED" },
+  {
+    icon: "🖊",
+    text: "Amy L. signed Sarah Chen's Birthday card",
+    time: "2 hours ago",
+    color: "#E6F1FB",
+  },
+  {
+    icon: "🔗",
+    text: "You shared the signing link for James Morley's Farewell card",
+    time: "5 hours ago",
+    color: "#EEF3EE",
+  },
+  {
+    icon: "🎉",
+    text: "Priya Rajan's Congratulations card was delivered",
+    time: "4 days ago",
+    color: "#F0EBF8",
+  },
+  {
+    icon: "🖊",
+    text: "Marcus W. signed Sarah Chen's Birthday card",
+    time: "4 days ago",
+    color: "#F5EAD8",
+  },
+  {
+    icon: "＋",
+    text: "You created a Birthday card for Sarah Chen",
+    time: "5 days ago",
+    color: "#FEF3ED",
+  },
 ];
 
 export default function Dashboard() {
@@ -134,7 +177,6 @@ export default function Dashboard() {
 
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
-
       {/* ── SIDEBAR ── */}
       <aside className="fixed top-0 left-0 bottom-0 w-56 bg-[#1A1208] flex flex-col z-40 px-5 py-6">
         <div className="font-playfair text-[20px] tracking-tight text-[#FDF8F2] mb-10">
@@ -157,7 +199,9 @@ export default function Dashboard() {
                   : "text-[#8A7F74] hover:bg-[#2E2820] hover:text-[#FDF8F2] bg-transparent"
               }`}
             >
-              <span className="text-sm w-4 text-center leading-none">{item.icon}</span>
+              <span className="text-sm w-4 text-center leading-none">
+                {item.icon}
+              </span>
               {item.label}
             </button>
           ))}
@@ -178,21 +222,26 @@ export default function Dashboard() {
             MW
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-medium text-[#FDF8F2] truncate">Marcus W.</div>
-            <div className="text-[10px] text-[#8A7F74] truncate">marcus@co.com</div>
+            <div className="text-xs font-medium text-[#FDF8F2] truncate">
+              Marcus W.
+            </div>
+            <div className="text-[10px] text-[#8A7F74] truncate">
+              marcus@co.com
+            </div>
           </div>
         </div>
       </aside>
 
       {/* ── MAIN ── */}
       <div className="ml-56 flex-1 min-h-screen">
-
         {/* Top bar */}
         <div className="sticky top-0 z-30 flex items-center justify-between px-8 h-16 bg-[rgba(245,240,232,0.95)] backdrop-blur-md border-b border-[#E8DDD0]">
           <h1 className="font-playfair text-[22px] tracking-tight">My cards</h1>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-taupe text-sm pointer-events-none">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-taupe text-sm pointer-events-none">
+                🔍
+              </span>
               <input
                 type="text"
                 value={search}
@@ -208,14 +257,22 @@ export default function Dashboard() {
         </div>
 
         <div className="px-8 py-8">
-
           {/* Stats */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             {stats.map((s) => (
-              <div key={s.label} className="bg-white border border-[#E8DDD0] rounded-2xl p-5">
-                <div className="text-xs text-muted-taupe font-medium mb-1">{s.label}</div>
-                <div className="font-playfair text-[36px] tracking-[-1px] leading-tight">{s.value}</div>
-                <div className="text-[11px] text-muted-taupe font-light mt-1">{s.sub}</div>
+              <div
+                key={s.label}
+                className="bg-white border border-[#E8DDD0] rounded-2xl p-5"
+              >
+                <div className="text-xs text-muted-taupe font-medium mb-1">
+                  {s.label}
+                </div>
+                <div className="font-playfair text-[36px] tracking-[-1px] leading-tight">
+                  {s.value}
+                </div>
+                <div className="text-[11px] text-muted-taupe font-light mt-1">
+                  {s.sub}
+                </div>
               </div>
             ))}
           </div>
@@ -228,7 +285,9 @@ export default function Dashboard() {
                   key={t}
                   onClick={() => setActiveTab(t)}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all font-dm-sans border-none cursor-pointer ${
-                    activeTab === t ? "bg-[#1A1208] text-[#FDF8F2]" : "text-muted-taupe hover:text-[#1A1208] bg-transparent"
+                    activeTab === t
+                      ? "bg-[#1A1208] text-[#FDF8F2]"
+                      : "text-muted-taupe hover:text-[#1A1208] bg-transparent"
                   }`}
                 >
                   {t}
@@ -237,8 +296,8 @@ export default function Dashboard() {
                       {t === "Collecting"
                         ? cards.filter((c) => c.status === "collecting").length
                         : t === "Delivered"
-                        ? cards.filter((c) => c.status === "delivered").length
-                        : cards.filter((c) => c.status === "draft").length}
+                          ? cards.filter((c) => c.status === "delivered").length
+                          : cards.filter((c) => c.status === "draft").length}
                     </span>
                   )}
                 </button>
@@ -253,7 +312,9 @@ export default function Dashboard() {
           {filtered.length === 0 ? (
             <div className="text-center py-24 text-muted-taupe">
               <div className="text-4xl mb-3">🔍</div>
-              <div className="text-sm font-light">No cards match your search.</div>
+              <div className="text-sm font-light">
+                No cards match your search.
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-5">
@@ -267,7 +328,9 @@ export default function Dashboard() {
                     {/* Colour band */}
                     <div
                       className="h-20 relative"
-                      style={{ background: `linear-gradient(135deg,${card.theme.from},${card.theme.to})` }}
+                      style={{
+                        background: `linear-gradient(135deg,${card.theme.from},${card.theme.to})`,
+                      }}
                     >
                       <div className="absolute top-3 left-4 text-[10px] font-medium tracking-[1.5px] uppercase text-[#C4734A]">
                         {card.emoji} {card.occasion}
@@ -278,24 +341,30 @@ export default function Dashboard() {
                       {/* Menu */}
                       <div className="absolute top-2 right-3">
                         <button
-                          onClick={() => setMenuOpen(menuOpen === card.id ? null : card.id)}
+                          onClick={() =>
+                            setMenuOpen(menuOpen === card.id ? null : card.id)
+                          }
                           className="w-7 h-7 rounded-full bg-white/60 hover:bg-white flex items-center justify-center text-muted-taupe text-xs transition-colors border-none cursor-pointer"
                         >
                           •••
                         </button>
                         {menuOpen === card.id && (
                           <div className="absolute right-0 top-8 bg-white border border-[#E8DDD0] rounded-xl shadow-lg z-20 min-w-[140px] py-1 overflow-hidden">
-                            {["View card", "Copy link", "Edit", "Delete"].map((action) => (
-                              <button
-                                key={action}
-                                onClick={() => setMenuOpen(null)}
-                                className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FDF8F2] transition-colors font-dm-sans border-none cursor-pointer bg-transparent ${
-                                  action === "Delete" ? "text-red-500" : "text-[#1A1208]"
-                                }`}
-                              >
-                                {action}
-                              </button>
-                            ))}
+                            {["View card", "Copy link", "Edit", "Delete"].map(
+                              (action) => (
+                                <button
+                                  key={action}
+                                  onClick={() => setMenuOpen(null)}
+                                  className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FDF8F2] transition-colors font-dm-sans border-none cursor-pointer bg-transparent ${
+                                    action === "Delete"
+                                      ? "text-red-500"
+                                      : "text-[#1A1208]"
+                                  }`}
+                                >
+                                  {action}
+                                </button>
+                              ),
+                            )}
                           </div>
                         )}
                       </div>
@@ -304,18 +373,26 @@ export default function Dashboard() {
                     {/* Body */}
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${s.bg} ${s.text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                        <div
+                          className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${s.bg} ${s.text}`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${s.dot}`}
+                          />
                           {s.label}
                         </div>
-                        <div className="text-xs text-muted-taupe">{card.createdAt}</div>
+                        <div className="text-xs text-muted-taupe">
+                          {card.createdAt}
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between text-sm mb-4">
                         <div className="flex items-center gap-1.5 text-muted-taupe">
                           <span>🖊</span>
                           <span>
-                            <span className="font-medium text-[#1A1208]">{card.signers}</span>{" "}
+                            <span className="font-medium text-[#1A1208]">
+                              {card.signers}
+                            </span>{" "}
                             {card.signers === 1 ? "signer" : "signers"}
                           </span>
                         </div>
@@ -380,7 +457,9 @@ export default function Dashboard() {
 
           {/* Recent activity */}
           <div className="mt-10">
-            <h2 className="font-playfair text-[20px] tracking-tight mb-4">Recent activity</h2>
+            <h2 className="font-playfair text-[20px] tracking-tight mb-4">
+              Recent activity
+            </h2>
             <div className="bg-white border border-[#E8DDD0] rounded-2xl overflow-hidden">
               {activity.map((a, i) => (
                 <div
@@ -394,12 +473,13 @@ export default function Dashboard() {
                     {a.icon}
                   </div>
                   <div className="flex-1 text-sm">{a.text}</div>
-                  <div className="text-xs text-muted-taupe shrink-0">{a.time}</div>
+                  <div className="text-xs text-muted-taupe shrink-0">
+                    {a.time}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-
         </div>
       </div>
     </div>

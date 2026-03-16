@@ -9,23 +9,30 @@ const steps = [
   {
     icon: <ImagePlus className="text-terracotta w-6 h-6" />,
     title: "Create a Card",
-    description: "Pick an occasion, add a cover, and personalize your card in seconds.",
+    description:
+      "Pick an occasion, add a cover, and personalize your card in seconds.",
   },
   {
     icon: <Link className="text-terracotta w-6 h-6" />,
     title: "Share a Link",
-    description: "Send a single link to everyone — no app downloads, no sign-ups needed.",
+    description:
+      "Send a single link to everyone — no app downloads, no sign-ups needed.",
   },
   {
     icon: <Send className="text-terracotta w-6 h-6" />,
     title: "Deliver It",
-    description: "Send the finished card to the recipient at just the right moment.",
+    description:
+      "Send the finished card to the recipient at just the right moment.",
   },
 ];
 
 const occasions = [
-  "🎂 Birthdays", "💍 Weddings", "👋 Farewells",
-  "🎉 Retirements", "🍼 Baby Showers", "💼 New Jobs",
+  "🎂 Birthdays",
+  "💍 Weddings",
+  "👋 Farewells",
+  "🎉 Retirements",
+  "🍼 Baby Showers",
+  "💼 New Jobs",
 ];
 
 // Reusable animation variants
@@ -55,11 +62,9 @@ const scaleIn = {
 export default function Home() {
   return (
     <div className="font-dm-sans">
-
       {/* Hero */}
       <section className="flex min-h-[80vh] items-center justify-center px-10">
         <div className="max-w-5xl w-full flex items-center gap-16">
-
           {/* Left — text */}
           <div className="flex-1 flex flex-col">
             <div className="mb-4 w-fit overflow-hidden">
@@ -87,8 +92,8 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.45, ease: "easeOut" }}
             >
-              Create a card for any occasion. Share a link. Watch everyone's messages
-              and photos come together in one beautiful place.
+              Create a card for any occasion. Share a link. Watch everyone's
+              messages and photos come together in one beautiful place.
             </motion.h5>
 
             <motion.div
@@ -114,7 +119,9 @@ export default function Home() {
             >
               <Image
                 src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400"
-                alt="People celebrating" fill className="object-cover"
+                alt="People celebrating"
+                fill
+                className="object-cover"
               />
             </motion.div>
 
@@ -127,7 +134,9 @@ export default function Home() {
             >
               <Image
                 src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300"
-                alt="Birthday card" fill className="object-cover"
+                alt="Birthday card"
+                fill
+                className="object-cover"
               />
             </motion.div>
 
@@ -140,7 +149,9 @@ export default function Home() {
             >
               <Image
                 src="https://images.unsplash.com/photo-1464349153735-7db50ed83c84?w=300"
-                alt="Group signing card" fill className="object-cover"
+                alt="Group signing card"
+                fill
+                className="object-cover"
               />
             </motion.div>
 
@@ -153,11 +164,12 @@ export default function Home() {
             >
               <Image
                 src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200"
-                alt="Celebration" fill className="object-cover"
+                alt="Celebration"
+                fill
+                className="object-cover"
               />
             </motion.div>
           </div>
-
         </div>
       </section>
 
@@ -194,7 +206,11 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.3 }}
-                whileHover={{ y: -6, shadow: "lg", transition: { duration: 0.2 } }}
+                whileHover={{
+                  y: -6,
+                  shadow: "lg",
+                  transition: { duration: 0.2 },
+                }}
               >
                 <div className="bg-warm-sand rounded-full w-10 h-10 flex items-center justify-center">
                   {step.icon}
@@ -240,7 +256,12 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.5 }}
-                whileHover={{ scale: 1.08, backgroundColor: "#D4845A", color: "#fff", transition: { duration: 0.15 } }}
+                whileHover={{
+                  scale: 1.08,
+                  backgroundColor: "#D4845A",
+                  color: "#fff",
+                  transition: { duration: 0.15 },
+                }}
               >
                 {occasion}
               </motion.span>
@@ -289,7 +310,6 @@ export default function Home() {
           </ReusableButton>
         </motion.div>
       </motion.section>
-
     </div>
   );
 }

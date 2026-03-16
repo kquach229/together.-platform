@@ -98,8 +98,6 @@ export default function Pricing() {
 
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
-
-
       {/* ── HERO ── */}
       <section className="relative overflow-hidden pt-20 pb-16 px-12 text-center">
         <div className="absolute w-[480px] h-[480px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-24 -left-32 opacity-60 pointer-events-none" />
@@ -110,7 +108,8 @@ export default function Pricing() {
             Simple, honest pricing
           </div>
           <h1 className="font-playfair text-[clamp(40px,5vw,64px)] leading-[1.05] tracking-[-2px] mb-4">
-            Start free.<br />
+            Start free.
+            <br />
             <em className="text-terracotta">Upgrade</em> when it feels right.
           </h1>
           <p className="text-[17px] text-muted-taupe font-light leading-[1.75] mb-10">
@@ -129,10 +128,14 @@ export default function Pricing() {
                     : "text-muted-taupe"
                 }`}
               >
-                {b === "monthly" ? "Monthly" : (
+                {b === "monthly" ? (
+                  "Monthly"
+                ) : (
                   <span className="flex items-center gap-2">
                     Annual
-                    <span className="text-[11px] font-medium text-[#7B9E87]">–20%</span>
+                    <span className="text-[11px] font-medium text-[#7B9E87]">
+                      –20%
+                    </span>
                   </span>
                 )}
               </button>
@@ -160,29 +163,34 @@ export default function Pricing() {
               )}
 
               <div className="mb-6">
-                <div className="text-sm font-medium text-muted-taupe mb-2">{plan.name}</div>
+                <div className="text-sm font-medium text-muted-taupe mb-2">
+                  {plan.name}
+                </div>
                 <div className="flex items-baseline gap-1 mb-3">
                   <span className="font-playfair text-[48px] tracking-[-2px] leading-none">
                     {plan.monthlyPrice === 0
                       ? "$0"
                       : billing === "monthly"
-                      ? `$${plan.monthlyPrice}`
-                      : `$${plan.annualPrice}`}
+                        ? `$${plan.monthlyPrice}`
+                        : `$${plan.annualPrice}`}
                   </span>
                   <span className="text-sm text-muted-taupe font-light">
                     {plan.monthlyPrice === 0
                       ? "forever"
                       : billing === "monthly"
-                      ? "/ month"
-                      : "/ year"}
+                        ? "/ month"
+                        : "/ year"}
                   </span>
                 </div>
                 {plan.monthlyPrice > 0 && billing === "annual" && (
                   <div className="text-xs text-[#7B9E87] font-medium mb-2">
-                    Billed annually · saves ${(plan.monthlyPrice * 12) - plan.annualPrice}/yr
+                    Billed annually · saves $
+                    {plan.monthlyPrice * 12 - plan.annualPrice}/yr
                   </div>
                 )}
-                <p className="text-sm text-muted-taupe leading-[1.7] font-light">{plan.desc}</p>
+                <p className="text-sm text-muted-taupe leading-[1.7] font-light">
+                  {plan.desc}
+                </p>
               </div>
 
               <div className="h-px bg-[#E8DDD0] mb-5" />
@@ -199,7 +207,11 @@ export default function Pricing() {
                     >
                       {f.included ? "✓" : "–"}
                     </span>
-                    <span className={f.included ? "text-[#1A1208]" : "text-muted-taupe"}>
+                    <span
+                      className={
+                        f.included ? "text-[#1A1208]" : "text-muted-taupe"
+                      }
+                    >
                       {f.text}
                     </span>
                   </li>
@@ -211,8 +223,8 @@ export default function Pricing() {
                   plan.ctaStyle === "primary"
                     ? "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.3)]"
                     : plan.ctaStyle === "dark"
-                    ? "bg-[#1A1208] text-[#FDF8F2] hover:opacity-85"
-                    : "border border-[#E8DDD0] text-[#1A1208] hover:border-terracotta hover:text-terracotta bg-transparent"
+                      ? "bg-[#1A1208] text-[#FDF8F2] hover:opacity-85"
+                      : "border border-[#E8DDD0] text-[#1A1208] hover:border-terracotta hover:text-terracotta bg-transparent"
                 }`}
               >
                 {plan.cta}
@@ -220,13 +232,13 @@ export default function Pricing() {
             </div>
           ))}
         </div>
-
-   
       </section>
 
       {/* ── COMPARE TABLE ── */}
       <section className="max-w-[1160px] mx-auto px-12 py-24">
-        <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">Full breakdown</p>
+        <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">
+          Full breakdown
+        </p>
         <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-12">
           Compare plans
         </h2>
@@ -234,9 +246,14 @@ export default function Pricing() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#E8DDD0]">
-                <th className="text-left p-5 text-muted-taupe font-medium text-[11px] tracking-[1.5px] uppercase w-1/2">Feature</th>
+                <th className="text-left p-5 text-muted-taupe font-medium text-[11px] tracking-[1.5px] uppercase w-1/2">
+                  Feature
+                </th>
                 {plans.map((p) => (
-                  <th key={p.name} className={`p-5 text-center font-medium ${p.featured ? "text-terracotta" : "text-[#1A1208]"}`}>
+                  <th
+                    key={p.name}
+                    className={`p-5 text-center font-medium ${p.featured ? "text-terracotta" : "text-[#1A1208]"}`}
+                  >
                     {p.name}
                   </th>
                 ))}
@@ -256,14 +273,22 @@ export default function Pricing() {
                 ["Slack integration", "–", "–", "✓"],
                 ["Priority support", "–", "–", "✓"],
               ].map(([feature, free, plus, team], i) => (
-                <tr key={feature} className={i % 2 === 0 ? "bg-[#FDF8F2]" : "bg-white"}>
+                <tr
+                  key={feature}
+                  className={i % 2 === 0 ? "bg-[#FDF8F2]" : "bg-white"}
+                >
                   <td className="p-5 text-[#1A1208]">{feature}</td>
                   {[free, plus, team].map((val, j) => (
-                    <td key={j} className={`p-5 text-center font-medium ${
-                      val === "✓" ? "text-[#5A7D66]" :
-                      val === "–" ? "text-[#C0B8B0]" :
-                      "text-[#1A1208]"
-                    }`}>
+                    <td
+                      key={j}
+                      className={`p-5 text-center font-medium ${
+                        val === "✓"
+                          ? "text-[#5A7D66]"
+                          : val === "–"
+                            ? "text-[#C0B8B0]"
+                            : "text-[#1A1208]"
+                      }`}
+                    >
                       {val}
                     </td>
                   ))}
@@ -277,22 +302,25 @@ export default function Pricing() {
       {/* ── FAQ ── */}
       <div className="bg-[#F5EAD8] py-20 px-12">
         <div className="max-w-[640px] mx-auto">
-          <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">Got questions?</p>
+          <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">
+            Got questions?
+          </p>
           <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-10">
             Common questions
           </h2>
           <div className="flex flex-col">
             {faqs.map((faq, i) => (
-              <div
-                key={i}
-                className="border-t border-[#D8CEBE] last:border-b"
-              >
+              <div key={i} className="border-t border-[#D8CEBE] last:border-b">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex justify-between items-center py-5 text-left font-dm-sans cursor-pointer bg-transparent border-none"
                 >
-                  <span className="text-[15px] font-medium text-[#1A1208] pr-6">{faq.q}</span>
-                  <span className={`text-muted-taupe text-sm transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-180" : ""}`}>
+                  <span className="text-[15px] font-medium text-[#1A1208] pr-6">
+                    {faq.q}
+                  </span>
+                  <span
+                    className={`text-muted-taupe text-sm transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-180" : ""}`}
+                  >
                     ▾
                   </span>
                 </button>
@@ -312,7 +340,9 @@ export default function Pricing() {
         <div className="absolute w-[400px] h-[400px] rounded-full bg-white/10 -top-28 -left-24 pointer-events-none" />
         <div className="absolute w-[300px] h-[300px] rounded-full bg-white/10 -bottom-16 -right-14 pointer-events-none" />
         <h2 className="font-playfair text-[clamp(32px,4vw,52px)] text-white tracking-[-2px] mb-4 relative z-10">
-          Someone deserves to feel<br />celebrated today.
+          Someone deserves to feel
+          <br />
+          celebrated today.
         </h2>
         <p className="text-[17px] text-white/75 mb-9 font-light relative z-10">
           Start a card in 60 seconds — it's free.
@@ -326,8 +356,6 @@ export default function Pricing() {
       </div>
 
       {/* ── FOOTER ── */}
-     
-
     </div>
   );
 }
