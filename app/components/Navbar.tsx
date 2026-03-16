@@ -1,11 +1,10 @@
-import Image from 'next/image'
-import React from 'react'
+
 import LogoComponent from './LogoComponent'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 
 const Navbar = () => {
-    const navItems = ['How it works', 'Occasions', 'Pricing'];
+    const navItems = ['How it works', 'Create', "Sign", "Recipient", 'Dashboard', 'Pricing', 'How it works'];
   return (
     <nav className='bg-background font-dm-sans'>
       <div className='flex items-center justify-between h-20 px-5'>
