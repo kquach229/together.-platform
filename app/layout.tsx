@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import Footer from "./components/Footer";
 
 
 
@@ -36,6 +37,7 @@ export default function RootLayout({
         <div className="max-w-8xl mx-auto">
         <Navbar />
         {children}
+        <Footer />
 
         </div>
       </body>
