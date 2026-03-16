@@ -1,0 +1,20 @@
+<svg viewBox="0 0 160 36" width="320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&display=swap');</style>
+  </defs>
+  <text
+    x="0" y="27"
+    font-family="'Playfair Display', Georgia, serif"
+    font-size="28"
+    font-weight="400"
+    letter-spacing="-0.5"
+    fill="#1A1208"
+  >together</text>
+  <text
+    x="118" y="27"
+    font-family="'Playfair Display', Georgia, serif"
+    font-size="28"
+    font-weight="400"
+    fill="#D4845A"
+  >.</text>
+</svg>
