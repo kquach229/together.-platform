@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// =============================================================
+// ENUMS
+// =============================================================
+
+enum Plan {
+  free
+  plus
+  team
+}
+
+
+enum CardStatus {
+  draft
+  collecting
+  delivered
+  archived
+}
+
+enum NotificationType {
+  new_signature
+  deadline_reminder
+  card_delivered
+  card_received
+}
+
+enum SubscriptionStatus {
+  active
+  past_due
+  cancelled
+  trialing
+}
+
+enum BillingInterval {
+  monthly
+  annual
+}
+
+// =============================================================
+// MODELS
+// =============================================================
+
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  name String
+  plan Plan @default(free)
+  stripeCustomerId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cards Card[]
+  signatures Signature[]
+  notifications Notification[]
+  subscription UserSubscription?  @relation("UserSubscription")
+}
+
+
+model Card {
+  id String @id @default(uuid())
+  occasion String
+  recipientName String
+  recipientEmail String?
+  openingMessage String?
+  signingDeadline DateTime?
+  theme String @default("warm")
+  status String @default("draft")
+  creatorId String
+  creator User @relation(fields: [creatorId], references: [id])
+  scheduledDeliveryAt DateTime?
+  deliveredAt DateTime?
+  signerCount Int @default(0)
+  signingToken   String     @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex')")) @map("signing_token")
+  deliveryToken  String    @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex')")) @map("delivery_token")
+  signatures Signature[]
+  views CardView[]
+  notifications Notification[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+}
+
+model Signature {
+  id String @id @default(uuid())
+  userId String?
+  isHidden Boolean @default(false)
+  cardId String
+  card Card @relation(fields: [cardId], references: [id])
+  signerName String
+  signerEmail String?
+  message String
+  photoUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User? @relation(fields: [userId], references: [id])
+
+}
+
+
+model CardView {
+  id String @id @default(uuid())
+  cardId String
+  card Card @relation(fields: [cardId], references: [id])
+  viewerIp String?
+  viewerUserAgent String?
+  viewedAt DateTime @default(now())
+}
+
+
+model Notification {
+  id String @id @default(uuid())
+  userId String
+  cardId String?
+  type String
+  payload Json?
+  sentAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id])
+  card Card? @relation(fields: [cardId], references: [id])
+}
+
+
+model UserSubscription {
+  id                   String             @id @default(uuid())
+  userId               String?            @unique
+  stripeSubscriptionId String             @unique
+  stripePriceId        String
+  plan                 Plan
+  billingInterval      BillingInterval
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelledAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  // Relations
+  user User? @relation("UserSubscription", fields: [userId], references: [id], onDelete: SetNull)
+}
+
+
+
+model PlanLimit {
+  plan              Plan    @id
+  cardsPerMonth     Int?
+  signersPerCard    Int?
+  photoUploads      Boolean @default(false)
+  pdfDownload       Boolean @default(false)
+  scheduledDelivery Boolean @default(false)
+  teamDashboard     Boolean @default(false)
+  customBranding    Boolean @default(false)
+  slackIntegration  Boolean @default(false)
+  prioritySupport   Boolean @default(false)  // ← add this
+  premiumThemes     Boolean @default(false)
+
+  @@map("plan_limits")
+}
+
+
+model Price {
+  id String @id @default(uuid())
+  plan Plan
+  billingInterval BillingInterval
+  stripePriceId String @unique
+  amountCents Int
+  currency String @default("usd")
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("prices")
+}

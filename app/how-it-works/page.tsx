@@ -336,29 +336,6 @@ export default function HowItWorks() {
 
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] min-h-screen overflow-x-hidden">
-      {/* NAV */}
-      <nav className="sticky top-0 z-50 flex items-center justify-between px-12 h-16 bg-[rgba(253,248,242,0.92)] backdrop-blur-md border-b border-[#E8DDD0]">
-        <a
-          href="/"
-          className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
-        >
-          together<span className="text-terracotta">.</span>
-        </a>
-        <div className="flex items-center gap-8">
-          {["How it works", "Occasions", "Pricing", "For Teams"].map((l) => (
-            <a
-              key={l}
-              className={`text-sm cursor-pointer transition-colors no-underline ${l === "How it works" ? "text-terracotta font-medium" : "text-muted-taupe hover:text-[#1A1208]"}`}
-            >
-              {l}
-            </a>
-          ))}
-          <a className="text-sm font-medium bg-[#1A1208] text-[#FDF8F2] px-5 py-2 rounded-full hover:opacity-80 transition-opacity cursor-pointer no-underline">
-            Start a card →
-          </a>
-        </div>
-      </nav>
-
       {/* HERO */}
       <section className="relative overflow-hidden px-12 py-24 text-center">
         <div className="absolute w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-32 -left-40 opacity-70 pointer-events-none" />

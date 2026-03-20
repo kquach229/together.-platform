@@ -10,7 +10,6 @@ const Navbar = () => {
     "Recipient",
     "Dashboard",
     "Pricing",
-    "How it works",
   ];
   return (
     <nav className="bg-background font-dm-sans">
