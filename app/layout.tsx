@@ -8,6 +8,8 @@ import Footer from "./components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { getOrCreateUser } from "@/lib/helpers/getOrCreateUser";
 import { currentUser } from "@clerk/nextjs/server";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import AppSideBar from "./components/AppSideBar";
 
 const dmSans = localFont({
   src: "../public/dmsans.ttf",
@@ -35,11 +37,20 @@ export default async function RootLayout({
         className={`${dmSans.variable} ${playfair.variable} antialiased bg-background`}
       >
         <ClerkProvider>
-          <div className="max-w-8xl mx-auto">
-            <Navbar />
-            {children}
-            <Footer />
-          </div>
+          <SidebarProvider>
+            <div className="max-w-8xl mx-auto">
+              <div className="block md:hidden">
+                <AppSideBar />
+                <SidebarTrigger />
+              </div>
+              <div className="hidden md:block">
+                <Navbar />
+              </div>
+
+              {children}
+              <Footer />
+            </div>
+          </SidebarProvider>
         </ClerkProvider>
       </body>
     </html>
