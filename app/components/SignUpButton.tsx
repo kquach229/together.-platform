@@ -1,11 +1,14 @@
+import { SignUpButton } from "@clerk/nextjs";
 import ReusableButton from "./ReusableButton";
 
-const SignUpButton = () => {
+const ReusableSignUpButton = () => {
   return (
-    <ReusableButton>
+    <ReusableButton
+      style={{ padding: "0.5rem 1rem", borderRadius: "1.375rem" }}
+    >
       <SignUpButton />
     </ReusableButton>
   );
 };
 
-export default SignUpButton;
+export default ReusableSignUpButton;

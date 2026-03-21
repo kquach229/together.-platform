@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import Footer from "./components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { getOrCreateUser } from "@/lib/helpers/getOrCreateUser";
+import { currentUser } from "@clerk/nextjs/server";
 
 const dmSans = localFont({
   src: "../public/dmsans.ttf",
