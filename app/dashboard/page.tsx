@@ -178,7 +178,7 @@ export default function Dashboard() {
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
       {/* ── MAIN ── */}
-      <div className="ml-56 flex-1 min-h-screen">
+      <div className="flex-1 min-h-screen">
         {/* Top bar */}
         <div className="sticky top-0 z-30 flex items-center justify-between px-8 h-16 bg-[rgba(245,240,232,0.95)] backdrop-blur-md border-b border-[#E8DDD0]">
           <h1 className="font-playfair text-[22px] tracking-tight">My cards</h1>

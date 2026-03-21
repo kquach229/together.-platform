@@ -6,7 +6,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Footer from "./components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
-import { getOrCreateUser } from "@/lib/helpers/getOrCreateUser";
+import { getOrCreateUser } from "@/lib/helpers/getUser";
 import { currentUser } from "@clerk/nextjs/server";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSideBar from "./components/AppSideBar";
@@ -41,7 +41,9 @@ export default async function RootLayout({
             <div className="max-w-8xl mx-auto">
               <div className="block md:hidden">
                 <AppSideBar />
-                <SidebarTrigger />
+                <div className="absolute top-5 left-5 z-10">
+                  <SidebarTrigger />
+                </div>
               </div>
               <div className="hidden md:block">
                 <Navbar />

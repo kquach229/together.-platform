@@ -22,6 +22,17 @@ export async function POST(req: NextRequest) {
           name: `${first_name} ${last_name}`,
         },
       });
+
+      await prisma.userSubscription.create({
+        data: {
+          userId: user.id,
+          stripeSubscriptionId: "temp-id", // optional placeholder
+          stripePriceId: "price_free", // default free plan price ID
+          plan: "free",
+          billingInterval: "monthly",
+          status: "active",
+        },
+      });
     }
 
     return new Response("Webhook received", { status: 200 });

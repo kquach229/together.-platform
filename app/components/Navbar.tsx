@@ -1,4 +1,4 @@
-import { getOrCreateUser } from "@/lib/helpers/getOrCreateUser";
+import { getOrCreateUser } from "@/lib/helpers/getUser";
 import LogoComponent from "./LogoComponent";
 import { Separator } from "@/components/ui/separator";
 import { UserAvatar, UserButton } from "@clerk/nextjs";
