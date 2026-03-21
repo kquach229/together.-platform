@@ -1,8 +1,12 @@
+import { getOrCreateUser } from "@/lib/helpers/getOrCreateUser";
 import LogoComponent from "./LogoComponent";
 import { Separator } from "@/components/ui/separator";
+import { SignUpButton, UserAvatar } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { get } from "http";
 import Link from "next/link";
 
-const Navbar = () => {
+const Navbar = async () => {
   const navItems = [
     "How it works",
     "Create",
@@ -11,6 +15,9 @@ const Navbar = () => {
     "Dashboard",
     "Pricing",
   ];
+
+  const user = await getOrCreateUser();
+
   return (
     <nav className="bg-background font-dm-sans">
       <div className="flex items-center justify-between h-20 px-5">
@@ -28,6 +35,7 @@ const Navbar = () => {
               </Link>
             </li>
           ))}
+          {!user?.id ? <SignUpButton /> : <UserAvatar />}
         </ul>
       </div>
       <Separator />

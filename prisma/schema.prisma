@@ -57,6 +57,7 @@ enum BillingInterval {
 
 model User {
   id String @id @default(uuid())
+  clerkId String? @unique
   email String @unique
   name String
   plan Plan @default(free)
