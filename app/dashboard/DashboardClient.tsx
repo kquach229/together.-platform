@@ -159,26 +159,47 @@ export default function Dashboard({ user }) {
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
+  const { cards, signatures } = user;
+  const normalizedCards = (cards ?? []).map((card) => ({
+    id: card.id,
+    occasion: card.occasion,
+    recipient: card.recipientName,
+    status: card.status as CardStatus,
+    signers: card.signerCount,
+
+    deadline: card.signingDeadline
+      ? new Date(card.signingDeadline).toLocaleDateString()
+      : null,
+
+    deliveredOn: card.deliveredAt
+      ? new Date(card.deliveredAt).toLocaleDateString()
+      : null,
+
+    createdAt: new Date(card.createdAt).toLocaleDateString(),
+
+    theme: { from: "#FEF3ED", to: "#F5EAD8" },
+  }));
+
   const stats = [
-    { label: "Cards created", value: user.cards.length, sub: "All time" },
+    { label: "Cards created", value: cards.length ?? "0", sub: "All time" },
     {
       label: "Total signatures",
-      value: user.signatures.length,
+      value: signatures.length ?? "0",
       sub: "Across all cards",
     },
     { label: "Cards delivered", value: "3", sub: "This month" },
     { label: "Avg. signers", value: "12", sub: "Per card" },
   ];
 
-  const filtered = cards.filter((c) => {
+  const filtered = normalizedCards.filter((card) => {
     const matchTab =
       activeTab === "All" ||
-      (activeTab === "Collecting" && c.status === "collecting") ||
-      (activeTab === "Delivered" && c.status === "delivered") ||
-      (activeTab === "Drafts" && c.status === "draft");
+      (activeTab === "Collecting" && card.status === "collecting") ||
+      (activeTab === "Delivered" && card.status === "delivered") ||
+      (activeTab === "Drafts" && card.status === "draft");
     const matchSearch =
-      c.recipient.toLowerCase().includes(search.toLowerCase()) ||
-      c.occasion.toLowerCase().includes(search.toLowerCase());
+      card.recipient.toLowerCase().includes(search.toLowerCase()) ||
+      card.occasion.toLowerCase().includes(search.toLowerCase());
     return matchTab && matchSearch;
   });
 

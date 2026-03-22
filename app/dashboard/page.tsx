@@ -4,11 +4,20 @@ import DashboardClient from "./DashboardClient";
 
 export default async function DashboardPage() {
   const user = await getUser({
-    subscription: true,
     cards: true,
-    notifications: true,
     signatures: true,
   });
 
-  return <DashboardClient user={user} />;
+  // map + format
+  const formattedUser = {
+    ...user,
+    cards: user.cards.map((card) => ({
+      ...card,
+      createdAt: card.createdAt.toISOString(),
+      signingDeadline: card.signingDeadline?.toISOString() || null,
+      deliveredAt: card.deliveredAt?.toISOString() || null,
+    })),
+  };
+
+  return <DashboardClient user={formattedUser} />;
 }
