@@ -1,8 +1,7 @@
 import { CARD_THEMES } from "@/lib/theme";
 
 const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
-  const themeColors = CARD_THEMES[card.theme] || CARD_THEMES.warm;
-  console.log(themeColors);
+  console.log("CardGridItem", card);
   return (
     <div
       key={card.id}
@@ -12,7 +11,7 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
       <div
         className="h-20 relative"
         style={{
-          background: `linear-gradient(135deg,${themeColors.from},${themeColors.to})`,
+          background: `linear-gradient(135deg,${card.theme.from},${card.theme.to})`,
         }}
       >
         <div className="absolute top-3 left-4 text-[10px] font-medium tracking-[1.5px] uppercase text-[#C4734A]">

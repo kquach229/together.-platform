@@ -40,7 +40,7 @@ export default function CreateCard() {
   const [deadline, setDeadline] = useState("");
   const [theme, setTheme] = useState("warm");
 
-  const themeGradient = CARD_THEMES[theme] || CARD_THEMES.warm;
+  const themeObj = CARD_THEMES[theme] || CARD_THEMES.warm;
 
   // Set after the card is created via API
   const [signingToken, setSigningToken] = useState<string | null>(null);
@@ -304,12 +304,12 @@ export default function CreateCard() {
                   Sets the mood for everyone who opens the card.
                 </p>
                 <div className="grid grid-cols-3 gap-4">
-                  {themes.map((t) => (
+                  {themes.map((cardTheme) => (
                     <button
-                      key={t}
-                      onClick={() => setTheme(t)}
+                      key={cardTheme}
+                      onClick={() => setTheme(cardTheme)}
                       className={`relative rounded-xl overflow-hidden border-2 transition-all ${
-                        t === theme
+                        cardTheme === theme
                           ? "border-terracotta shadow-[0_2px_16px_rgba(212,132,90,0.2)]"
                           : "border-[#E8DDD0] hover:border-[#C5B8AD]"
                       }`}
@@ -317,19 +317,19 @@ export default function CreateCard() {
                       <div
                         className="h-24 w-full"
                         style={{
-                          background: `linear-gradient(135deg, ${CARD_THEMES[t].from}, ${CARD_THEMES[t].to})`,
+                          background: `linear-gradient(135deg, ${CARD_THEMES[cardTheme].from}, ${CARD_THEMES[cardTheme].to})`,
                         }}
                       />
                       <div
                         className={`px-3 py-2 text-xs font-medium text-left ${
-                          t === "warm"
+                          cardTheme === "warm"
                             ? "bg-[#1A1208] text-[#FDF8F2]"
                             : "bg-white text-[#1A1208]"
                         }`}
                       >
-                        {t}
+                        {cardTheme}
                       </div>
-                      {t === theme && (
+                      {cardTheme === theme && (
                         <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-terracotta flex items-center justify-center text-white text-[9px]">
                           ✓
                         </div>
@@ -508,7 +508,7 @@ export default function CreateCard() {
               <div
                 className="p-5"
                 style={{
-                  background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
+                  background: `linear-gradient(135deg, ${CARD_THEMES[theme].from}, ${CARD_THEMES[theme].to})`,
                 }}
               >
                 <div

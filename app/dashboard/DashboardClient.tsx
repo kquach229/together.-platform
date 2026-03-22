@@ -5,6 +5,8 @@ import CardGridItem from "../components/CardGridItem";
 import { getUser } from "@/lib/helpers/getUser";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { CARD_THEMES } from "@/lib/theme";
+import Link from "next/link";
 
 type CardStatus = "collecting" | "delivered" | "draft";
 
@@ -178,7 +180,10 @@ export default function Dashboard({ user }) {
 
     createdAt: new Date(card.createdAt).toLocaleDateString(),
 
-    theme: { from: "#FEF3ED", to: "#F5EAD8" },
+    theme: {
+      from: CARD_THEMES[card.theme].from,
+      to: CARD_THEMES[card.theme].to,
+    },
   }));
 
   const stats = [
@@ -205,6 +210,8 @@ export default function Dashboard({ user }) {
   });
 
   const router = useRouter();
+
+  console.log(cards);
 
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
@@ -311,14 +318,15 @@ export default function Dashboard({ user }) {
                       setMenuOpen={setMenuOpen}
                       card={card}
                       status={status}
-                      theme={card.theme}
                     />
                   </div>
                 );
               })}
 
-              {/* New card tile */}
-              <button className="border-2 border-dashed border-[#E8DDD0] rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-terracotta hover:bg-[#FEF3ED]/30 transition-all group cursor-pointer bg-transparent min-h-[200px]">
+              <button
+                onClick={() => router.push("/create")}
+                className="border-2 border-dashed border-[#E8DDD0] rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-terracotta hover:bg-[#FEF3ED]/30 transition-all group cursor-pointer bg-transparent min-h-[200px]"
+              >
                 <div className="w-12 h-12 rounded-full border-2 border-dashed border-[#E8DDD0] group-hover:border-terracotta flex items-center justify-center text-xl text-muted-taupe group-hover:text-terracotta transition-all">
                   ＋
                 </div>
