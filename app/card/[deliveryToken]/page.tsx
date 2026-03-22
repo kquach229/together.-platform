@@ -1,0 +1,52 @@
+// app/card/[deliveryToken]/page.tsx
+// Public page — no auth required. The deliveryToken IS the access key.
+
+import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
+import RecipientView from "./RecipientView";
+
+interface Props {
+  params: Promise<{ deliveryToken: string }>; // ← now a Promise in Next.js 15+
+}
+export default async function CardPage({ params }: Props) {
+  const { deliveryToken } = await params;
+
+  // Fetch the card by its delivery token
+  const card = await prisma.card.findUnique({
+    where: { deliveryToken },
+    select: {
+      id: true,
+      occasion: true,
+      recipientName: true,
+      openingMessage: true,
+      theme: true,
+      status: true,
+      deliveredAt: true,
+      signerCount: true,
+      creator: {
+        select: { name: true },
+      },
+      signatures: {
+        where: { isHidden: false },
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          signerName: true,
+          message: true,
+          photoUrl: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+
+  // Card not found or not yet delivered — show 404
+  //   if (!card || card.status !== "delivered") {
+  //     notFound();
+  //   }
+
+  // Log the view (fire and forget — don't block rendering)
+  prisma.cardView.create({ data: { cardId: card.id } }).catch(() => {});
+
+  return <RecipientView card={card} />;
+}
