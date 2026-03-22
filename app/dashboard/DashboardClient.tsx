@@ -4,6 +4,7 @@ import { useState } from "react";
 import CardGridItem from "../components/CardGridItem";
 import { getUser } from "@/lib/helpers/getUser";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 type CardStatus = "collecting" | "delivered" | "draft";
 
@@ -203,6 +204,8 @@ export default function Dashboard({ user }) {
     return matchTab && matchSearch;
   });
 
+  const router = useRouter();
+
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
       {/* ── MAIN ── */}
@@ -225,7 +228,10 @@ export default function Dashboard({ user }) {
                 className="pl-9 pr-4 py-2 border border-[#E8DDD0] rounded-full text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD] w-52"
               />
             </div>
-            <button className="flex items-center gap-2 bg-terracotta text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#C4734A] transition-colors shadow-[0_4px_12px_rgba(212,132,90,0.25)] font-dm-sans border-none cursor-pointer">
+            <button
+              onClick={() => router.push("/create")}
+              className="flex items-center gap-2 bg-terracotta text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#C4734A] transition-colors shadow-[0_4px_12px_rgba(212,132,90,0.25)] font-dm-sans border-none cursor-pointer"
+            >
               <span>＋</span> New card
             </button>
           </div>
@@ -269,10 +275,13 @@ export default function Dashboard({ user }) {
                   {t !== "All" && (
                     <span className="ml-1.5 text-[10px] opacity-60">
                       {t === "Collecting"
-                        ? cards.filter((c) => c.status === "collecting").length
+                        ? cards.filter((card) => card.status === "collecting")
+                            .length
                         : t === "Delivered"
-                          ? cards.filter((c) => c.status === "delivered").length
-                          : cards.filter((c) => c.status === "draft").length}
+                          ? cards.filter((card) => card.status === "delivered")
+                              .length
+                          : cards.filter((card) => card.status === "draft")
+                              .length}
                     </span>
                   )}
                 </button>
@@ -294,14 +303,15 @@ export default function Dashboard({ user }) {
           ) : (
             <div className="grid grid-cols-3 gap-5">
               {filtered.map((card) => {
-                const s = statusConfig[card.status];
+                const status = statusConfig[card.status];
                 return (
                   <div key={card.id}>
                     <CardGridItem
                       menuOpen={menuOpen}
                       setMenuOpen={setMenuOpen}
                       card={card}
-                      s={s}
+                      status={status}
+                      theme={card.theme}
                     />
                   </div>
                 );

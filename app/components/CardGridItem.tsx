@@ -1,6 +1,8 @@
-import React from "react";
+import { CARD_THEMES } from "@/lib/theme";
 
-const CardGridItem = ({ card, menuOpen, setMenuOpen, s }) => {
+const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
+  const themeColors = CARD_THEMES[card.theme] || CARD_THEMES.warm;
+  console.log(themeColors);
   return (
     <div
       key={card.id}
@@ -10,7 +12,7 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, s }) => {
       <div
         className="h-20 relative"
         style={{
-          background: `linear-gradient(135deg,${card.theme.from},${card.theme.to})`,
+          background: `linear-gradient(135deg,${themeColors.from},${themeColors.to})`,
         }}
       >
         <div className="absolute top-3 left-4 text-[10px] font-medium tracking-[1.5px] uppercase text-[#C4734A]">
@@ -49,10 +51,10 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, s }) => {
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div
-            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${s.bg} ${s.text}`}
+            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${status.bg} ${status.text}`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-            {s.label}
+            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+            {status.label}
           </div>
           <div className="text-xs text-muted-taupe">{card.createdAt}</div>
         </div>

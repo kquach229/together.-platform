@@ -1,5 +1,6 @@
 "use client";
 
+import { CARD_THEMES } from "@/lib/theme";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -18,21 +19,14 @@ const occasions = [
   { emoji: "💔", label: "Sympathy" },
 ];
 
-const themes = [
-  { id: "warm", label: "Warm", from: "#FEF3ED", to: "#F5EAD8" },
-  { id: "sage", label: "Sage", from: "#EEF3EE", to: "#D4E8D4" },
-  { id: "lavender", label: "Lavender", from: "#F0EBF8", to: "#E2D4F0" },
-  { id: "sky", label: "Sky", from: "#E6F1FB", to: "#C8DFF5" },
-  { id: "parchment", label: "Parchment", from: "#FDF8F2", to: "#EDE0CE" },
-  { id: "midnight", label: "Midnight", from: "#1A1208", to: "#2E2820" },
-];
-
 const steps = [
   { num: 1, label: "Occasion" },
   { num: 2, label: "Details" },
   { num: 3, label: "Theme" },
   { num: 4, label: "Share" },
 ];
+
+const themes = ["warm", "lavender", "sage", "sky", "neutral"];
 
 export default function CreateCard() {
   const router = useRouter();
@@ -44,13 +38,17 @@ export default function CreateCard() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [message, setMessage] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [theme, setTheme] = useState(themes[0]);
+  const [theme, setTheme] = useState("warm");
+
+  const themeGradient = CARD_THEMES[theme] || CARD_THEMES.warm;
 
   // Set after the card is created via API
   const [signingToken, setSigningToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const themeColors = ["warm", "neutral", "sage", "lavendar", "sky"];
 
   const shareLink = signingToken
     ? `${window.location.origin}/sign/${signingToken}`
@@ -84,7 +82,7 @@ export default function CreateCard() {
           recipientName,
           recipientEmail: recipientEmail || undefined,
           openingMessage: message || undefined,
-          theme: theme.id,
+          theme: theme,
           signingDeadline: deadline
             ? new Date(deadline).toISOString()
             : undefined,
@@ -308,10 +306,10 @@ export default function CreateCard() {
                 <div className="grid grid-cols-3 gap-4">
                   {themes.map((t) => (
                     <button
-                      key={t.id}
+                      key={t}
                       onClick={() => setTheme(t)}
                       className={`relative rounded-xl overflow-hidden border-2 transition-all ${
-                        theme.id === t.id
+                        t === theme
                           ? "border-terracotta shadow-[0_2px_16px_rgba(212,132,90,0.2)]"
                           : "border-[#E8DDD0] hover:border-[#C5B8AD]"
                       }`}
@@ -319,19 +317,19 @@ export default function CreateCard() {
                       <div
                         className="h-24 w-full"
                         style={{
-                          background: `linear-gradient(135deg, ${t.from}, ${t.to})`,
+                          background: `linear-gradient(135deg, ${CARD_THEMES[t].from}, ${CARD_THEMES[t].to})`,
                         }}
                       />
                       <div
                         className={`px-3 py-2 text-xs font-medium text-left ${
-                          t.id === "midnight"
+                          t === "warm"
                             ? "bg-[#1A1208] text-[#FDF8F2]"
                             : "bg-white text-[#1A1208]"
                         }`}
                       >
-                        {t.label}
+                        {t}
                       </div>
-                      {theme.id === t.id && (
+                      {t === theme && (
                         <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-terracotta flex items-center justify-center text-white text-[9px]">
                           ✓
                         </div>
