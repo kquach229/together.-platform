@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const occasions = [
@@ -34,18 +35,29 @@ const steps = [
 ];
 
 export default function CreateCard() {
+  const router = useRouter();
+
   const [step, setStep] = useState(1);
   const [occasion, setOccasion] = useState("Birthday");
   const [occasionEmoji, setOccasionEmoji] = useState("🎂");
   const [recipientName, setRecipientName] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [message, setMessage] = useState("");
   const [deadline, setDeadline] = useState("");
   const [theme, setTheme] = useState(themes[0]);
+
+  // Set after the card is created via API
+  const [signingToken, setSigningToken] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const shareLink = "together.co/sign/abc-xyz-123";
+  const shareLink = signingToken
+    ? `${window.location.origin}/sign/${signingToken}`
+    : "Generating link…";
 
   function handleCopy() {
+    if (!signingToken) return;
     navigator.clipboard.writeText(shareLink).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -56,6 +68,55 @@ export default function CreateCard() {
     if (step === 2) return recipientName.trim().length > 0;
     if (step === 3) return !!theme;
     return true;
+  }
+
+  // Called on step 3 — creates the card via API then moves to step 4
+  async function handleCreateCard() {
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch("/api/cards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          occasion,
+          recipientName,
+          recipientEmail: recipientEmail || undefined,
+          openingMessage: message || undefined,
+          theme: theme.id,
+          signingDeadline: deadline
+            ? new Date(deadline).toISOString()
+            : undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSubmitError(data.message ?? data.error ?? "Something went wrong.");
+        return;
+      }
+
+      // Store the real signing token and advance to the share step
+      setSigningToken(data.card.signingToken);
+      setStep(4);
+    } catch (err) {
+      console.error("Failed to create card", err);
+      setSubmitError("Network error — please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleContinue() {
+    if (!canProceed()) return;
+    if (step === 3) {
+      // Step 3 → 4: create the card via API first
+      handleCreateCard();
+    } else {
+      setStep(step + 1);
+    }
   }
 
   return (
@@ -225,6 +286,8 @@ export default function CreateCard() {
                     </label>
                     <input
                       type="email"
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
                       placeholder="sarah@example.com"
                       className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD]"
                     />
@@ -260,7 +323,11 @@ export default function CreateCard() {
                         }}
                       />
                       <div
-                        className={`px-3 py-2 text-xs font-medium text-left ${t.id === "midnight" ? "bg-[#1A1208] text-[#FDF8F2]" : "bg-white text-[#1A1208]"}`}
+                        className={`px-3 py-2 text-xs font-medium text-left ${
+                          t.id === "midnight"
+                            ? "bg-[#1A1208] text-[#FDF8F2]"
+                            : "bg-white text-[#1A1208]"
+                        }`}
                       >
                         {t.label}
                       </div>
@@ -272,6 +339,14 @@ export default function CreateCard() {
                     </button>
                   ))}
                 </div>
+
+                {/* Error message */}
+                {submitError && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+                    {submitError}
+                  </div>
+                )}
+
                 <div className="mt-6 p-4 border border-[#E8DDD0] rounded-xl bg-white">
                   <div className="text-xs font-medium text-muted-taupe uppercase tracking-[1.5px] mb-2">
                     More themes with Plus
@@ -313,6 +388,7 @@ export default function CreateCard() {
                     </div>
                     <button
                       onClick={handleCopy}
+                      disabled={!signingToken}
                       className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all font-dm-sans ${
                         copied
                           ? "bg-[#7B9E87] text-white"
@@ -391,7 +467,7 @@ export default function CreateCard() {
 
             {/* ── NAVIGATION BUTTONS ── */}
             <div className="flex justify-between items-center mt-10 pt-6 border-t border-[#E8DDD0]">
-              {step > 1 ? (
+              {step > 1 && step < 4 ? (
                 <button
                   onClick={() => setStep(step - 1)}
                   className="text-sm text-muted-taupe hover:text-[#1A1208] transition-colors flex items-center gap-1"
@@ -401,20 +477,24 @@ export default function CreateCard() {
               ) : (
                 <div />
               )}
+
               {step < 4 ? (
                 <button
-                  onClick={() => canProceed() && setStep(step + 1)}
-                  disabled={!canProceed()}
+                  onClick={handleContinue}
+                  disabled={!canProceed() || isSubmitting}
                   className={`px-8 py-3 rounded-full text-sm font-medium transition-all font-dm-sans ${
-                    canProceed()
+                    canProceed() && !isSubmitting
                       ? "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.25)]"
                       : "bg-[#E8DDD0] text-[#C5B8AD] cursor-not-allowed"
                   }`}
                 >
-                  Continue →
+                  {isSubmitting ? "Creating…" : "Continue →"}
                 </button>
               ) : (
-                <button className="px-8 py-3 rounded-full text-sm font-medium bg-[#1A1208] text-[#FDF8F2] hover:opacity-85 transition-opacity font-dm-sans">
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="px-8 py-3 rounded-full text-sm font-medium bg-[#1A1208] text-[#FDF8F2] hover:opacity-85 transition-opacity font-dm-sans"
+                >
                   Go to dashboard →
                 </button>
               )}
@@ -427,7 +507,6 @@ export default function CreateCard() {
               Live preview
             </div>
             <div className="rounded-2xl border border-[#E8DDD0] overflow-hidden shadow-[0_8px_32px_rgba(26,18,8,0.07)]">
-              {/* Card header */}
               <div
                 className="p-5"
                 style={{
@@ -436,9 +515,7 @@ export default function CreateCard() {
               >
                 <div
                   className="text-[10px] font-medium tracking-[1.5px] uppercase mb-1"
-                  style={{
-                    color: theme.id === "midnight" ? "#D4845A" : "#D4845A",
-                  }}
+                  style={{ color: "#D4845A" }}
                 >
                   {occasionEmoji} {occasion}
                 </div>
@@ -448,11 +525,13 @@ export default function CreateCard() {
                     color: theme.id === "midnight" ? "#FDF8F2" : "#1A1208",
                   }}
                 >
-                  {occasion === "Birthday" ||
-                  occasion === "Get Well Soon" ||
-                  occasion === "Sympathy"
-                    ? `${occasion === "Birthday" ? "Happy Birthday" : occasion === "Get Well Soon" ? "Get Well Soon" : "Thinking of You"}`
-                    : occasion}
+                  {occasion === "Birthday"
+                    ? "Happy Birthday"
+                    : occasion === "Get Well Soon"
+                      ? "Get Well Soon"
+                      : occasion === "Sympathy"
+                        ? "Thinking of You"
+                        : occasion}
                   {recipientName ? `, ${recipientName}!` : "…"}
                 </div>
                 {message && (
@@ -466,7 +545,6 @@ export default function CreateCard() {
                   </p>
                 )}
               </div>
-              {/* Card body */}
               <div className="bg-white p-4">
                 <div className="border border-dashed border-[#E8DDD0] rounded-xl p-4 text-center">
                   <div className="text-2xl mb-1.5">🖊</div>
@@ -489,7 +567,6 @@ export default function CreateCard() {
               </div>
             </div>
 
-            {/* Step hint */}
             <div className="mt-4 bg-[#F5EAD8] rounded-xl p-4 text-xs text-muted-taupe leading-[1.7] font-light">
               {step === 1 &&
                 "Choose the occasion that fits best. This sets the tone for the whole card."}
