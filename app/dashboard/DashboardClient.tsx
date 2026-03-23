@@ -100,7 +100,7 @@ export default function Dashboard({ user }) {
       sub: "Across all cards",
     },
     { label: "Cards delivered", value: "3", sub: "This month" },
-    { label: "Avg. signers", value: "12", sub: "Per card" },
+    { label: "Plan", value: user.plan, sub: "" },
   ];
 
   const filtered = normalizedCards.filter((card) => {
@@ -125,7 +125,7 @@ export default function Dashboard({ user }) {
         {/* Top bar */}
         <div className="sticky top-0 z-30 flex items-center justify-between px-8 h-16 bg-[rgba(245,240,232,0.95)] backdrop-blur-md border-b border-[#E8DDD0]">
           <h1 className="font-playfair text-[22px] tracking-tight">
-            Hi, {user?.name}
+            Hi, {user?.name.split(" ")[0]}
           </h1>
           <div className="flex items-center gap-3">
             <div className="relative">
