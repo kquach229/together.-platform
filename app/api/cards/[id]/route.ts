@@ -35,11 +35,12 @@ export async function GET(
 ) {
   try {
     const { userId: clerkId } = await auth();
+    const { id: cardId } = await params;
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
 
-    const result = await getAuthedUserAndCard(clerkId, params.id);
+    const result = await getAuthedUserAndCard(clerkId, cardId);
     if ("error" in result) {
       return NextResponse.json(
         { error: result.error },
@@ -89,12 +90,13 @@ export async function PATCH(
   { params }: { params: { id: string } },
 ) {
   try {
+    const { id: cardId } = await params;
     const { userId: clerkId } = await auth();
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
 
-    const result = await getAuthedUserAndCard(clerkId, params.id);
+    const result = await getAuthedUserAndCard(clerkId, cardId);
     if ("error" in result) {
       return NextResponse.json(
         { error: result.error },
@@ -139,7 +141,7 @@ export async function PATCH(
     const deliveredAt = status === "delivered" ? new Date() : undefined;
 
     const updated = await prisma.card.update({
-      where: { id: params.id },
+      where: { id: cardId },
       data: {
         ...(occasion && { occasion }),
         ...(recipientName && { recipientName }),
@@ -211,11 +213,12 @@ export async function DELETE(
 ) {
   try {
     const { userId: clerkId } = await auth();
+    const { id: cardId } = await params;
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
 
-    const result = await getAuthedUserAndCard(clerkId, params.id);
+    const result = await getAuthedUserAndCard(clerkId, cardId);
     if ("error" in result) {
       return NextResponse.json(
         { error: result.error },
@@ -223,7 +226,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.card.delete({ where: { id: params.id } });
+    await prisma.card.delete({ where: { id: cardId } });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

@@ -205,7 +205,7 @@ export default function CardDetailView({ card }: Props) {
     setIsArchiving(true);
     try {
       await fetch(`/api/cards/${card.id}`, {
-        method: "PATCH",
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "archived" }),
       });

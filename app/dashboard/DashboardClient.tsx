@@ -217,8 +217,8 @@ export default function Dashboard({ user }) {
               {filtered.map((card) => {
                 const status = statusConfig[card.status];
                 return (
-                  <Link href={`/cards/${card.id}`}>
-                    <div key={card.id}>
+                  <Link href={`/cards/${card.id}`} key={card.id}>
+                    <div>
                       <CardGridItem
                         menuOpen={menuOpen}
                         setMenuOpen={setMenuOpen}
