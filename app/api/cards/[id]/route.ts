@@ -226,7 +226,27 @@ export async function DELETE(
       );
     }
 
+    await prisma.notification.create({
+      data: {
+        userId: result.user.id,
+        cardId: null, // 👈 important
+        type: "delete_card",
+        payload: {
+          title: `You deleted ${result.card.occasion} card for ${result.card.recipientName}`,
+        },
+      },
+    });
+
     await prisma.card.delete({ where: { id: cardId } });
+
+    //       id String @id @default(uuid())
+    //   userId String
+    //   cardId String?
+    //   type String
+    //   payload Json?
+    //   sentAt DateTime?
+    //   createdAt DateTime @default(now())
+    //   updatedAt DateTime @updatedAt
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

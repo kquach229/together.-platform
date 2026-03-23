@@ -6,6 +6,7 @@ export default async function DashboardPage() {
   const user = await getUser({
     cards: true,
     signatures: true,
+    notifications: true,
   });
 
   // map + format

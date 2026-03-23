@@ -30,43 +30,64 @@ const statusConfig: Record<
 
 const tabs = ["All", "Collecting", "Delivered"];
 
-const activity = [
-  {
-    icon: "🖊",
-    text: "Amy L. signed Sarah Chen's Birthday card",
-    time: "2 hours ago",
-    color: "#E6F1FB",
-  },
-  {
-    icon: "🔗",
-    text: "You shared the signing link for James Morley's Farewell card",
-    time: "5 hours ago",
-    color: "#EEF3EE",
-  },
-  {
-    icon: "🎉",
-    text: "Priya Rajan's Congratulations card was delivered",
-    time: "4 days ago",
-    color: "#F0EBF8",
-  },
-  {
-    icon: "🖊",
-    text: "Marcus W. signed Sarah Chen's Birthday card",
-    time: "4 days ago",
-    color: "#F5EAD8",
-  },
-  {
-    icon: "＋",
-    text: "You created a Birthday card for Sarah Chen",
-    time: "5 days ago",
-    color: "#FEF3ED",
-  },
-];
+const mapActivity = (type: string, payload: any, createdAt?: string) => {
+  switch (type) {
+    case "new_signature":
+      return {
+        icon: "🖊",
+        text: `${payload.signerName} signed ${payload.cardTitle}`,
+        time: formatTimeAgo(createdAt),
+        color: "#E6F1FB",
+      };
+
+    case "delete_card":
+      return {
+        icon: "🗑️",
+        text: payload.title,
+        time: formatTimeAgo(createdAt),
+        color: "#FDECEC",
+      };
+
+    case "create_card":
+      return {
+        icon: "＋",
+        text: payload.title,
+        time: formatTimeAgo(createdAt),
+        color: "#FEF3ED",
+      };
+
+    case "card_delivered":
+      return {
+        icon: "🎉",
+        text: payload.cardTitle + " was delivered",
+        time: formatTimeAgo(createdAt),
+        color: "#F0EBF8",
+      };
+
+    default:
+      return null;
+  }
+};
+
+function formatTimeAgo(date?: string) {
+  if (!date) return "";
+
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+
+  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
+  return `${Math.floor(mins / 1440)}d ago`;
+}
 
 export default function Dashboard({ user }) {
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+
+  const activity = (user.notifications ?? [])
+    .map((n) => mapActivity(n.type, n.payload, n.createdAt))
+    .filter(Boolean);
 
   const { cards, signatures } = user;
   const normalizedCards = (cards ?? []).map((card) => ({

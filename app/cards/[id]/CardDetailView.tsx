@@ -603,7 +603,7 @@ export default function CardDetailView({ card }: Props) {
                   disabled={isArchiving}
                   className="w-full py-2.5 rounded-full text-xs font-medium border border-[#E8DDD0] text-[#8C7B6B] hover:border-red-300 hover:text-red-400 transition-all font-dm-sans bg-white cursor-pointer"
                 >
-                  {isArchiving ? "Archiving…" : "Archive this card"}
+                  {isArchiving ? "Deleting…" : "Delete this card"}
                 </button>
                 <p className="text-[10px] text-[#C5B8AD] text-center mt-2 font-light">
                   Hides the card from your dashboard. Signers lose access.

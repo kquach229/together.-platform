@@ -108,6 +108,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        cardId: card.id,
+        type: "create_card",
+        payload: {
+          title: `You created ${card.occasion} for ${card.recipientName}`,
+        },
+      },
+    });
+
     return NextResponse.json({ card }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/cards]", err);
