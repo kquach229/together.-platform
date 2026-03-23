@@ -2,7 +2,7 @@
 // Public page — no auth required.
 
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import SignView from "./SignView";
 
 interface Props {
