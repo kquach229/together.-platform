@@ -90,6 +90,37 @@ interface Props {
 
 type Screen = "form" | "success";
 
+// 1. Ask our API for a presigned POST URL — keeps AWS keys server-side
+// 2. POST the file directly from the browser to S3
+// 3. Return the S3 object key to store on the signature row
+async function uploadPhoto(file: File, cardId: string): Promise<string> {
+  // Step 1 — get presigned URL from our server
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contentType: file.type, cardId }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error ?? "Failed to get upload URL");
+  }
+
+  const { url, fields, key } = await res.json();
+
+  // Step 2 — upload directly to S3 using the presigned POST
+  // The fields from S3 must come first, file must be last
+  const formData = new FormData();
+  Object.entries(fields).forEach(([k, v]) => formData.append(k, v as string));
+  formData.append("file", file);
+
+  const s3Res = await fetch(url, { method: "POST", body: formData });
+  if (!s3Res.ok) throw new Error("Failed to upload photo");
+
+  // Step 3 — return the key so it can be stored on the signature
+  return key;
+}
+
 export default function SignView({ card, signingToken }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -98,7 +129,8 @@ export default function SignView({ card, signingToken }: Props) {
   const [signerEmail, setSignerEmail] = useState("");
   const [message, setMessage] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   // UI state
   const [screen, setScreen] = useState<Screen>("form");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,12 +149,14 @@ export default function SignView({ card, signingToken }: Props) {
   function handlePhoto(ev: React.ChangeEvent<HTMLInputElement>) {
     const file = ev.target.files?.[0];
     if (!file) return;
+    setPhotoFile(file);
     const reader = new FileReader();
     reader.onload = () => setPhotoPreview(reader.result as string);
     reader.readAsDataURL(file);
   }
 
   function removePhoto() {
+    setPhotoFile(null);
     setPhotoPreview(null);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -145,7 +179,16 @@ export default function SignView({ card, signingToken }: Props) {
     setErrors({});
     setIsSubmitting(true);
 
+    const s3PhotoUrl = await fetch("/api/upload", { method: "POST" });
+    console.log(s3PhotoUrl);
+
     try {
+      let photoUrl: string | undefined;
+      if (photoFile) {
+        setUploadProgress("Uploading photo…");
+        photoUrl = await uploadPhoto(photoFile, card.id);
+        setUploadProgress(null);
+      }
       const res = await fetch(`/api/cards/sign/${signingToken}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -153,7 +196,6 @@ export default function SignView({ card, signingToken }: Props) {
           signerName,
           signerEmail: signerEmail || undefined,
           message,
-          // photoUrl would come from an S3 upload — placeholder for now
           photoUrl: undefined,
         }),
       });
@@ -474,7 +516,17 @@ export default function SignView({ card, signingToken }: Props) {
               </p>
             </div>
 
-            {/* Submit error */}
+            {/* Upload progress */}
+            {uploadProgress && (
+              <div className="flex items-center gap-3 p-4 bg-[#F5EAD8] rounded-xl">
+                <div className="w-4 h-4 border-2 border-[#E8DDD0] border-t-terracotta rounded-full animate-spin shrink-0" />
+                <p className="text-sm text-[#8C7B6B] font-light">
+                  {uploadProgress}
+                </p>
+              </div>
+            )}
+
+            {/* Error */}
             {errors.submit && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
                 {errors.submit}
@@ -483,15 +535,13 @@ export default function SignView({ card, signingToken }: Props) {
 
             {/* Submit button */}
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`w-full py-4 rounded-full text-sm font-medium transition-all font-dm-sans border-none cursor-pointer ${
-                isSubmitting
-                  ? "bg-[#E8DDD0] text-[#C5B8AD] cursor-not-allowed"
-                  : "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_20px_rgba(212,132,90,0.3)]"
-              }`}
+              className={`w-full py-4 rounded-full text-sm font-medium transition-all font-dm-sans border-none ${isSubmitting ? "bg-[#E8DDD0] text-[#C5B8AD] cursor-not-allowed" : "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_20px_rgba(212,132,90,0.3)] cursor-pointer"}`}
             >
-              {isSubmitting ? "Signing…" : "Sign the card →"}
+              {uploadProgress ??
+                (isSubmitting ? "Signing…" : "Sign the card →")}
             </button>
           </div>
         </div>
