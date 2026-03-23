@@ -441,7 +441,7 @@ export default function CardDetailView({ card }: Props) {
                           {sig.photoUrl && (
                             <div className="mt-3 rounded-xl overflow-hidden border border-[#E8DDD0] max-w-[280px]">
                               <img
-                                src={sig.photoUrl}
+                                src={`https://together-uploads-bucket.s3.us-east-1.amazonaws.com/${sig.photoUrl}`}
                                 alt={`Photo from ${sig.signerName}`}
                                 className="w-full object-cover max-h-40"
                               />
