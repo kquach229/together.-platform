@@ -1,6 +1,6 @@
 import LogoComponent from "./LogoComponent";
 import { Separator } from "@/components/ui/separator";
-import { UserAvatar, UserButton } from "@clerk/nextjs";
+import { Show, UserAvatar, UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { get } from "http";
 import Link from "next/link";
@@ -38,7 +38,10 @@ const Navbar = async () => {
               </Link>
             </li>
           ))}
-          {!user?.id ? <SignUpButton /> : <UserButton />}
+
+          <Show fallback={<SignUpButton />} when={"signed-in"}>
+            <UserButton />
+          </Show>
         </ul>
       </div>
       <Separator />

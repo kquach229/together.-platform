@@ -28,7 +28,7 @@ const statusConfig: Record<
   },
 };
 
-const tabs = ["All", "Collecting", "Delivered", "Drafts"];
+const tabs = ["All", "Collecting", "Delivered"];
 
 const activity = [
   {

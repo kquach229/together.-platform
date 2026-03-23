@@ -150,7 +150,6 @@ export async function POST(
         signerEmail: signerEmail || null,
         message,
         photoUrl: photoUrl || null,
-        ipAddress: ip,
       },
       select: {
         id: true,
@@ -158,6 +157,15 @@ export async function POST(
         message: true,
         photoUrl: true,
         createdAt: true,
+      },
+    });
+
+    await prisma.card.update({
+      where: {
+        id: card.id,
+      },
+      data: {
+        signerCount: { increment: 1 },
       },
     });
 
