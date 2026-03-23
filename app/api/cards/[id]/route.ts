@@ -12,7 +12,7 @@ const updateCardSchema = z.object({
   theme: z.string().optional(),
   signingDeadline: z.string().datetime().optional().nullable(),
   scheduledDeliveryAt: z.string().datetime().optional().nullable(),
-  status: z.enum(["draft", "collecting", "delivered", "archived"]).optional(),
+  status: z.enum(["collecting", "delivered", "archived"]).optional(),
 });
 
 // ─── Helper: get authed user + verify card ownership ─────────
@@ -220,19 +220,6 @@ export async function DELETE(
       return NextResponse.json(
         { error: result.error },
         { status: result.status },
-      );
-    }
-
-    const { card } = result;
-
-    // Only allow deleting drafts
-    if (card.status !== "draft") {
-      return NextResponse.json(
-        {
-          error: "Only draft cards can be deleted",
-          message: "To remove a live card, archive it instead.",
-        },
-        { status: 409 },
       );
     }
 

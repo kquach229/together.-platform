@@ -97,16 +97,6 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
               View card
             </button>
           )}
-          {card.status === "draft" && (
-            <>
-              <button className="flex-1 py-2 rounded-full text-xs font-medium bg-[#1A1208] text-[#FDF8F2] hover:opacity-85 transition-opacity font-dm-sans border-none cursor-pointer">
-                Continue editing
-              </button>
-              <button className="py-2 px-3 rounded-full text-xs font-medium border border-[#E8DDD0] text-muted-taupe hover:border-red-300 hover:text-red-400 transition-all font-dm-sans cursor-pointer bg-white">
-                Delete
-              </button>
-            </>
-          )}
         </div>
       </div>
     </div>

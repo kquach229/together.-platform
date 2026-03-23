@@ -10,15 +10,16 @@ const Navbar = async () => {
   const navItems = [
     "Dashboard",
     "How it works",
-    "Create",
-    "Sign",
-    "Recipient",
     "Pricing",
+    // "Create",
+    // "Sign",
+    // "Recipient",
+    // "Pricing",
   ];
   const user = await currentUser();
 
   const filteredNavItems = !user?.id
-    ? navItems.filter((item) => item !== "How it works")
+    ? navItems.filter((item) => item !== "Dashboard")
     : navItems;
   return (
     <nav className="bg-background font-dm-sans">

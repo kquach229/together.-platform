@@ -34,7 +34,6 @@ const AppSideBar = async () => {
                 { icon: "＋", label: "New card", active: false },
                 { icon: "◷", label: "Collecting", active: false },
                 { icon: "✓", label: "Delivered", active: false },
-                { icon: "◈", label: "Drafts", active: false },
               ].map((item) => (
                 <button
                   key={item.label}

@@ -8,95 +8,7 @@ import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
 import Link from "next/link";
 
-type CardStatus = "collecting" | "delivered" | "draft";
-
-interface Card {
-  id: string;
-  occasion: string;
-  emoji: string;
-  recipient: string;
-  status: CardStatus;
-  signers: number;
-  deadline: string | null;
-  deliveredOn: string | null;
-  theme: { from: string; to: string };
-  createdAt: string;
-}
-
-const cards: Card[] = [
-  {
-    id: "1",
-    occasion: "Birthday",
-    emoji: "🎂",
-    recipient: "Sarah Chen",
-    status: "collecting",
-    signers: 8,
-    deadline: "Mar 20, 2026",
-    deliveredOn: null,
-    theme: { from: "#FEF3ED", to: "#F5EAD8" },
-    createdAt: "Mar 14, 2026",
-  },
-  {
-    id: "2",
-    occasion: "Farewell",
-    emoji: "👋",
-    recipient: "James Morley",
-    status: "collecting",
-    signers: 5,
-    deadline: "Mar 22, 2026",
-    deliveredOn: null,
-    theme: { from: "#EEF3EE", to: "#D4E8D4" },
-    createdAt: "Mar 13, 2026",
-  },
-  {
-    id: "3",
-    occasion: "Congratulations",
-    emoji: "🎊",
-    recipient: "Priya Rajan",
-    status: "delivered",
-    signers: 14,
-    deadline: null,
-    deliveredOn: "Mar 10, 2026",
-    theme: { from: "#F0EBF8", to: "#E2D4F0" },
-    createdAt: "Mar 5, 2026",
-  },
-  {
-    id: "4",
-    occasion: "Work Anniversary",
-    emoji: "💼",
-    recipient: "Tom Keller",
-    status: "delivered",
-    signers: 22,
-    deadline: null,
-    deliveredOn: "Feb 28, 2026",
-    theme: { from: "#E6F1FB", to: "#C8DFF5" },
-    createdAt: "Feb 22, 2026",
-  },
-  {
-    id: "5",
-    occasion: "Birthday",
-    emoji: "🎂",
-    recipient: "Leila Bashir",
-    status: "draft",
-    signers: 0,
-    deadline: null,
-    deliveredOn: null,
-    theme: { from: "#FDF8F2", to: "#EDE0CE" },
-    createdAt: "Mar 15, 2026",
-  },
-  {
-    id: "6",
-    occasion: "Get Well Soon",
-    emoji: "🏥",
-    recipient: "Ravi Nair",
-    status: "delivered",
-    signers: 9,
-    deadline: null,
-    deliveredOn: "Feb 14, 2026",
-    theme: { from: "#EEF3EE", to: "#D4E8D4" },
-    createdAt: "Feb 10, 2026",
-  },
-];
+type CardStatus = "collecting" | "delivered";
 
 const statusConfig: Record<
   CardStatus,
@@ -113,12 +25,6 @@ const statusConfig: Record<
     dot: "bg-[#7B9E87]",
     bg: "bg-[#EEF3EE]",
     text: "text-[#5A7D66]",
-  },
-  draft: {
-    label: "Draft",
-    dot: "bg-[#C5B8AD]",
-    bg: "bg-[#F5F4F2]",
-    text: "text-[#8C7B6B]",
   },
 };
 
@@ -201,8 +107,7 @@ export default function Dashboard({ user }) {
     const matchTab =
       activeTab === "All" ||
       (activeTab === "Collecting" && card.status === "collecting") ||
-      (activeTab === "Delivered" && card.status === "delivered") ||
-      (activeTab === "Drafts" && card.status === "draft");
+      (activeTab === "Delivered" && card.status === "delivered");
     const matchSearch =
       card.recipient.toLowerCase().includes(search.toLowerCase()) ||
       card.occasion.toLowerCase().includes(search.toLowerCase());

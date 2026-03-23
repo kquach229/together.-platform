@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         recipientEmail: recipientEmail || null,
         openingMessage: openingMessage || null,
         theme,
-        status: "draft",
+        status: "collecting",
         signingDeadline: signingDeadline ? new Date(signingDeadline) : null,
         scheduledDeliveryAt: scheduledDeliveryAt
           ? new Date(scheduledDeliveryAt)
@@ -137,7 +137,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Validate status if provided
-    const validStatuses = ["draft", "collecting", "delivered", "archived"];
+    const validStatuses = ["collecting", "delivered", "archived"];
     if (status && !validStatuses.includes(status)) {
       return NextResponse.json(
         {

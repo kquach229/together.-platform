@@ -65,7 +65,7 @@ export default async function SignPage({ params }: Props) {
   if (card.signingDeadline && new Date() > new Date(card.signingDeadline)) {
     return (
       <div className="font-dm-sans min-h-screen bg-[#FDF8F2] flex items-center justify-center px-12">
-        <div className="text-center max-w-[400px]">
+        <div className="text-center max-w-100">
           <div className="text-5xl mb-5">⏰</div>
           <h1 className="font-playfair text-[28px] tracking-tight mb-3">
             Signing has closed
