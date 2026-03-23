@@ -86,7 +86,9 @@ export default function Dashboard({ user }) {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
   const activity = (user.notifications ?? [])
+    .slice(0, 5)
     .sort((a, b) => b.createdAt - a.createdAt)
+
     .map((n) => mapActivity(n.type, n.payload, n.createdAt))
     .filter(Boolean);
 

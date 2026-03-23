@@ -244,6 +244,7 @@ export default function SignView({ card, signingToken }: Props) {
           </p>
 
           {/* Mini preview of submitted message */}
+          {/* Mini preview of submitted message */}
           <div className="bg-[#F5EAD8] rounded-2xl p-5 text-left mb-8">
             <div className="flex items-center gap-2.5 mb-3">
               <div className="w-8 h-8 rounded-full bg-[#F5EAD8] border border-[#EDD5C5] flex items-center justify-center text-xs font-medium text-[#C4734A]">
@@ -253,6 +254,15 @@ export default function SignView({ card, signingToken }: Props) {
               <span className="text-xs text-[#8C7B6B] ml-auto">Just now</span>
             </div>
             <p className="text-sm leading-[1.7] text-[#3A2F27]">{message}</p>
+
+            {/* Show the photo preview if one was uploaded */}
+            {photoPreview && (
+              <img
+                src={photoPreview}
+                alt="Your photo"
+                className="w-full h-auto object-cover max-h-[420px] mt-5"
+              />
+            )}
           </div>
 
           <div className="flex flex-col gap-3">
@@ -468,7 +478,7 @@ export default function SignView({ card, signingToken }: Props) {
                   <img
                     src={photoPreview}
                     alt="Preview"
-                    className="w-full max-h-56 object-cover"
+                    className="w-full h-auto object-cover max-h-[420px]"
                   />
                   <button
                     onClick={removePhoto}
