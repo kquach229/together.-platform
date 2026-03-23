@@ -13,7 +13,7 @@ const signCardSchema = z.object({
     .string()
     .min(1, "Message is required")
     .max(300, "Message must be 300 characters or less"),
-  photoUrl: z.string().url("Invalid photo URL").optional().or(z.literal("")),
+  photoUrl: z.string().optional().or(z.literal("")),
 });
 
 // ─── GET /api/sign/[signingToken] ────────────────────────────
@@ -83,6 +83,7 @@ export async function GET(
 
 // ─── POST /api/sign/[signingToken] ───────────────────────────
 // Submits a new signature to the card.
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ signingToken: string }> },
@@ -134,7 +135,7 @@ export async function POST(
     }
 
     const { signerName, signerEmail, message, photoUrl } = parsed.data;
-
+    console.log("dsfjslflsjfklsjfkljsfjslfjlskjfsjL::::::", photoUrl);
     // 5. Get IP for audit trail
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
@@ -143,6 +144,7 @@ export async function POST(
 
     // 6. Create the signature
     // signer_count is auto-incremented by the DB trigger
+    console.log("photoUrl:", photoUrl);
     const signature = await prisma.signature.create({
       data: {
         cardId: card.id,

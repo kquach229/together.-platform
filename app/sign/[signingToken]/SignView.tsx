@@ -179,9 +179,6 @@ export default function SignView({ card, signingToken }: Props) {
     setErrors({});
     setIsSubmitting(true);
 
-    const s3PhotoUrl = await fetch("/api/upload", { method: "POST" });
-    console.log(s3PhotoUrl);
-
     try {
       let photoUrl: string | undefined;
       if (photoFile) {
@@ -196,7 +193,7 @@ export default function SignView({ card, signingToken }: Props) {
           signerName,
           signerEmail: signerEmail || undefined,
           message,
-          photoUrl: undefined,
+          photoUrl: photoUrl || undefined,
         }),
       });
 

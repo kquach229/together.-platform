@@ -264,7 +264,7 @@ export default function RecipientView({ card }: Props) {
                     {sig.photoUrl && (
                       <div className="w-full h-40 overflow-hidden">
                         <img
-                          src={sig.photoUrl}
+                          src={`https://together-uploads-bucket.s3.us-east-1.amazonaws.com/${sig.photoUrl}`}
                           alt={`Photo from ${sig.signerName}`}
                           className="w-full h-full object-cover"
                         />
