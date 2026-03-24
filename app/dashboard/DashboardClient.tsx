@@ -117,7 +117,7 @@ export default function Dashboard({ user }) {
   }));
 
   const stats = [
-    { label: "Cards created", value: cards.length ?? "0", sub: "All time" },
+    { label: "Current cards", value: cards.length ?? "0", sub: "" },
     {
       label: "Total signatures",
       value: signatures.length ?? "0",
