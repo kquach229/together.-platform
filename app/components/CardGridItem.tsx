@@ -4,8 +4,26 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
-  const [openDialog, setOpenDialog] = useState();
+  const [openDialog, setOpenDialog] = useState(false);
   const router = useRouter();
+
+  //   const mapActions = (action) => {
+  //     switch (action.toLowerCase()) {
+  //       case "view card":
+  //         return () => router.push(`/cards/${card.id}`);
+  //       case "delete":
+  //         return () => setOpenDialog(true);
+  //     }
+  //   };
+
+  const actions = {
+    view: () => router.push(`/cards/${card.id}`),
+    delete: () => setOpenDialog(true),
+    copy: () =>
+      navigator.clipboard.writeText(
+        `http://localhost:3000/sign/${card.signingToken}`,
+      ),
+  };
   return (
     <div
       key={card.id}
@@ -34,21 +52,21 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
           </button>
           {menuOpen === card.id && (
             <div className="absolute right-0 top-8 bg-white border border-[#E8DDD0] rounded-xl shadow-lg z-20 min-w-[140px] py-1 overflow-hidden">
-              {["View card", "Copy link", "Edit", "Delete"].map((action) => (
+              {[
+                { key: "view", label: "View card" },
+                { key: "copy", label: "Copy link" },
+                { key: "delete", label: "Delete" },
+              ].map((action) => (
                 <button
-                  key={action}
-                  onClick={
-                    action === "Delete"
-                      ? () => setOpenDialog(true)
-                      : action === "View card"
-                        ? () => router.push(`/cards/${card.id}`)
-                        : console.log("bithc")
-                  }
+                  key={action.key}
+                  onClick={actions[action.key]}
                   className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FDF8F2] transition-colors font-dm-sans border-none cursor-pointer bg-transparent ${
-                    action === "Delete" ? "text-red-500" : "text-[#1A1208]"
+                    action.label === "Delete"
+                      ? "text-red-500"
+                      : "text-[#1A1208]"
                   }`}
                 >
-                  {action}
+                  {action.label}
                 </button>
               ))}
             </div>
