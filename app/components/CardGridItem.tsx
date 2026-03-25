@@ -1,7 +1,10 @@
-import { CARD_THEMES } from "@/lib/theme";
+import { useState } from "react";
+import DeleteCardDialog from "./DeleteCardDialog";
+import { useRouter } from "next/navigation";
 
 const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
-  console.log("CardGridItem", card);
+  const [openDialog, setOpenDialog] = useState();
+  const router = useRouter();
   return (
     <div
       key={card.id}
@@ -33,7 +36,13 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
               {["View card", "Copy link", "Edit", "Delete"].map((action) => (
                 <button
                   key={action}
-                  onClick={() => setMenuOpen(null)}
+                  onClick={
+                    action === "Delete"
+                      ? () => setOpenDialog(true)
+                      : action === "View card"
+                        ? () => router.push(`/cards/${card.id}`)
+                        : console.log("bithc")
+                  }
                   className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FDF8F2] transition-colors font-dm-sans border-none cursor-pointer bg-transparent ${
                     action === "Delete" ? "text-red-500" : "text-[#1A1208]"
                   }`}
@@ -99,6 +108,11 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
           )}
         </div>
       </div>
+      <DeleteCardDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        cardId={card.id}
+      />
     </div>
   );
 };

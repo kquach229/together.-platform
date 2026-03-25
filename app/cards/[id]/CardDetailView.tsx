@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import DeleteCardDialog from "@/app/components/DeleteCardDialog";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Signature {
@@ -141,6 +142,7 @@ export default function CardDetailView({ card }: Props) {
   const [signatures, setSignatures] = useState<Signature[]>(card.signatures);
   const [deliverError, setDeliverError] = useState<string | null>(null);
   const [showDeliver, setShowDeliver] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const theme = themes[card.theme] ?? themes.warm;
   const isMidnight = card.theme === "midnight";
@@ -599,7 +601,7 @@ export default function CardDetailView({ card }: Props) {
                   Danger zone
                 </div>
                 <button
-                  onClick={handleArchive}
+                  onClick={() => setOpenDeleteDialog(true)}
                   disabled={isArchiving}
                   className="w-full py-2.5 rounded-full text-xs font-medium border border-[#E8DDD0] text-[#8C7B6B] hover:border-red-300 hover:text-red-400 transition-all font-dm-sans bg-white cursor-pointer"
                 >
@@ -613,6 +615,11 @@ export default function CardDetailView({ card }: Props) {
           </div>
         </div>
       </div>
+      <DeleteCardDialog
+        open={openDeleteDialog}
+        onOpenChange={setOpenDeleteDialog}
+        cardId={card.id}
+      />
     </div>
   );
 }

@@ -206,7 +206,7 @@ export async function PATCH(
 }
 
 // ─── DELETE /api/cards/[id] ──────────────────────────────────
-// Deletes a card — only allowed while status is 'draft'
+
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } },
@@ -238,15 +238,6 @@ export async function DELETE(
     });
 
     await prisma.card.delete({ where: { id: cardId } });
-
-    //       id String @id @default(uuid())
-    //   userId String
-    //   cardId String?
-    //   type String
-    //   payload Json?
-    //   sentAt DateTime?
-    //   createdAt DateTime @default(now())
-    //   updatedAt DateTime @updatedAt
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

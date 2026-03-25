@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import CardGridItem from "../components/CardGridItem";
-import { getUser } from "@/lib/helpers/getUser";
-import { useUser } from "@clerk/nextjs";
+
 import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
 import Link from "next/link";
+import ReusableDialog from "../components/ReusableDialog";
 
 type CardStatus = "collecting" | "delivered";
 
@@ -241,16 +241,15 @@ export default function Dashboard({ user }) {
               {filtered.map((card) => {
                 const status = statusConfig[card.status];
                 return (
-                  <Link href={`/cards/${card.id}`} key={card.id}>
-                    <div>
-                      <CardGridItem
-                        menuOpen={menuOpen}
-                        setMenuOpen={setMenuOpen}
-                        card={card}
-                        status={status}
-                      />
-                    </div>
-                  </Link>
+                  //   <Link href={`/cards/${card.id}`}>
+                  <CardGridItem
+                    key={card.id}
+                    menuOpen={menuOpen}
+                    setMenuOpen={setMenuOpen}
+                    card={card}
+                    status={status}
+                  />
+                  //   </Link>
                 );
               })}
 
@@ -295,6 +294,10 @@ export default function Dashboard({ user }) {
           </div>
         </div>
       </div>
+
+      <ReusableDialog title={"dljfsjfs"} description={"bitchass"}>
+        ayoooooo
+      </ReusableDialog>
     </div>
   );
 }

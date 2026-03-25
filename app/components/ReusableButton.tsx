@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 
-const ReusableButton = ({ children, style }) => {
+const ReusableButton = ({ children, style, onClick }) => {
   return (
-    <Button style={style} className="bg-foreground">
+    <Button onClick={onClick} style={style} className="bg-foreground">
       {children}
     </Button>
   );

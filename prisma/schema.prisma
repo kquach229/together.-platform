@@ -99,7 +99,7 @@ model Signature {
   userId String?
   isHidden Boolean @default(false)
   cardId String
-  card Card @relation(fields: [cardId], references: [id])
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
   signerName String
   signerEmail String?
   message String
@@ -108,13 +108,14 @@ model Signature {
   updatedAt DateTime @updatedAt
   user User? @relation(fields: [userId], references: [id])
 
+
 }
 
 
 model CardView {
   id String @id @default(uuid())
   cardId String
-  card Card @relation(fields: [cardId], references: [id])
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
   viewerIp String?
   viewerUserAgent String?
   viewedAt DateTime @default(now())
@@ -131,7 +132,7 @@ model Notification {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user User @relation(fields: [userId], references: [id])
-  card Card? @relation(fields: [cardId], references: [id])
+  card Card? @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }
 
 
