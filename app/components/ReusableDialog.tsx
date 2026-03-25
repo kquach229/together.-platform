@@ -4,7 +4,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 const ReusableDialog = ({
@@ -16,16 +15,25 @@ const ReusableDialog = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md rounded-2xl p-6 gap-4">
         {(title || description) && (
-          <DialogHeader>
-            {title && <DialogTitle>{title}</DialogTitle>}
+          <DialogHeader className="space-y-2 text-left">
+            {title && (
+              <DialogTitle className="text-lg font-semibold tracking-tight">
+                {title}
+              </DialogTitle>
+            )}
+
             {description && (
-              <DialogDescription>{description}</DialogDescription>
+              <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
+                {description}
+              </DialogDescription>
             )}
           </DialogHeader>
         )}
-        {children}
+
+        {/* Content */}
+        <div className="pt-2">{children}</div>
       </DialogContent>
     </Dialog>
   );

@@ -595,23 +595,22 @@ export default function CardDetailView({ card }: Props) {
             </div>
 
             {/* Danger zone */}
-            {card.status !== "delivered" && (
-              <div className="bg-white border border-[#E8DDD0] rounded-2xl p-5">
-                <div className="text-[11px] font-medium tracking-[1.5px] uppercase text-[#8C7B6B] mb-3">
-                  Danger zone
-                </div>
-                <button
-                  onClick={() => setOpenDeleteDialog(true)}
-                  disabled={isArchiving}
-                  className="w-full py-2.5 rounded-full text-xs font-medium border border-[#E8DDD0] text-[#8C7B6B] hover:border-red-300 hover:text-red-400 transition-all font-dm-sans bg-white cursor-pointer"
-                >
-                  {isArchiving ? "Deleting…" : "Delete this card"}
-                </button>
-                <p className="text-[10px] text-[#C5B8AD] text-center mt-2 font-light">
-                  Hides the card from your dashboard. Signers lose access.
-                </p>
+
+            <div className="bg-white border border-[#E8DDD0] rounded-2xl p-5">
+              <div className="text-[11px] font-medium tracking-[1.5px] uppercase text-[#8C7B6B] mb-3">
+                Danger zone
               </div>
-            )}
+              <button
+                onClick={() => setOpenDeleteDialog(true)}
+                disabled={isArchiving}
+                className="w-full py-2.5 rounded-full text-xs font-medium border border-[#E8DDD0] text-[#8C7B6B] hover:border-red-300 hover:text-red-400 transition-all font-dm-sans bg-white cursor-pointer"
+              >
+                {isArchiving ? "Deleting…" : "Delete this card"}
+              </button>
+              <p className="text-[10px] text-[#C5B8AD] text-center mt-2 font-light">
+                Deletes the card. Signers and recipients lose all access.
+              </p>
+            </div>
           </div>
         </div>
       </div>

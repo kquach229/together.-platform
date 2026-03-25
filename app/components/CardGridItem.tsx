@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DeleteCardDialog from "./DeleteCardDialog";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
   const [openDialog, setOpenDialog] = useState();
@@ -102,7 +103,10 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
             </>
           )}
           {card.status === "delivered" && (
-            <button className="flex-1 py-2 rounded-full text-xs font-medium border border-[#E8DDD0] text-[#1A1208] hover:border-terracotta hover:text-terracotta transition-all font-dm-sans cursor-pointer bg-white">
+            <button
+              onClick={() => router.push(`/cards/${card.id}`)}
+              className="flex-1 py-2 rounded-full text-xs font-medium border border-[#E8DDD0] text-[#1A1208] hover:border-terracotta hover:text-terracotta transition-all font-dm-sans cursor-pointer bg-white"
+            >
               View card
             </button>
           )}
