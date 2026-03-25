@@ -61,9 +61,7 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
                   key={action.key}
                   onClick={actions[action.key]}
                   className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FDF8F2] transition-colors font-dm-sans border-none cursor-pointer bg-transparent ${
-                    action.label === "Delete"
-                      ? "text-red-500"
-                      : "text-[#1A1208]"
+                    action.key === "delete" ? "text-red-500" : "text-[#1A1208]"
                   }`}
                 >
                   {action.label}

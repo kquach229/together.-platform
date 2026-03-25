@@ -116,3 +116,33 @@ body {
     @apply font-sans;
   }
 }
+
+[data-radix-popper-content-wrapper],
+[data-state] .fixed.inset-0 {
+  backdrop-filter: blur(4px);
+}
+
+[role="dialog"] ~ [data-radix-dialog-overlay] {
+  background-color: rgba(26, 18, 8, 0.4);
+}
+
+/* Close button — match Together border style */
+[data-radix-dialog-close] {
+  color: #8c7b6b;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e8ddd0;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+[data-radix-dialog-close]:hover {
+  color: #d4845a;
+  border-color: #d4845a;
+  background: transparent;
+}
