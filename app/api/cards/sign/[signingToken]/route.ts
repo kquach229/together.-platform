@@ -4,6 +4,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
+import { getUser } from "@/lib/helpers/getUser";
 
 // ─── Validation schema ───────────────────────────────────────
 const signCardSchema = z.object({
@@ -135,7 +137,8 @@ export async function POST(
     }
 
     const { signerName, signerEmail, message, photoUrl } = parsed.data;
-    console.log("dsfjslflsjfklsjfkljsfjslfjlskjfsjL::::::", photoUrl);
+    const user = await getUser();
+
     // 5. Get IP for audit trail
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
@@ -144,10 +147,26 @@ export async function POST(
 
     // 6. Create the signature
     // signer_count is auto-incremented by the DB trigger
-    console.log("photoUrl:", photoUrl);
+
+    if (user?.id) {
+      const existing = await prisma.signature.findFirst({
+        where: {
+          cardId: card.id,
+          userId: user.id,
+        },
+      });
+      if (existing) {
+        return NextResponse.json(
+          { error: "You have already signed this card." },
+          { status: 403 },
+        );
+      }
+    }
+
     const signature = await prisma.signature.create({
       data: {
         cardId: card.id,
+        userId: user?.id,
         signerName,
         signerEmail: signerEmail || null,
         message,
@@ -159,6 +178,7 @@ export async function POST(
         message: true,
         photoUrl: true,
         createdAt: true,
+        userId: true,
       },
     });
 

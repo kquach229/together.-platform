@@ -1,8 +1,9 @@
 "use client";
 
+import { UserAvatar, useUser } from "@clerk/nextjs";
 // app/sign/[signingToken]/SignView.tsx
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const themes: Record<string, { from: string; to: string }> = {
   warm: { from: "#FEF3ED", to: "#F5EAD8" },
@@ -51,14 +52,14 @@ const occasionEmojis: Record<string, string> = {
   Sympathy: "💔",
 };
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
+// function getInitials(name: string) {
+//   return name
+//     .split(" ")
+//     .map((n) => n[0])
+//     .join("")
+//     .toUpperCase()
+//     .slice(0, 2);
+// }
 
 function daysUntil(date: Date) {
   const diff = new Date(date).getTime() - Date.now();
@@ -142,6 +143,10 @@ export default function SignView({ card, signingToken }: Props) {
   const deadline = card.signingDeadline ? new Date(card.signingDeadline) : null;
   const daysLeft = deadline ? daysUntil(deadline) : null;
 
+  useEffect(() => {
+    // setSignerName(user?.fullName);
+  }, []);
+
   function handleEmoji(e: string) {
     if (message.length < MAX_CHARS) setMessage((m) => m + e);
   }
@@ -163,12 +168,12 @@ export default function SignView({ card, signingToken }: Props) {
 
   function validate() {
     const errs: Record<string, string> = {};
-    if (!signerName.trim()) errs.signerName = "Please enter your name.";
     if (!message.trim()) errs.message = "Please write a message.";
     if (message.length > MAX_CHARS)
       errs.message = `Message must be ${MAX_CHARS} characters or less.`;
     return errs;
   }
+  const { user } = useUser();
 
   async function handleSubmit() {
     const errs = validate();
@@ -190,7 +195,7 @@ export default function SignView({ card, signingToken }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          signerName,
+          signerName: signerName,
           signerEmail: signerEmail || undefined,
           message,
           photoUrl: photoUrl || undefined,
@@ -248,7 +253,7 @@ export default function SignView({ card, signingToken }: Props) {
           <div className="bg-[#F5EAD8] rounded-2xl p-5 text-left mb-8">
             <div className="flex items-center gap-2.5 mb-3">
               <div className="w-8 h-8 rounded-full bg-[#F5EAD8] border border-[#EDD5C5] flex items-center justify-center text-xs font-medium text-[#C4734A]">
-                {getInitials(signerName)}
+                <UserAvatar />
               </div>
               <span className="text-sm font-medium">{signerName}</span>
               <span className="text-xs text-[#8C7B6B] ml-auto">Just now</span>
@@ -356,7 +361,7 @@ export default function SignView({ card, signingToken }: Props) {
                           marginLeft: i === 0 ? 0 : -6,
                         }}
                       >
-                        {getInitials(s.signerName)}
+                        <UserAvatar />
                       </div>
                     );
                   })}
@@ -583,7 +588,7 @@ export default function SignView({ card, signingToken }: Props) {
                         className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-medium shrink-0"
                         style={{ background: c.avatar, color: c.avatarText }}
                       >
-                        {getInitials(s.signerName)}
+                        <UserAvatar />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">

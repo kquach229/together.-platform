@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DeleteCardDialog from "@/app/components/DeleteCardDialog";
 import EditCardPanel from "./EditCardPanel";
+import { UserAvatar } from "@clerk/nextjs";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Signature {
@@ -429,7 +430,7 @@ export default function CardDetailView({ card }: Props) {
                             className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium shrink-0 mt-0.5"
                             style={{ background: c.bg, color: c.text }}
                           >
-                            {getInitials(sig.signerName)}
+                            <UserAvatar />
                           </div>
 
                           {/* Content */}
