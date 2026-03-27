@@ -8,6 +8,11 @@ import {
 import { getUser } from "@/lib/helpers/getUser";
 
 import { UserButton } from "@clerk/nextjs";
+import {
+  CreditCardIcon,
+  LayoutDashboardIcon,
+  WorkflowIcon,
+} from "lucide-react";
 
 const AppSideBar = async () => {
   const user = await getUser({
@@ -15,7 +20,7 @@ const AppSideBar = async () => {
     cards: true,
     notifications: true,
   });
-  console.log(user);
+
   return (
     <Sidebar className="bg-red-500">
       {/* ── SIDEBAR ── */}
@@ -30,14 +35,21 @@ const AppSideBar = async () => {
           <SidebarGroup>
             <nav className="flex flex-col gap-1 flex-1">
               {[
-                { icon: "▦", label: "Dashboard", active: true },
-                { icon: "＋", label: "New card", active: false },
-                { icon: "◷", label: "Collecting", active: false },
-                { icon: "✓", label: "Delivered", active: false },
+                {
+                  icon: <LayoutDashboardIcon />,
+                  label: "Dashboard",
+                  path: "/",
+                },
+                {
+                  icon: <WorkflowIcon />,
+                  label: "How it works",
+                  path: "how-it-works",
+                },
+                { icon: <CreditCardIcon />, label: "Pricing", path: "/" },
               ].map((item) => (
                 <button
                   key={item.label}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left font-dm-sans w-full border-none ${
+                  className={`flex items-center gap-5 px-3 py-2.5 rounded-xl text-sm transition-all text-left font-dm-sans w-full border-none ${
                     item.active
                       ? "bg-terracotta text-white font-medium"
                       : "text-[#8A7F74] hover:bg-[#2E2820] hover:text-[#FDF8F2] bg-transparent"
@@ -51,20 +63,20 @@ const AppSideBar = async () => {
               ))}
             </nav>
           </SidebarGroup>
-
-          <SidebarGroup>
-            {/* Plan badge */}
-            <div className="border border-[#2E2820] rounded-xl p-3 mb-5">
-              <div className="text-xs text-[#8A7F74] mb-0.5">Current plan</div>
-              <div className="text-sm font-medium text-[#FDF8F2]">
-                {user?.plan}
-              </div>
-              <button className="mt-1.5 text-xs text-terracotta hover:underline font-medium bg-transparent border-none cursor-pointer p-0">
-                Upgrade to Plus →
-              </button>
-            </div>
-          </SidebarGroup>
         </SidebarContent>
+
+        <SidebarGroup>
+          {/* Plan badge */}
+          <div className="border border-[#2E2820] rounded-xl p-3 mb-5">
+            <div className="text-xs text-[#8A7F74] mb-0.5">Current plan</div>
+            <div className="text-sm font-medium text-[#FDF8F2]">
+              {user?.plan}
+            </div>
+            <button className="mt-1.5 text-xs text-terracotta hover:underline font-medium bg-transparent border-none cursor-pointer p-0">
+              Upgrade to Plus →
+            </button>
+          </div>
+        </SidebarGroup>
 
         <SidebarFooter>
           {/* User */}

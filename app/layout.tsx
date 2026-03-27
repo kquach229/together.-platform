@@ -37,17 +37,11 @@ export default function RootLayout({
           <SidebarProvider>
             <div className="max-w-450 mx-auto relative w-full">
               {/* Mobile sidebar */}
-              <div className="block md:hidden">
-                <div className="">
-                  <AppSideBar />
-                  <SidebarTrigger />
-                </div>
+              <div className="block md:hidden h-16 p-5">
+                <SidebarTrigger />
               </div>
 
-              {/* Desktop navbar */}
-              <div className="hidden md:block">
-                <Navbar />
-              </div>
+              <Navbar />
 
               {children}
               <Footer />
