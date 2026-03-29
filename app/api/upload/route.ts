@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     // temp/ objects can be cleaned up by an S3 lifecycle rule after 24h.
     const key = cardId
       ? `signatures/${cardId}/${uid}.${ext}`
-      : `temp/${uid}.${ext}`;
+      : `cover-photos/${uid}.${ext}`;
 
     const { url, fields } = await createPresignedPost(s3, {
       Bucket: process.env.AWS_BUCKET_NAME!,

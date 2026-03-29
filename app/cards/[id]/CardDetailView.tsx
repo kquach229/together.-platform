@@ -311,6 +311,19 @@ export default function CardDetailView({ card }: Props) {
                   )}
                 </div>
 
+                {/* Cover photo preview */}
+                {card.creatorPhotoUrl && (
+                  <div className="w-full h-16 overflow-hidden">
+                    <img
+                      src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
+                      alt="Cover"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {console.log(card.creatorPhotoUrl)}
+
                 {/* Card meta strip */}
                 <div className="bg-white px-6 py-4 flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-5">

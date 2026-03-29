@@ -43,6 +43,7 @@ export default async function CardDetailPage({ params }: Props) {
       createdAt: true,
       creatorId: true,
       creator: { select: { name: true } },
+      creatorPhotoUrl: true,
       signatures: {
         orderBy: { createdAt: "desc" },
         select: {
