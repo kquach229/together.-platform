@@ -23,6 +23,7 @@ export default async function CardPage({ params }: Props) {
       status: true,
       deliveredAt: true,
       signerCount: true,
+      creatorPhotoUrl: true,
       creator: {
         select: { name: true },
       },

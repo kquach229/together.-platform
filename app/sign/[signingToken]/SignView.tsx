@@ -313,6 +313,17 @@ export default function SignView({ card, signingToken }: Props) {
               </span>
             </p>
 
+            {/* Cover photo preview */}
+            {card.creatorPhotoUrl && (
+              <div className="w-full h-16 overflow-hidden mt-5">
+                <img
+                  src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
+                  alt="Cover"
+                  className="w-full h-full object-cover rounded-xl"
+                />
+              </div>
+            )}
+
             {/* Signer avatar stack */}
             {card.signatures.length > 0 && (
               <div className="flex items-center justify-center gap-3 mt-4">

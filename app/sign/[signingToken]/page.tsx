@@ -22,6 +22,7 @@ export default async function SignPage({ params }: Props) {
       status: true,
       signingDeadline: true,
       signerCount: true,
+      creatorPhotoUrl: true,
       creator: {
         select: { name: true },
       },

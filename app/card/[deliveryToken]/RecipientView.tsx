@@ -240,6 +240,19 @@ export default function RecipientView({ card }: Props) {
         </div>
       </div>
 
+      <div>
+        {/* Cover photo preview */}
+        {card.creatorPhotoUrl && (
+          <div className="w-full h-50 overflow-hidden">
+            <img
+              src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
+              alt="Cover"
+              className="w-full h-50 object-cover rounded-b-md"
+            />
+          </div>
+        )}
+      </div>
+
       {/* MESSAGES */}
       <section className="max-w-[1060px] mx-auto px-12 py-16">
         {card.signatures.length === 0 ? (
