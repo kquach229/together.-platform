@@ -1,8 +1,9 @@
 "use client";
 
+import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
 import { CARD_THEMES } from "@/lib/theme";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const occasions = [
   { emoji: "🎂", label: "Birthday" },
@@ -26,10 +27,11 @@ const steps = [
   { num: 4, label: "Share" },
 ];
 
-const themes = ["warm", "lavender", "sage", "sky", "neutral"];
+const themes = ["warm", "lavender", "sage", "sky", "neutral", "midnight"];
 
 export default function CreateCard() {
   const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(1);
   const [occasion, setOccasion] = useState("Birthday");
@@ -39,8 +41,9 @@ export default function CreateCard() {
   const [message, setMessage] = useState("");
   const [deadline, setDeadline] = useState("");
   const [theme, setTheme] = useState("warm");
-
-  const themeObj = CARD_THEMES[theme] || CARD_THEMES.warm;
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState();
+  const [photoFile, setPhotoFile] = useState();
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
 
   // Set after the card is created via API
   const [signingToken, setSigningToken] = useState<string | null>(null);
@@ -48,7 +51,20 @@ export default function CreateCard() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const themeColors = ["warm", "neutral", "sage", "lavendar", "sky"];
+  function handlePhoto(ev: React.ChangeEvent<HTMLInputElement>) {
+    const file = ev.target.files?.[0];
+    if (!file) return;
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setCoverPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  function removePhoto() {
+    setPhotoFile(null);
+    setCoverPhotoPreview(null);
+    if (fileRef.current) fileRef.current.value = "";
+  }
 
   const shareLink = signingToken
     ? `${window.location.origin}/sign/${signingToken}`
@@ -68,13 +84,25 @@ export default function CreateCard() {
     return true;
   }
 
-  // Called on step 3 — creates the card via API then moves to step 4
+  function buildS3Url(key: string): string {
+    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  }
+
+  // Called when the user clicks Continue on step 3.
+  // Flow:
+  //   1. POST /api/cards       → create card, get cardId + signingToken
+  //   2. POST /api/upload      → get presigned S3 URL (uses real cardId now)
+  //   3. PUT file → S3
+  //   4. PATCH /api/cards/:id/photo → save URL to card
+  //   5. Advance to step 4
   async function handleCreateCard() {
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      const res = await fetch("/api/cards", {
+      // Step 1 — create the card
+      setUploadProgress("Creating your card…");
+      const createRes = await fetch("/api/cards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,28 +110,55 @@ export default function CreateCard() {
           recipientName,
           recipientEmail: recipientEmail || undefined,
           openingMessage: message || undefined,
-          theme: theme,
+          theme: theme.id,
           signingDeadline: deadline
             ? new Date(deadline).toISOString()
             : undefined,
         }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setSubmitError(data.message ?? data.error ?? "Something went wrong.");
+      const createData = await createRes.json();
+      if (!createRes.ok) {
+        setSubmitError(
+          createData.message ?? createData.error ?? "Something went wrong.",
+        );
         return;
       }
 
-      // Store the real signing token and advance to the share step
-      setSigningToken(data.card.signingToken);
+      const { id: cardId, signingToken: token } = createData.card;
+
+      // Step 2 & 3 — upload cover photo if one was chosen
+      if (photoFile) {
+        setUploadProgress("Uploading cover photo…");
+
+        // Now we have a real cardId — key goes to signatures/{cardId}/...
+        const photoUrl = await uploadPhoto(photoFile);
+
+        console.log("photoUrl: ", photoUrl, "photoFile: ", photoFile);
+
+        console.log("THE BUILT UP URL FOR S3::::::::::", photoUrl);
+
+        // Step 4 — save the photo URL to the card
+        setUploadProgress("Saving photo…");
+        await fetch(`/api/cards/${cardId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ creatorPhotoUrl: photoUrl }),
+        });
+      }
+
+      setSigningToken(token);
       setStep(4);
     } catch (err) {
-      console.error("Failed to create card", err);
-      setSubmitError("Network error — please try again.");
+      console.error("Failed to create card:", err);
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Network error — please try again.",
+      );
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(null);
     }
   }
 
@@ -247,6 +302,9 @@ export default function CreateCard() {
                         (optional)
                       </span>
                     </label>
+                    <p className="text-xs text-muted-taupe font-light mb-4">
+                      Shown at the top of the card when recipients open it.
+                    </p>
                     <textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
@@ -336,6 +394,67 @@ export default function CreateCard() {
                       )}
                     </button>
                   ))}
+                </div>
+
+                {/* Cover photo upload */}
+                <div className="border-t border-[#E8DDD0] pt-6">
+                  <label className="block text-sm font-medium mb-1">
+                    Cover photo
+                    <span className="text-muted-taupe font-light ml-2">
+                      (optional)
+                    </span>
+                  </label>
+                  <p className="text-xs text-muted-taupe font-light mb-4">
+                    Shown at the top of the card when recipients open it.
+                  </p>
+
+                  {coverPhotoPreview ? (
+                    <div className="relative rounded-xl overflow-hidden border border-[#E8DDD0] mb-2">
+                      <img
+                        src={coverPhotoPreview}
+                        alt="Cover preview"
+                        className="w-full max-h-48 object-cover"
+                      />
+                      <div className="absolute top-2 right-2 flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => fileRef.current?.click()}
+                          className="px-3 py-1.5 rounded-lg bg-white/90 text-xs font-medium text-[#1A1208] hover:bg-white transition-colors border-none cursor-pointer font-dm-sans shadow-sm"
+                        >
+                          Replace
+                        </button>
+                        <button
+                          type="button"
+                          onClick={removePhoto}
+                          className="w-7 h-7 rounded-lg bg-[#1A1208]/60 text-white text-xs flex items-center justify-center hover:bg-[#1A1208] transition-colors cursor-pointer border-none"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="w-full border border-dashed border-[#E8DDD0] rounded-xl p-6 flex flex-col items-center gap-2 hover:border-terracotta hover:bg-[#FEF3ED]/30 transition-all bg-white cursor-pointer"
+                    >
+                      <span className="text-2xl">📷</span>
+                      <span className="text-sm text-muted-taupe font-light">
+                        Add a cover photo
+                      </span>
+                      <span className="text-xs text-[#C5B8AD]">
+                        PNG, JPG up to 5MB
+                      </span>
+                    </button>
+                  )}
+
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handlePhoto}
+                  />
                 </div>
 
                 {/* Error message */}
@@ -543,6 +662,16 @@ export default function CreateCard() {
                   </p>
                 )}
               </div>
+              {/* Cover photo preview */}
+              {coverPhotoPreview && (
+                <div className="w-full h-16 overflow-hidden">
+                  <img
+                    src={coverPhotoPreview}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <div className="bg-white p-4">
                 <div className="border border-dashed border-[#E8DDD0] rounded-xl p-4 text-center">
                   <div className="text-2xl mb-1.5">🖊</div>
@@ -563,17 +692,6 @@ export default function CreateCard() {
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="mt-4 bg-[#F5EAD8] rounded-xl p-4 text-xs text-muted-taupe leading-[1.7] font-light">
-              {step === 1 &&
-                "Choose the occasion that fits best. This sets the tone for the whole card."}
-              {step === 2 &&
-                "The recipient's name appears on the card header. Your message shows up first, before everyone else's."}
-              {step === 3 &&
-                "The theme affects the card's background and colour palette. All message bubbles adapt to match."}
-              {step === 4 &&
-                "Share this link anywhere — Slack, email, WhatsApp. No one needs an account to sign."}
             </div>
           </div>
         </div>

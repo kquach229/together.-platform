@@ -5,7 +5,6 @@ import CardGridItem from "../components/CardGridItem";
 
 import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
-import Link from "next/link";
 import ReusableDialog from "../components/ReusableDialog";
 
 type CardStatus = "collecting" | "delivered";
@@ -294,10 +293,6 @@ export default function Dashboard({ user }) {
           </div>
         </div>
       </div>
-
-      <ReusableDialog title={"dljfsjfs"} description={"bitchass"}>
-        ayoooooo
-      </ReusableDialog>
     </div>
   );
 }

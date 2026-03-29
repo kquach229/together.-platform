@@ -13,6 +13,7 @@ const updateCardSchema = z.object({
   signingDeadline: z.string().datetime().optional().nullable(),
   scheduledDeliveryAt: z.string().datetime().optional().nullable(),
   status: z.enum(["collecting", "delivered", "archived"]).optional(),
+  creatorPhotoUrl: z.string().optional(),
 });
 
 // ─── Helper: get authed user + verify card ownership ─────────
@@ -135,6 +136,7 @@ export async function PATCH(
       signingDeadline,
       scheduledDeliveryAt,
       status,
+      creatorPhotoUrl,
     } = parsed.data;
 
     // If delivering, set deliveredAt timestamp
@@ -160,6 +162,7 @@ export async function PATCH(
         }),
         ...(status && { status }),
         ...(deliveredAt && { deliveredAt }),
+        ...(creatorPhotoUrl !== undefined && { creatorPhotoUrl }),
       },
       select: {
         id: true,
@@ -174,6 +177,7 @@ export async function PATCH(
         signerCount: true,
         signingDeadline: true,
         scheduledDeliveryAt: true,
+        creatorPhotoUrl: true,
         deliveredAt: true,
         updatedAt: true,
       },

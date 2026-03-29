@@ -20,4 +20,8 @@ export const CARD_THEMES = {
     from: "#FDF8F2",
     to: "#EDE0CE",
   },
+  midnight: {
+    from: "#1A1208",
+    to: "#2E2820",
+  },
 };
