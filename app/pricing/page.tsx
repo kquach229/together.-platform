@@ -7,10 +7,10 @@ interface Feature {
   text: string;
   included: boolean;
 }
+
 interface Plan {
   name: "Free" | "Plus" | "Team";
   monthlyPrice: number;
-
   annualPrice: number;
   desc: string;
   cta: string;
@@ -114,13 +114,15 @@ export default function Pricing() {
     };
   }, [prices]);
 
-  console.log(prices);
-
   const calculateSavings = (monthlyPrice: number, annualPrice: number) => {
     const yearlyTotal = monthlyPrice * 12;
     const savings = yearlyTotal - annualPrice;
-    const percentage = (savings / yearlyTotal) * 100;
+    const percentage = yearlyTotal > 0 ? (savings / yearlyTotal) * 100 : 0;
     return { savings, percentage: Math.round(percentage) };
+  };
+
+  const formatPrice = (amount: number) => {
+    return Number.isInteger(amount) ? amount.toString() : amount.toFixed(2);
   };
 
   const handlePlanClick = async (planName: Plan["name"]) => {
@@ -146,6 +148,7 @@ export default function Pricing() {
     try {
       setLoadingCheckout(planName);
 
+      // Use window.location to handle the redirect
       const response = await fetch("/api/checkout_sessions", {
         method: "POST",
         headers: {
@@ -153,23 +156,16 @@ export default function Pricing() {
         },
         body: JSON.stringify({
           priceId: selectedPrice.stripePriceId,
-          plan: planName.toLowerCase(),
-          billingInterval: billing,
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data?.error || "Failed to create checkout session");
+        throw new Error("Failed to create checkout session");
       }
 
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      throw new Error("No checkout URL returned");
+      // If the API returns a redirect URL
+      const data = await response.json();
+      if (data.url) router.push(data.url);
     } catch (error) {
       console.error("Checkout error:", error);
       alert("Something went wrong starting checkout.");
@@ -180,13 +176,6 @@ export default function Pricing() {
 
   const handleCreateCard = () => {
     router.push("/create");
-  };
-
-  const PRICING_OBJECTS = {
-    PLUS: "plus",
-    TEAM: "team",
-    PLUS_ANNUAL: "plus_annual",
-    TEAM_ANNUAL: "team_annual",
   };
 
   const plans: Plan[] = [
@@ -212,10 +201,10 @@ export default function Pricing() {
     },
     {
       name: "Plus",
-      monthlyPrice: priceMap.plus?.monthly
+      monthlyPrice: priceMap.plus.monthly
         ? priceMap.plus.monthly.amountCents / 100
-        : 0,
-      annualPrice: priceMap.plus?.annual
+        : 6,
+      annualPrice: priceMap.plus.annual
         ? priceMap.plus.annual.amountCents / 100
         : 58,
       desc: "For people who send cards regularly and want the full experience.",
@@ -237,10 +226,10 @@ export default function Pricing() {
     },
     {
       name: "Team",
-      monthlyPrice: priceMap.team?.monthly
+      monthlyPrice: priceMap.team.monthly
         ? priceMap.team.monthly.amountCents / 100
         : 18,
-      annualPrice: priceMap.team?.annual
+      annualPrice: priceMap.team.annual
         ? priceMap.team.annual.amountCents / 100
         : 173,
       desc: "For workplaces sending cards together — HR, managers, team leads.",
@@ -282,7 +271,6 @@ export default function Pricing() {
             No hidden fees. No surprise charges. Cancel any time.
           </p>
 
-          {/* Billing toggle */}
           <div className="inline-flex bg-[#F5EAD8] rounded-full p-1">
             {(["monthly", "annual"] as const).map((b) => (
               <button
@@ -323,8 +311,8 @@ export default function Pricing() {
               plan.monthlyPrice === 0
                 ? "$0"
                 : billing === "monthly"
-                  ? `$${plan.monthlyPrice}`
-                  : `$${plan.annualPrice}`;
+                  ? `$${formatPrice(plan.monthlyPrice)}`
+                  : `$${formatPrice(plan.annualPrice)}`;
 
             const isLoading = loadingCheckout === plan.name;
 
@@ -362,8 +350,8 @@ export default function Pricing() {
 
                   {plan.monthlyPrice > 0 && billing === "annual" && savings && (
                     <div className="text-xs text-[#7B9E87] font-medium mb-2">
-                      Billed annually · saves ${savings.savings}/yr (
-                      {savings.percentage}% off)
+                      Billed annually · saves ${formatPrice(savings.savings)}/yr
+                      ({savings.percentage}% off)
                     </div>
                   )}
 
@@ -403,6 +391,8 @@ export default function Pricing() {
                 <button
                   onClick={() => handlePlanClick(plan.name)}
                   disabled={isLoading || loadingPrices}
+                  type="submit"
+                  role="link"
                   className={`w-full py-3 rounded-full text-sm font-medium font-dm-sans transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                     plan.ctaStyle === "primary"
                       ? "bg-[#D4845A] text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.3)]"
