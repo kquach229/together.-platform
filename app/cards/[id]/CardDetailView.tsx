@@ -440,7 +440,7 @@ export default function CardDetailView({ card }: Props) {
                         >
                           {/* Avatar */}
                           <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium shrink-0 mt-0.5"
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium shrink-0 mt-0.5"
                             style={{ background: c.bg, color: c.text }}
                           >
                             <UserAvatar />
