@@ -7,14 +7,14 @@ export async function POST(request: NextRequest) {
     const headersList = await headers();
     const origin = headersList.get("origin");
 
-    const { priceId } = await request.json();
+    const { priceId, mode } = await request.json();
     if (!priceId) {
       return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
     }
 
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
-      mode: "payment",
+      mode: mode,
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
     });

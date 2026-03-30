@@ -156,6 +156,7 @@ export default function Pricing() {
         },
         body: JSON.stringify({
           priceId: selectedPrice.stripePriceId,
+          mode: billing === "monthly" ? "payment" : "subscription",
         }),
       });
 
