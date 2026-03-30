@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Feature {
   text: string;
   included: boolean;
 }
-
 interface Plan {
-  name: string;
+  name: "Free" | "Plus" | "Team";
   monthlyPrice: number;
+
   annualPrice: number;
   desc: string;
   cta: string;
@@ -19,70 +20,16 @@ interface Plan {
   features: Feature[];
 }
 
-const plans: Plan[] = [
-  {
-    name: "Free",
-    monthlyPrice: 0,
-    annualPrice: 0,
-    desc: "Perfect for occasional personal cards and trying things out.",
-    cta: "Start for free",
-    ctaStyle: "ghost",
-    featured: false,
-    features: [
-      { text: "First card free", included: true },
-      { text: "You are the only signer", included: true },
-      { text: "Text messages", included: true },
-      { text: "Standard themes", included: true },
-      { text: "Card stored for 24 hours", included: true },
-      { text: "Photo uploads (1 per card)", included: false },
-      { text: "PDF download", included: false },
-      { text: "Scheduled delivery", included: false },
-      { text: "Team dashboard", included: false },
-    ],
-  },
-  {
-    name: "Plus",
-    monthlyPrice: 6,
-    annualPrice: 58,
-    desc: "For people who send cards regularly and want the full experience.",
-    cta: "Get Plus",
-    ctaStyle: "primary",
-    featured: true,
-    badge: "Most popular",
-    features: [
-      { text: "Unlimited cards", included: true },
-      { text: "Unlimited signers", included: true },
-      { text: "Text + photo messages", included: true },
-      { text: "Premium themes", included: true },
-      { text: "Unlimited photo uploads", included: true },
-      { text: "PDF download", included: true },
-      { text: "Scheduled delivery", included: true },
-      { text: "Cards stored for entirety of plan duration", included: true },
-      { text: "Team dashboard", included: false },
-    ],
-  },
-  {
-    name: "Team",
-    monthlyPrice: 18,
-    annualPrice: 173,
-    desc: "For workplaces sending cards together — HR, managers, team leads.",
-    cta: "Get Team",
-    ctaStyle: "dark",
-    featured: false,
-    features: [
-      { text: "Everything in Plus", included: true },
-      { text: "Team dashboard", included: true },
-      { text: "Up to 20 team members", included: true },
-      { text: "Custom branding", included: true },
-      { text: "Slack integration", included: true },
-      { text: "Priority support", included: true },
-      { text: "Billing receipts", included: true },
-      { text: "Analytics dashboard", included: true },
-      { text: "Cards stored for entirety of plan duration", included: true },
-      { text: "SSO / SAML", included: false },
-    ],
-  },
-];
+interface DbPrice {
+  id: string;
+  plan: "free" | "plus" | "plus_annual" | "team" | "team_annual";
+  billingInterval: "monthly" | "annual";
+  stripePriceId: string;
+  amountCents: number;
+  currency: string;
+  active: boolean;
+  createdAt: string;
+}
 
 const faqs = [
   {
@@ -99,7 +46,7 @@ const faqs = [
   },
   {
     q: "Is there a limit on how long a card stays live?",
-    a: "Free cards are kept for 12 months. Plus and Team cards are stored indefinitely.",
+    a: "Free cards are kept for 24 hours. Plus and Team cards are stored for the duration of your active plan.",
   },
   {
     q: "Can I use Together for my whole company?",
@@ -114,8 +61,60 @@ const faqs = [
 const logos = ["STRIPE", "NOTION", "FIGMA", "VERCEL", "LINEAR", "LOOM"];
 
 export default function Pricing() {
+  const router = useRouter();
+
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [prices, setPrices] = useState<DbPrice[]>([]);
+  const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
+  const [loadingPrices, setLoadingPrices] = useState(true);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const response = await fetch("/api/prices", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch prices");
+        }
+
+        const data = await response.json();
+        setPrices(data);
+      } catch (error) {
+        console.error("Error fetching pricing:", error);
+      } finally {
+        setLoadingPrices(false);
+      }
+    };
+
+    fetchPrices();
+  }, []);
+
+  const priceMap = useMemo(() => {
+    return {
+      plus: {
+        monthly: prices.find(
+          (p) => p.plan === "plus" && p.billingInterval === "monthly",
+        ),
+        annual: prices.find(
+          (p) => p.plan === "plus_annual" && p.billingInterval === "annual",
+        ),
+      },
+      team: {
+        monthly: prices.find(
+          (p) => p.plan === "team" && p.billingInterval === "monthly",
+        ),
+        annual: prices.find(
+          (p) => p.plan === "team_annual" && p.billingInterval === "annual",
+        ),
+      },
+    };
+  }, [prices]);
+
+  console.log(prices);
 
   const calculateSavings = (monthlyPrice: number, annualPrice: number) => {
     const yearlyTotal = monthlyPrice * 12;
@@ -124,15 +123,144 @@ export default function Pricing() {
     return { savings, percentage: Math.round(percentage) };
   };
 
-  const handlePlanClick = (planName: string) => {
-    // Add your payment/upgrade logic here
-    console.log(`Upgrading to ${planName} plan`);
+  const handlePlanClick = async (planName: Plan["name"]) => {
+    if (planName === "Free") {
+      router.push("/create");
+      return;
+    }
+
+    const selectedPrice =
+      planName === "Plus"
+        ? billing === "monthly"
+          ? priceMap.plus.monthly
+          : priceMap.plus.annual
+        : billing === "monthly"
+          ? priceMap.team.monthly
+          : priceMap.team.annual;
+
+    if (!selectedPrice?.stripePriceId) {
+      alert("Pricing is not available right now. Please try again.");
+      return;
+    }
+
+    try {
+      setLoadingCheckout(planName);
+
+      const response = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          priceId: selectedPrice.stripePriceId,
+          plan: planName.toLowerCase(),
+          billingInterval: billing,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to create checkout session");
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+
+      throw new Error("No checkout URL returned");
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Something went wrong starting checkout.");
+    } finally {
+      setLoadingCheckout(null);
+    }
   };
 
   const handleCreateCard = () => {
-    // Add your card creation logic here
-    console.log("Creating new card");
+    router.push("/create");
   };
+
+  const PRICING_OBJECTS = {
+    PLUS: "plus",
+    TEAM: "team",
+    PLUS_ANNUAL: "plus_annual",
+    TEAM_ANNUAL: "team_annual",
+  };
+
+  const plans: Plan[] = [
+    {
+      name: "Free",
+      monthlyPrice: 0,
+      annualPrice: 0,
+      desc: "Perfect for occasional personal cards and trying things out.",
+      cta: "Start for free",
+      ctaStyle: "ghost",
+      featured: false,
+      features: [
+        { text: "First card free", included: true },
+        { text: "You are the only signer", included: true },
+        { text: "Text messages", included: true },
+        { text: "Standard themes", included: true },
+        { text: "Card stored for 24 hours", included: true },
+        { text: "Photo uploads (1 per card)", included: false },
+        { text: "PDF download", included: false },
+        { text: "Scheduled delivery", included: false },
+        { text: "Team dashboard", included: false },
+      ],
+    },
+    {
+      name: "Plus",
+      monthlyPrice: priceMap.plus?.monthly
+        ? priceMap.plus.monthly.amountCents / 100
+        : 0,
+      annualPrice: priceMap.plus?.annual
+        ? priceMap.plus.annual.amountCents / 100
+        : 58,
+      desc: "For people who send cards regularly and want the full experience.",
+      cta: "Get Plus",
+      ctaStyle: "primary",
+      featured: true,
+      badge: "Most popular",
+      features: [
+        { text: "Unlimited cards", included: true },
+        { text: "Unlimited signers", included: true },
+        { text: "Text + photo messages", included: true },
+        { text: "Premium themes", included: true },
+        { text: "Unlimited photo uploads", included: true },
+        { text: "PDF download", included: true },
+        { text: "Scheduled delivery", included: true },
+        { text: "Cards stored for entirety of plan duration", included: true },
+        { text: "Team dashboard", included: false },
+      ],
+    },
+    {
+      name: "Team",
+      monthlyPrice: priceMap.team?.monthly
+        ? priceMap.team.monthly.amountCents / 100
+        : 18,
+      annualPrice: priceMap.team?.annual
+        ? priceMap.team.annual.amountCents / 100
+        : 173,
+      desc: "For workplaces sending cards together — HR, managers, team leads.",
+      cta: "Get Team",
+      ctaStyle: "dark",
+      featured: false,
+      features: [
+        { text: "Everything in Plus", included: true },
+        { text: "Team dashboard", included: true },
+        { text: "Up to 20 team members", included: true },
+        { text: "Custom branding", included: true },
+        { text: "Slack integration", included: true },
+        { text: "Priority support", included: true },
+        { text: "Billing receipts", included: true },
+        { text: "Analytics dashboard", included: true },
+        { text: "Cards stored for entirety of plan duration", included: true },
+        { text: "SSO / SAML", included: false },
+      ],
+    },
+  ];
 
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
@@ -190,12 +318,15 @@ export default function Pricing() {
               plan.monthlyPrice > 0
                 ? calculateSavings(plan.monthlyPrice, plan.annualPrice)
                 : null;
+
             const displayPrice =
               plan.monthlyPrice === 0
                 ? "$0"
                 : billing === "monthly"
                   ? `$${plan.monthlyPrice}`
                   : `$${plan.annualPrice}`;
+
+            const isLoading = loadingCheckout === plan.name;
 
             return (
               <div
@@ -228,12 +359,14 @@ export default function Pricing() {
                           : "/ year"}
                     </span>
                   </div>
+
                   {plan.monthlyPrice > 0 && billing === "annual" && savings && (
                     <div className="text-xs text-[#7B9E87] font-medium mb-2">
                       Billed annually · saves ${savings.savings}/yr (
                       {savings.percentage}% off)
                     </div>
                   )}
+
                   <p className="text-sm text-[#8B7A6B] leading-[1.7] font-light">
                     {plan.desc}
                   </p>
@@ -269,7 +402,8 @@ export default function Pricing() {
 
                 <button
                   onClick={() => handlePlanClick(plan.name)}
-                  className={`w-full py-3 rounded-full text-sm font-medium font-dm-sans transition-all ${
+                  disabled={isLoading || loadingPrices}
+                  className={`w-full py-3 rounded-full text-sm font-medium font-dm-sans transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                     plan.ctaStyle === "primary"
                       ? "bg-[#D4845A] text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.3)]"
                       : plan.ctaStyle === "dark"
@@ -277,7 +411,7 @@ export default function Pricing() {
                         : "border border-[#E8DDD0] text-[#1A1208] hover:border-[#D4845A] hover:text-[#D4845A] bg-transparent"
                   }`}
                 >
-                  {plan.cta}
+                  {isLoading ? "Redirecting..." : plan.cta}
                 </button>
               </div>
             );
@@ -303,7 +437,9 @@ export default function Pricing() {
                 {plans.map((p) => (
                   <th
                     key={p.name}
-                    className={`p-5 text-center font-medium ${p.featured ? "text-[#D4845A]" : "text-[#1A1208]"}`}
+                    className={`p-5 text-center font-medium ${
+                      p.featured ? "text-[#D4845A]" : "text-[#1A1208]"
+                    }`}
                   >
                     {p.name}
                   </th>
@@ -312,10 +448,10 @@ export default function Pricing() {
             </thead>
             <tbody>
               {[
-                ["Cards per month", "3", "Unlimited", "Unlimited"],
-                ["Signers per card", "10", "Unlimited", "Unlimited"],
+                ["Cards per month", "1", "Unlimited", "Unlimited"],
+                ["Signers per card", "1", "Unlimited", "Unlimited"],
                 ["Text messages", "✓", "✓", "✓"],
-                ["Photo uploads", "1 per card", "Unlimited", "Unlimited"],
+                ["Photo uploads", "–", "Unlimited", "Unlimited"],
                 ["Premium themes", "–", "✓", "✓"],
                 ["Scheduled delivery", "–", "✓", "✓"],
                 ["PDF download", "–", "✓", "✓"],
@@ -350,12 +486,11 @@ export default function Pricing() {
           </table>
         </div>
 
-        {/* Enterprise CTA */}
         <div className="text-center mt-8">
           <p className="text-sm text-[#8B7A6B]">
             Need SSO, advanced analytics, or 50+ team members?{" "}
             <button
-              onClick={() => console.log("Contact sales")}
+              onClick={() => router.push("/contact")}
               className="text-[#D4845A] font-medium hover:underline"
             >
               Contact us for Enterprise →
@@ -401,7 +536,9 @@ export default function Pricing() {
                     {faq.q}
                   </span>
                   <span
-                    className={`text-[#8B7A6B] text-sm transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-180" : ""}`}
+                    className={`text-[#8B7A6B] text-sm transition-transform duration-200 shrink-0 ${
+                      openFaq === i ? "rotate-180" : ""
+                    }`}
                   >
                     ▾
                   </span>
