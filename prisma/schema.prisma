@@ -170,6 +170,11 @@ model PlanLimit {
   prioritySupport   Boolean @default(false)  // ← add this
   premiumThemes     Boolean @default(false)
 
+  // Optional credit-based limit info
+  creditsPerPack    Int?    // e.g., 1, 3, 5
+  priceCents        Int?    // e.g., 500 for $5
+  stripePriceId     String? // priceId for Stripe
+
   @@map("plan_limits")
 }
 
@@ -185,4 +190,13 @@ model Price {
   createdAt DateTime @default(now())
 
   @@map("prices")
+}
+
+
+model UserCredits {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  credits   Int      @default(0)
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

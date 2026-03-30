@@ -2,21 +2,38 @@
 
 import { useState } from "react";
 
-const plans = [
+interface Feature {
+  text: string;
+  included: boolean;
+}
+
+interface Plan {
+  name: string;
+  monthlyPrice: number;
+  annualPrice: number;
+  desc: string;
+  cta: string;
+  ctaStyle: "ghost" | "primary" | "dark";
+  featured: boolean;
+  badge?: string;
+  features: Feature[];
+}
+
+const plans: Plan[] = [
   {
     name: "Free",
     monthlyPrice: 0,
     annualPrice: 0,
-    desc: "Perfect for one-off personal cards and trying things out.",
+    desc: "Perfect for occasional personal cards and trying things out.",
     cta: "Start for free",
     ctaStyle: "ghost",
     featured: false,
     features: [
-      { text: "Up to 10 signers per card", included: true },
-      { text: "3 cards per month", included: true },
+      { text: "First card free", included: true },
+      { text: "You are the only signer", included: true },
       { text: "Text messages", included: true },
       { text: "Standard themes", included: true },
-      { text: "Photo uploads", included: false },
+      { text: "Photo uploads (1 per card)", included: false },
       { text: "PDF download", included: false },
       { text: "Scheduled delivery", included: false },
       { text: "Team dashboard", included: false },
@@ -32,11 +49,11 @@ const plans = [
     featured: true,
     badge: "Most popular",
     features: [
-      { text: "Unlimited signers", included: true },
       { text: "Unlimited cards", included: true },
+      { text: "Unlimited signers", included: true },
       { text: "Text + photo messages", included: true },
       { text: "Premium themes", included: true },
-      { text: "Photo uploads", included: true },
+      { text: "Unlimited photo uploads", included: true },
       { text: "PDF download", included: true },
       { text: "Scheduled delivery", included: true },
       { text: "Team dashboard", included: false },
@@ -58,7 +75,8 @@ const plans = [
       { text: "Slack integration", included: true },
       { text: "Priority support", included: true },
       { text: "Billing receipts", included: true },
-      { text: "SSO / SAML (Enterprise)", included: false },
+      { text: "Analytics dashboard", included: true },
+      { text: "SSO / SAML", included: false },
     ],
   },
 ];
@@ -82,7 +100,7 @@ const faqs = [
   },
   {
     q: "Can I use Together for my whole company?",
-    a: "Absolutely. The Team plan includes a shared dashboard so multiple people can create and manage cards together. For larger orgs, contact us for Enterprise pricing.",
+    a: "Absolutely. The Team plan includes a shared dashboard so multiple people can create and manage cards together. For larger orgs with 50+ members, contact us for Enterprise pricing with SSO, advanced analytics, and dedicated support.",
   },
   {
     q: "Do you offer refunds?",
@@ -96,23 +114,40 @@ export default function Pricing() {
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const calculateSavings = (monthlyPrice: number, annualPrice: number) => {
+    const yearlyTotal = monthlyPrice * 12;
+    const savings = yearlyTotal - annualPrice;
+    const percentage = (savings / yearlyTotal) * 100;
+    return { savings, percentage: Math.round(percentage) };
+  };
+
+  const handlePlanClick = (planName: string) => {
+    // Add your payment/upgrade logic here
+    console.log(`Upgrading to ${planName} plan`);
+  };
+
+  const handleCreateCard = () => {
+    // Add your card creation logic here
+    console.log("Creating new card");
+  };
+
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden pt-20 pb-16 px-12 text-center">
+      <section className="relative overflow-hidden pt-20 pb-16 px-6 md:px-12 text-center">
         <div className="absolute w-[480px] h-[480px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-24 -left-32 opacity-60 pointer-events-none" />
         <div className="absolute w-[380px] h-[380px] rounded-full bg-[radial-gradient(circle,#EEF3EE_0%,transparent_70%)] -bottom-16 -right-16 opacity-50 pointer-events-none" />
         <div className="relative z-10 max-w-[640px] mx-auto">
-          <div className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[2px] uppercase text-terracotta border border-[#EDD5C5] rounded-full px-4 py-2 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-terracotta" />
+          <div className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[2px] uppercase text-[#D4845A] border border-[#EDD5C5] rounded-full px-4 py-2 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4845A]" />
             Simple, honest pricing
           </div>
           <h1 className="font-playfair text-[clamp(40px,5vw,64px)] leading-[1.05] tracking-[-2px] mb-4">
             Start free.
             <br />
-            <em className="text-terracotta">Upgrade</em> when it feels right.
+            <em className="text-[#D4845A]">Upgrade</em> when it feels right.
           </h1>
-          <p className="text-[17px] text-muted-taupe font-light leading-[1.75] mb-10">
+          <p className="text-[17px] text-[#8B7A6B] font-light leading-[1.75] mb-10">
             No hidden fees. No surprise charges. Cancel any time.
           </p>
 
@@ -125,7 +160,7 @@ export default function Pricing() {
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all font-dm-sans ${
                   billing === b
                     ? "bg-white text-[#1A1208] shadow-sm"
-                    : "text-muted-taupe"
+                    : "text-[#8B7A6B]"
                 }`}
               >
                 {b === "monthly" ? (
@@ -134,7 +169,7 @@ export default function Pricing() {
                   <span className="flex items-center gap-2">
                     Annual
                     <span className="text-[11px] font-medium text-[#7B9E87]">
-                      –20%
+                      Save 20%
                     </span>
                   </span>
                 )}
@@ -145,114 +180,127 @@ export default function Pricing() {
       </section>
 
       {/* ── PLANS ── */}
-      <section className="max-w-[1160px] mx-auto px-12 pb-24">
-        <div className="grid grid-cols-3 gap-6">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-2xl p-8 flex flex-col ${
-                plan.featured
-                  ? "border-2 border-terracotta bg-white shadow-[0_8px_40px_rgba(212,132,90,0.15)]"
-                  : "border border-[#E8DDD0] bg-white"
-              }`}
-            >
-              {plan.badge && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-medium px-4 py-1 rounded-full whitespace-nowrap">
-                  {plan.badge}
-                </div>
-              )}
+      <section className="max-w-[1160px] mx-auto px-6 md:px-12 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {plans.map((plan) => {
+            const savings =
+              plan.monthlyPrice > 0
+                ? calculateSavings(plan.monthlyPrice, plan.annualPrice)
+                : null;
+            const displayPrice =
+              plan.monthlyPrice === 0
+                ? "$0"
+                : billing === "monthly"
+                  ? `$${plan.monthlyPrice}`
+                  : `$${plan.annualPrice}`;
 
-              <div className="mb-6">
-                <div className="text-sm font-medium text-muted-taupe mb-2">
-                  {plan.name}
-                </div>
-                <div className="flex items-baseline gap-1 mb-3">
-                  <span className="font-playfair text-[48px] tracking-[-2px] leading-none">
-                    {plan.monthlyPrice === 0
-                      ? "$0"
-                      : billing === "monthly"
-                        ? `$${plan.monthlyPrice}`
-                        : `$${plan.annualPrice}`}
-                  </span>
-                  <span className="text-sm text-muted-taupe font-light">
-                    {plan.monthlyPrice === 0
-                      ? "forever"
-                      : billing === "monthly"
-                        ? "/ month"
-                        : "/ year"}
-                  </span>
-                </div>
-                {plan.monthlyPrice > 0 && billing === "annual" && (
-                  <div className="text-xs text-[#7B9E87] font-medium mb-2">
-                    Billed annually · saves $
-                    {plan.monthlyPrice * 12 - plan.annualPrice}/yr
-                  </div>
-                )}
-                <p className="text-sm text-muted-taupe leading-[1.7] font-light">
-                  {plan.desc}
-                </p>
-              </div>
-
-              <div className="h-px bg-[#E8DDD0] mb-5" />
-
-              <ul className="flex flex-col gap-3 mb-8 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f.text} className="flex items-start gap-2.5 text-sm">
-                    <span
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] mt-0.5 shrink-0 ${
-                        f.included
-                          ? "bg-[#EEF3EE] text-[#5A7D66]"
-                          : "bg-[#F5F4F2] text-[#C0B8B0]"
-                      }`}
-                    >
-                      {f.included ? "✓" : "–"}
-                    </span>
-                    <span
-                      className={
-                        f.included ? "text-[#1A1208]" : "text-muted-taupe"
-                      }
-                    >
-                      {f.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                className={`w-full py-3 rounded-full text-sm font-medium font-dm-sans transition-all ${
-                  plan.ctaStyle === "primary"
-                    ? "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.3)]"
-                    : plan.ctaStyle === "dark"
-                      ? "bg-[#1A1208] text-[#FDF8F2] hover:opacity-85"
-                      : "border border-[#E8DDD0] text-[#1A1208] hover:border-terracotta hover:text-terracotta bg-transparent"
+            return (
+              <div
+                key={plan.name}
+                className={`relative rounded-2xl p-8 flex flex-col ${
+                  plan.featured
+                    ? "border-2 border-[#D4845A] bg-white shadow-[0_8px_40px_rgba(212,132,90,0.15)]"
+                    : "border border-[#E8DDD0] bg-white"
                 }`}
               >
-                {plan.cta}
-              </button>
-            </div>
-          ))}
+                {plan.badge && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#D4845A] text-white text-[11px] font-medium px-4 py-1 rounded-full whitespace-nowrap">
+                    {plan.badge}
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <div className="text-sm font-medium text-[#8B7A6B] mb-2">
+                    {plan.name}
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-3">
+                    <span className="font-playfair text-[48px] tracking-[-2px] leading-none">
+                      {displayPrice}
+                    </span>
+                    <span className="text-sm text-[#8B7A6B] font-light">
+                      {plan.monthlyPrice === 0
+                        ? "forever"
+                        : billing === "monthly"
+                          ? "/ month"
+                          : "/ year"}
+                    </span>
+                  </div>
+                  {plan.monthlyPrice > 0 && billing === "annual" && savings && (
+                    <div className="text-xs text-[#7B9E87] font-medium mb-2">
+                      Billed annually · saves ${savings.savings}/yr (
+                      {savings.percentage}% off)
+                    </div>
+                  )}
+                  <p className="text-sm text-[#8B7A6B] leading-[1.7] font-light">
+                    {plan.desc}
+                  </p>
+                </div>
+
+                <div className="h-px bg-[#E8DDD0] mb-5" />
+
+                <ul className="flex flex-col gap-3 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li
+                      key={f.text}
+                      className="flex items-start gap-2.5 text-sm"
+                    >
+                      <span
+                        className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] mt-0.5 shrink-0 ${
+                          f.included
+                            ? "bg-[#EEF3EE] text-[#5A7D66]"
+                            : "bg-[#F5F4F2] text-[#C0B8B0]"
+                        }`}
+                      >
+                        {f.included ? "✓" : "–"}
+                      </span>
+                      <span
+                        className={
+                          f.included ? "text-[#1A1208]" : "text-[#8B7A6B]"
+                        }
+                      >
+                        {f.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => handlePlanClick(plan.name)}
+                  className={`w-full py-3 rounded-full text-sm font-medium font-dm-sans transition-all ${
+                    plan.ctaStyle === "primary"
+                      ? "bg-[#D4845A] text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.3)]"
+                      : plan.ctaStyle === "dark"
+                        ? "bg-[#1A1208] text-[#FDF8F2] hover:opacity-85"
+                        : "border border-[#E8DDD0] text-[#1A1208] hover:border-[#D4845A] hover:text-[#D4845A] bg-transparent"
+                  }`}
+                >
+                  {plan.cta}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       {/* ── COMPARE TABLE ── */}
-      <section className="max-w-[1160px] mx-auto px-12 py-24">
-        <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">
+      <section className="max-w-[1160px] mx-auto px-6 md:px-12 py-24">
+        <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-[#D4845A] mb-3">
           Full breakdown
         </p>
         <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-12">
           Compare plans
         </h2>
-        <div className="border border-[#E8DDD0] rounded-2xl overflow-hidden bg-white">
-          <table className="w-full text-sm">
+        <div className="border border-[#E8DDD0] rounded-2xl overflow-hidden bg-white overflow-x-auto">
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="border-b border-[#E8DDD0]">
-                <th className="text-left p-5 text-muted-taupe font-medium text-[11px] tracking-[1.5px] uppercase w-1/2">
+                <th className="text-left p-5 text-[#8B7A6B] font-medium text-[11px] tracking-[1.5px] uppercase w-1/2">
                   Feature
                 </th>
                 {plans.map((p) => (
                   <th
                     key={p.name}
-                    className={`p-5 text-center font-medium ${p.featured ? "text-terracotta" : "text-[#1A1208]"}`}
+                    className={`p-5 text-center font-medium ${p.featured ? "text-[#D4845A]" : "text-[#1A1208]"}`}
                   >
                     {p.name}
                   </th>
@@ -264,26 +312,27 @@ export default function Pricing() {
                 ["Cards per month", "3", "Unlimited", "Unlimited"],
                 ["Signers per card", "10", "Unlimited", "Unlimited"],
                 ["Text messages", "✓", "✓", "✓"],
-                ["Photo uploads", "–", "✓", "✓"],
+                ["Photo uploads", "1 per card", "Unlimited", "Unlimited"],
                 ["Premium themes", "–", "✓", "✓"],
                 ["Scheduled delivery", "–", "✓", "✓"],
                 ["PDF download", "–", "✓", "✓"],
                 ["Team dashboard", "–", "–", "✓"],
                 ["Custom branding", "–", "–", "✓"],
                 ["Slack integration", "–", "–", "✓"],
+                ["Analytics dashboard", "–", "–", "✓"],
                 ["Priority support", "–", "–", "✓"],
               ].map(([feature, free, plus, team], i) => (
                 <tr
                   key={feature}
                   className={i % 2 === 0 ? "bg-[#FDF8F2]" : "bg-white"}
                 >
-                  <td className="p-5 text-[#1A1208]">{feature}</td>
+                  <td className="p-5 text-[#1A1208] font-medium">{feature}</td>
                   {[free, plus, team].map((val, j) => (
                     <td
                       key={j}
-                      className={`p-5 text-center font-medium ${
+                      className={`p-5 text-center ${
                         val === "✓"
-                          ? "text-[#5A7D66]"
+                          ? "text-[#5A7D66] font-medium"
                           : val === "–"
                             ? "text-[#C0B8B0]"
                             : "text-[#1A1208]"
@@ -297,12 +346,42 @@ export default function Pricing() {
             </tbody>
           </table>
         </div>
+
+        {/* Enterprise CTA */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-[#8B7A6B]">
+            Need SSO, advanced analytics, or 50+ team members?{" "}
+            <button
+              onClick={() => console.log("Contact sales")}
+              className="text-[#D4845A] font-medium hover:underline"
+            >
+              Contact us for Enterprise →
+            </button>
+          </p>
+        </div>
+      </section>
+
+      {/* ── SOCIAL PROOF / LOGOS ── */}
+      <section className="max-w-[1160px] mx-auto px-6 md:px-12 py-16 border-t border-[#E8DDD0]">
+        <p className="text-center text-xs text-[#8B7A6B] mb-8 tracking-wide">
+          TRUSTED BY TEAMS AT
+        </p>
+        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60">
+          {logos.map((logo) => (
+            <span
+              key={logo}
+              className="text-[#8B7A6B] text-sm font-mono tracking-wider"
+            >
+              {logo}
+            </span>
+          ))}
+        </div>
       </section>
 
       {/* ── FAQ ── */}
-      <div className="bg-[#F5EAD8] py-20 px-12">
+      <div className="bg-[#F5EAD8] py-20 px-6 md:px-12">
         <div className="max-w-[640px] mx-auto">
-          <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">
+          <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-[#D4845A] mb-3">
             Got questions?
           </p>
           <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-10">
@@ -319,13 +398,13 @@ export default function Pricing() {
                     {faq.q}
                   </span>
                   <span
-                    className={`text-muted-taupe text-sm transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-180" : ""}`}
+                    className={`text-[#8B7A6B] text-sm transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-180" : ""}`}
                   >
                     ▾
                   </span>
                 </button>
                 {openFaq === i && (
-                  <p className="text-sm text-muted-taupe leading-[1.75] font-light pb-5">
+                  <p className="text-sm text-[#8B7A6B] leading-[1.75] font-light pb-5">
                     {faq.a}
                   </p>
                 )}
@@ -336,7 +415,7 @@ export default function Pricing() {
       </div>
 
       {/* ── CTA ── */}
-      <div className="bg-terracotta relative overflow-hidden py-24 px-12 text-center">
+      <div className="bg-[#D4845A] relative overflow-hidden py-24 px-6 md:px-12 text-center">
         <div className="absolute w-[400px] h-[400px] rounded-full bg-white/10 -top-28 -left-24 pointer-events-none" />
         <div className="absolute w-[300px] h-[300px] rounded-full bg-white/10 -bottom-16 -right-14 pointer-events-none" />
         <h2 className="font-playfair text-[clamp(32px,4vw,52px)] text-white tracking-[-2px] mb-4 relative z-10">
@@ -347,15 +426,16 @@ export default function Pricing() {
         <p className="text-[17px] text-white/75 mb-9 font-light relative z-10">
           Start a card in 60 seconds — it's free.
         </p>
-        <button className="bg-[#FDF8F2] text-terracotta px-10 py-4 rounded-full text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity relative z-10">
+        <button
+          onClick={handleCreateCard}
+          className="bg-[#FDF8F2] text-[#D4845A] px-10 py-4 rounded-full text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity relative z-10"
+        >
           Create your first card →
         </button>
         <p className="text-xs text-white/50 mt-4 relative z-10">
           No account needed to sign. No credit card to start.
         </p>
       </div>
-
-      {/* ── FOOTER ── */}
     </div>
   );
 }
