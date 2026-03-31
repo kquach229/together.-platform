@@ -183,9 +183,34 @@ export async function PATCH(
       },
     });
 
-    // If card was just set to 'collecting', create a notification
+    // Create notification for update
+    await prisma.notification.create({
+      data: {
+        type: "card_edited",
+        userId: result.user.id,
+        cardId: card.id,
+        payload: {
+          title: `You edited ${card.occasion} card for ${card.recipientName}`,
+        },
+      },
+    });
+
+    //     model Notification {
+    //   id String @id @default(uuid())
+    //   userId String
+    //   cardId String?
+    //   type String
+    //   payload Json?
+    //   sentAt DateTime?
+    //   createdAt DateTime @default(now())
+    //   updatedAt DateTime @updatedAt
+    //   user User @relation(fields: [userId], references: [id])
+    //   card Card? @relation(fields: [cardId], references: [id], onDelete: Cascade)
+    // }
+
+    // If card was just set to 'delivered', create a notification
     // so the creator knows it's live
-    if (status === "collecting") {
+    if (status === "delivered") {
       await prisma.notification.create({
         data: {
           userId: result.user.id,

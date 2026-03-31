@@ -39,9 +39,9 @@ const mapActivity = (type: string, payload: any, createdAt?: string) => {
         color: "#E6F1FB",
       };
 
-    case "delete_card":
+    case "card_edited":
       return {
-        icon: "🗑️",
+        icon: "📝",
         text: payload.title,
         time: formatTimeAgo(createdAt),
         color: "#FDECEC",
@@ -85,8 +85,8 @@ export default function Dashboard({ user }) {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
   const activity = (user.notifications ?? [])
-    .slice(0, 5)
     .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 5)
 
     .map((n) => mapActivity(n.type, n.payload, n.createdAt))
     .filter(Boolean);
@@ -114,6 +114,8 @@ export default function Dashboard({ user }) {
       to: CARD_THEMES[card.theme].to,
     },
   }));
+
+  console.log("ACTIVITY:", user.notifications);
 
   const stats = [
     { label: "Current cards", value: cards.length ?? "0", sub: "" },

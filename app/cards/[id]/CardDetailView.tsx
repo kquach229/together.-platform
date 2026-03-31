@@ -146,6 +146,7 @@ export default function CardDetailView({ card }: Props) {
   const [showDeliver, setShowDeliver] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [recipientLinkCopied, setRecipientLinkCopied] = useState(false);
 
   const theme = themes[card.theme] ?? themes.warm;
   const isMidnight = card.theme === "midnight";
@@ -161,6 +162,15 @@ export default function CardDetailView({ card }: Props) {
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2500);
   }
+
+  const handleCopyRecipientLink = () => {
+    const url = `${window.location.origin}/card/${card.deliveryToken}`;
+    navigator.clipboard.writeText(url).catch(() => {});
+    setRecipientLinkCopied(true);
+    setTimeout(() => {
+      setRecipientLinkCopied(false);
+    }, 5000);
+  };
 
   // ── Toggle message visibility ───────────────────────────────
   async function handleToggleHide(sigId: string, currentlyHidden: boolean) {
@@ -583,13 +593,12 @@ export default function CardDetailView({ card }: Props) {
                     {card.recipientName} can view the card at the link below.
                   </p>
                   <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/card/${card.deliveryToken}`;
-                      navigator.clipboard.writeText(url).catch(() => {});
-                    }}
+                    onClick={handleCopyRecipientLink}
                     className="w-full py-2.5 rounded-full text-xs font-medium bg-[#5A7D66] text-white hover:bg-[#3B6D11] transition-colors font-dm-sans border-none cursor-pointer"
                   >
-                    Copy recipient link
+                    {recipientLinkCopied
+                      ? "Recipient link copied!"
+                      : " Copy recipient link"}
                   </button>
                 </div>
               )}
