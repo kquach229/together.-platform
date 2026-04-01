@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getUser } from "@/lib/helpers/getUser";
+import { useUser } from "@clerk/nextjs";
 
 interface Feature {
   text: string;
@@ -62,6 +64,7 @@ const logos = ["STRIPE", "NOTION", "FIGMA", "VERCEL", "LINEAR", "LOOM"];
 
 export default function Pricing() {
   const router = useRouter();
+  const { loadingUser, user } = useUser();
 
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -126,6 +129,10 @@ export default function Pricing() {
   };
 
   const handlePlanClick = async (planName: Plan["name"]) => {
+    if (!user && !loadingUser) {
+      router.push("/dashboard");
+      return;
+    }
     if (planName === "Free") {
       router.push("/create");
       return;
