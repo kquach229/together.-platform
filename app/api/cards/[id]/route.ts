@@ -51,7 +51,7 @@ export async function GET(
 
     // Return full card with signatures for creator dashboard
     const card = await prisma.card.findUnique({
-      where: { id: params.id },
+      where: { id: cardId },
       include: {
         signatures: {
           where: { isHidden: false },
@@ -105,7 +105,7 @@ export async function PATCH(
       );
     }
 
-    const { card } = result;
+    const { card, user } = result;
 
     // Can't edit a delivered or archived card
     if (card.status === "delivered" || card.status === "archived") {
@@ -141,6 +141,19 @@ export async function PATCH(
 
     // If delivering, set deliveredAt timestamp
     const deliveredAt = status === "delivered" ? new Date() : undefined;
+
+    // Store the original card data before update to detect meaningful changes
+    const originalCard = await prisma.card.findUnique({
+      where: { id: cardId },
+      select: {
+        occasion: true,
+        recipientName: true,
+        openingMessage: true,
+        theme: true,
+        status: true,
+        creatorPhotoUrl: true,
+      },
+    });
 
     const updated = await prisma.card.update({
       where: { id: cardId },
@@ -183,37 +196,63 @@ export async function PATCH(
       },
     });
 
-    // Create notification for update
-    await prisma.notification.create({
-      data: {
-        type: "card_edited",
-        userId: result.user.id,
-        cardId: card.id,
-        payload: {
-          title: `You edited ${card.occasion} card for ${card.recipientName}`,
-        },
-      },
-    });
+    // ─── NOTIFICATION LOGIC ───────────────────────────────────
+    // Determine if this is a meaningful edit (not just a photo upload)
 
-    //     model Notification {
-    //   id String @id @default(uuid())
-    //   userId String
-    //   cardId String?
-    //   type String
-    //   payload Json?
-    //   sentAt DateTime?
-    //   createdAt DateTime @default(now())
-    //   updatedAt DateTime @updatedAt
-    //   user User @relation(fields: [userId], references: [id])
-    //   card Card? @relation(fields: [cardId], references: [id], onDelete: Cascade)
-    // }
+    // Check if this is a brand new card (created within last minute)
+    const isNewCard = card.createdAt.getTime() > Date.now() - 60000; // 1 minute
+
+    // Check if this update only contains creatorPhotoUrl
+    const updateKeys = Object.keys(parsed.data);
+    const isOnlyPhotoUpdate =
+      updateKeys.length === 1 && updateKeys[0] === "creatorPhotoUrl";
+
+    // Check if meaningful fields actually changed
+    let hasMeaningfulChanges = false;
+    if (originalCard) {
+      hasMeaningfulChanges =
+        (occasion && occasion !== originalCard.occasion) ||
+        (recipientName && recipientName !== originalCard.recipientName) ||
+        (openingMessage !== undefined &&
+          openingMessage !== originalCard.openingMessage) ||
+        (theme && theme !== originalCard.theme) ||
+        (status && status !== originalCard.status);
+    }
+
+    // Only create "card_edited" notification if:
+    // 1. Card is not brand new
+    // 2. It's not just a photo upload
+    // 3. There are meaningful changes OR we're not sure (fallback)
+    const shouldCreateEditNotification =
+      !isNewCard &&
+      !isOnlyPhotoUpdate &&
+      (hasMeaningfulChanges || updateKeys.length > 0);
+
+    if (shouldCreateEditNotification) {
+      await prisma.notification.create({
+        data: {
+          type: "card_edited",
+          userId: user.id,
+          cardId: card.id,
+          payload: {
+            title: `You edited ${card.occasion} card for ${card.recipientName}`,
+            changes: {
+              occasion: occasion !== originalCard?.occasion,
+              recipientName: recipientName !== originalCard?.recipientName,
+              openingMessage: openingMessage !== originalCard?.openingMessage,
+              theme: theme !== originalCard?.theme,
+              status: status !== originalCard?.status,
+            },
+          },
+        },
+      });
+    }
 
     // If card was just set to 'delivered', create a notification
-    // so the creator knows it's live
     if (status === "delivered") {
       await prisma.notification.create({
         data: {
-          userId: result.user.id,
+          userId: user.id,
           cardId: card.id,
           type: "card_delivered",
           payload: {
@@ -235,7 +274,6 @@ export async function PATCH(
 }
 
 // ─── DELETE /api/cards/[id] ──────────────────────────────────
-
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } },
@@ -255,20 +293,35 @@ export async function DELETE(
       );
     }
 
-    await prisma.notification.create({
-      data: {
-        userId: result.user.id,
-        cardId: null, // 👈 important
-        type: "delete_card",
-        payload: {
-          title: `You deleted ${result.card.occasion} card for ${result.card.recipientName}`,
+    // Use a transaction to ensure atomicity
+    await prisma.$transaction(async (tx) => {
+      // Create audit notification before deletion
+      await tx.notification.create({
+        data: {
+          userId: result.user.id,
+          cardId: null, // 👈 Prevents cascade deletion
+          type: "card_deleted",
+          payload: {
+            title: `You deleted ${result.card.occasion} card for ${result.card.recipientName}`,
+            cardId: result.card.id,
+            occasion: result.card.occasion,
+            recipientName: result.card.recipientName,
+            deletedAt: new Date().toISOString(),
+          },
         },
-      },
+      });
+
+      // Delete the card (this will cascade delete signatures, views, and notifications)
+      await tx.card.delete({ where: { id: cardId } });
     });
 
-    await prisma.card.delete({ where: { id: cardId } });
-
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Card deleted successfully",
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("[DELETE /api/cards/:id]", error);
     return NextResponse.json(

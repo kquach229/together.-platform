@@ -110,7 +110,7 @@ export default function CreateCard() {
           recipientName,
           recipientEmail: recipientEmail || undefined,
           openingMessage: message || undefined,
-          theme: theme.id,
+          theme: theme,
           signingDeadline: deadline
             ? new Date(deadline).toISOString()
             : undefined,
@@ -133,10 +133,6 @@ export default function CreateCard() {
 
         // Now we have a real cardId — key goes to signatures/{cardId}/...
         const photoUrl = await uploadPhoto(photoFile);
-
-        console.log("photoUrl: ", photoUrl, "photoFile: ", photoFile);
-
-        console.log("THE BUILT UP URL FOR S3::::::::::", photoUrl);
 
         // Step 4 — save the photo URL to the card
         setUploadProgress("Saving photo…");
@@ -639,7 +635,7 @@ export default function CreateCard() {
                 <div
                   className="font-playfair text-xl tracking-tight"
                   style={{
-                    color: theme.id === "midnight" ? "#FDF8F2" : "#1A1208",
+                    color: theme === "midnight" ? "#FDF8F2" : "#1A1208",
                   }}
                 >
                   {occasion === "Birthday"
@@ -655,7 +651,7 @@ export default function CreateCard() {
                   <p
                     className="text-xs mt-2 leading-relaxed opacity-80"
                     style={{
-                      color: theme.id === "midnight" ? "#FDF8F2" : "#3A2F27",
+                      color: theme === "midnight" ? "#FDF8F2" : "#3A2F27",
                     }}
                   >
                     {message}
