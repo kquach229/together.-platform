@@ -111,7 +111,7 @@ function CreateMockup() {
       <div className="text-[10px] font-medium tracking-[1.5px] uppercase text-muted-taupe mb-3">
         Choose occasion
       </div>
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
         {occasions.map((o) => (
           <button
             key={o.label}
@@ -145,7 +145,7 @@ function InviteMockup() {
       <div className="text-[10px] font-medium tracking-[1.5px] uppercase text-muted-taupe mb-3">
         Signing link
       </div>
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <div className="flex-1 px-3 py-2 border border-[#E8DDD0] rounded-lg text-xs font-mono text-muted-taupe bg-[#FAFAFA] truncate">
           together.co/sign/abc-xyz
         </div>
@@ -162,7 +162,7 @@ function InviteMockup() {
       <div className="text-[10px] font-medium tracking-[1.5px] uppercase text-muted-taupe mb-2">
         Share via
       </div>
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         {[
           { icon: "💬", label: "Slack" },
           { icon: "✉️", label: "Email" },
@@ -170,7 +170,7 @@ function InviteMockup() {
         ].map((s) => (
           <button
             key={s.label}
-            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 border border-[#E8DDD0] rounded-lg text-xs font-medium hover:border-terracotta hover:text-terracotta transition-all font-dm-sans bg-white cursor-pointer"
+            className="flex-1 min-w-[70px] flex items-center justify-center gap-1.5 px-2 py-2 border border-[#E8DDD0] rounded-lg text-xs font-medium hover:border-terracotta hover:text-terracotta transition-all font-dm-sans bg-white cursor-pointer"
           >
             <span>{s.icon}</span>
             {s.label}
@@ -224,7 +224,7 @@ function CollectMockup() {
   ];
   return (
     <div className="bg-white rounded-2xl border border-[#E8DDD0] p-5 shadow-[0_8px_32px_rgba(26,18,8,0.07)]">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="text-[10px] font-medium tracking-[1.5px] uppercase text-muted-taupe">
           Signed so far
         </div>
@@ -337,7 +337,7 @@ export default function HowItWorks() {
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] min-h-screen overflow-x-hidden">
       {/* HERO */}
-      <section className="relative overflow-hidden px-12 py-24 text-center">
+      <section className="relative overflow-hidden px-4 sm:px-8 md:px-12 py-16 sm:py-20 md:py-24 text-center">
         <div className="absolute w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-32 -left-40 opacity-70 pointer-events-none" />
         <div className="absolute w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,#EEF3EE_0%,transparent_70%)] -bottom-20 -right-24 opacity-60 pointer-events-none" />
         <div className="relative z-10 max-w-[680px] mx-auto">
@@ -350,15 +350,15 @@ export default function HowItWorks() {
             <br />
             in minutes.
           </h1>
-          <p className="text-[18px] text-muted-taupe font-light leading-[1.75] max-w-[500px] mx-auto mb-10">
+          <p className="text-[16px] sm:text-[18px] text-muted-taupe font-light leading-[1.75] max-w-[500px] mx-auto mb-8 sm:mb-10">
             Together makes group cards effortless — for the person organising
             and the people signing.
           </p>
-          <div className="flex gap-3 justify-center">
-            <button className="bg-terracotta text-white px-8 py-3.5 rounded-full text-sm font-medium shadow-[0_6px_20px_rgba(212,132,90,0.3)] hover:bg-[#C4734A] transition-all border-none cursor-pointer font-dm-sans">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <button className="bg-terracotta text-white px-6 sm:px-8 py-3.5 rounded-full text-sm font-medium shadow-[0_6px_20px_rgba(212,132,90,0.3)] hover:bg-[#C4734A] transition-all border-none cursor-pointer font-dm-sans w-full sm:w-auto">
               Create your first card
             </button>
-            <button className="bg-transparent text-[#1A1208] px-7 py-3.5 rounded-full text-sm border border-[#E8DDD0] hover:border-terracotta hover:text-terracotta transition-all cursor-pointer font-dm-sans">
+            <button className="bg-transparent text-[#1A1208] px-6 sm:px-7 py-3.5 rounded-full text-sm border border-[#E8DDD0] hover:border-terracotta hover:text-terracotta transition-all cursor-pointer font-dm-sans w-full sm:w-auto">
               See an example →
             </button>
           </div>
@@ -366,17 +366,19 @@ export default function HowItWorks() {
       </section>
 
       {/* STEPS */}
-      <section className="max-w-[1060px] mx-auto px-12 pb-8">
+      <section className="max-w-[1060px] mx-auto px-4 sm:px-8 md:px-12 pb-8">
         {steps.map((step, i) => {
           const Mockup = mockupMap[step.mockup as keyof typeof mockupMap];
           const isEven = i % 2 === 0;
           return (
             <div
               key={step.num}
-              className="grid grid-cols-2 gap-16 items-center mb-28"
+              className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-center mb-16 md:mb-28"
             >
               {/* Text */}
-              <div className={isEven ? "order-1" : "order-2"}>
+              <div
+                className={isEven ? "lg:order-1 order-1" : "lg:order-2 order-1"}
+              >
                 <div className="flex items-center gap-3 mb-5">
                   <div
                     className={`text-[11px] font-medium tracking-[2px] uppercase px-3 py-1 rounded-full ${step.accentBg} ${step.accentText}`}
@@ -390,7 +392,7 @@ export default function HowItWorks() {
                 <h2 className="font-playfair text-[clamp(28px,3vw,40px)] leading-[1.1] tracking-[-1.5px] mb-4">
                   {step.title}
                 </h2>
-                <p className="text-[16px] text-muted-taupe font-light leading-[1.75] mb-6">
+                <p className="text-[15px] sm:text-[16px] text-muted-taupe font-light leading-[1.75] mb-6">
                   {step.desc}
                 </p>
                 <ul className="flex flex-col gap-3">
@@ -401,15 +403,19 @@ export default function HowItWorks() {
                       >
                         ✓
                       </span>
-                      <span className="text-[#1A1208] leading-[1.6]">{d}</span>
+                      <span className="text-[#1A1208] leading-[1.6] text-sm sm:text-base">
+                        {d}
+                      </span>
                     </li>
                   ))}
                 </ul>
               </div>
               {/* Mockup */}
-              <div className={`relative ${isEven ? "order-2" : "order-1"}`}>
+              <div
+                className={`relative w-full ${isEven ? "lg:order-2 order-2" : "lg:order-1 order-2"}`}
+              >
                 <div
-                  className="absolute -top-6 -left-4 font-playfair text-[120px] leading-none pointer-events-none select-none z-0 font-bold"
+                  className="absolute -top-6 -left-4 font-playfair text-[80px] sm:text-[100px] md:text-[120px] leading-none pointer-events-none select-none z-0 font-bold"
                   style={{ color: step.color.from }}
                 >
                   {step.num}
@@ -424,25 +430,28 @@ export default function HowItWorks() {
       </section>
 
       {/* OVERVIEW STRIP */}
-      <div className="bg-[#1A1208] py-16 px-12">
+      <div className="bg-[#1A1208] py-12 sm:py-16 px-4 sm:px-8 md:px-12">
         <div className="max-w-[1060px] mx-auto">
-          <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-[#8A7F74] mb-10">
+          <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-[#8A7F74] mb-8 sm:mb-10">
             The full picture
           </p>
-          <div className="grid grid-cols-4 gap-0 relative">
-            <div className="absolute top-7 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-[#2E2820] via-terracotta to-[#2E2820]" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 relative">
+            <div className="hidden md:block absolute top-7 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-[#2E2820] via-terracotta to-[#2E2820]" />
             {steps.map((s) => (
-              <div key={s.num} className="text-center relative z-10 px-4">
-                <div className="w-14 h-14 rounded-full border border-[#2E2820] flex items-center justify-center mx-auto mb-4 bg-[#1A1208] text-2xl">
+              <div
+                key={s.num}
+                className="text-center relative z-10 px-2 md:px-4"
+              >
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-[#2E2820] flex items-center justify-center mx-auto mb-3 md:mb-4 bg-[#1A1208] text-xl md:text-2xl">
                   {s.emoji}
                 </div>
-                <div className="text-[10px] font-medium tracking-[1.5px] uppercase text-[#8A7F74] mb-1">
+                <div className="text-[9px] md:text-[10px] font-medium tracking-[1.5px] uppercase text-[#8A7F74] mb-1">
                   {s.num}
                 </div>
-                <div className="font-playfair text-lg text-[#FDF8F2] mb-2">
+                <div className="font-playfair text-base md:text-lg text-[#FDF8F2] mb-2">
                   {s.label}
                 </div>
-                <p className="text-xs text-[#6A635D] font-light leading-[1.7]">
+                <p className="text-[11px] md:text-xs text-[#6A635D] font-light leading-[1.7]">
                   {s.desc.split("—")[0].trim()}
                 </p>
               </div>
@@ -452,14 +461,14 @@ export default function HowItWorks() {
       </div>
 
       {/* FOR WHO */}
-      <section className="max-w-[1060px] mx-auto px-12 py-24">
+      <section className="max-w-[1060px] mx-auto px-4 sm:px-8 md:px-12 py-16 sm:py-20 md:py-24">
         <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">
           Who it's for
         </p>
-        <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-12">
+        <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-8 sm:mb-12">
           Perfect for every kind of team
         </h2>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
               emoji: "🏢",
@@ -515,12 +524,12 @@ export default function HowItWorks() {
       </section>
 
       {/* FAQ */}
-      <div className="bg-[#F5EAD8] py-20 px-12">
+      <div className="bg-[#F5EAD8] py-16 sm:py-20 px-4 sm:px-8 md:px-12">
         <div className="max-w-[640px] mx-auto">
           <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">
             Questions
           </p>
-          <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-10">
+          <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-8 sm:mb-10">
             Good to know
           </h2>
           <div className="flex flex-col">
@@ -528,9 +537,9 @@ export default function HowItWorks() {
               <div key={i} className="border-t border-[#D8CEBE] last:border-b">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex justify-between items-center py-5 text-left bg-transparent border-none cursor-pointer"
+                  className="w-full flex justify-between items-center py-4 sm:py-5 text-left bg-transparent border-none cursor-pointer"
                 >
-                  <span className="text-[15px] font-medium text-[#1A1208] pr-6 font-dm-sans">
+                  <span className="text-[14px] sm:text-[15px] font-medium text-[#1A1208] pr-6 font-dm-sans">
                     {faq.q}
                   </span>
                   <span
@@ -540,7 +549,7 @@ export default function HowItWorks() {
                   </span>
                 </button>
                 {openFaq === i && (
-                  <p className="text-sm text-muted-taupe leading-[1.75] font-light pb-5">
+                  <p className="text-sm text-muted-taupe leading-[1.75] font-light pb-4 sm:pb-5">
                     {faq.a}
                   </p>
                 )}
@@ -551,7 +560,7 @@ export default function HowItWorks() {
       </div>
 
       {/* CTA */}
-      <div className="bg-terracotta relative overflow-hidden py-24 px-12 text-center">
+      <div className="bg-terracotta relative overflow-hidden py-16 sm:py-20 md:py-24 px-4 sm:px-8 md:px-12 text-center">
         <div className="absolute w-[400px] h-[400px] rounded-full bg-white/10 -top-28 -left-24 pointer-events-none" />
         <div className="absolute w-[300px] h-[300px] rounded-full bg-white/10 -bottom-16 -right-14 pointer-events-none" />
         <div className="relative z-10 max-w-[520px] mx-auto">
@@ -560,10 +569,10 @@ export default function HowItWorks() {
             <br />
             someone's day?
           </h2>
-          <p className="text-[17px] text-white/75 mb-9 font-light">
+          <p className="text-[16px] sm:text-[17px] text-white/75 mb-7 sm:mb-9 font-light">
             Create your first card in 60 seconds — it's free.
           </p>
-          <button className="bg-[#FDF8F2] text-terracotta px-10 py-4 rounded-full text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity font-dm-sans border-none cursor-pointer">
+          <button className="bg-[#FDF8F2] text-terracotta px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-[14px] sm:text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity font-dm-sans border-none cursor-pointer w-full sm:w-auto">
             Create your first card →
           </button>
           <p className="text-xs text-white/50 mt-4">
