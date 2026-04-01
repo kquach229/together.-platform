@@ -45,7 +45,6 @@ export default function CreateCard() {
   const [photoFile, setPhotoFile] = useState();
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
 
-  // Set after the card is created via API
   const [signingToken, setSigningToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -88,19 +87,11 @@ export default function CreateCard() {
     return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
   }
 
-  // Called when the user clicks Continue on step 3.
-  // Flow:
-  //   1. POST /api/cards       → create card, get cardId + signingToken
-  //   2. POST /api/upload      → get presigned S3 URL (uses real cardId now)
-  //   3. PUT file → S3
-  //   4. PATCH /api/cards/:id/photo → save URL to card
-  //   5. Advance to step 4
   async function handleCreateCard() {
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      // Step 1 — create the card
       setUploadProgress("Creating your card…");
       const createRes = await fetch("/api/cards", {
         method: "POST",
@@ -127,14 +118,10 @@ export default function CreateCard() {
 
       const { id: cardId, signingToken: token } = createData.card;
 
-      // Step 2 & 3 — upload cover photo if one was chosen
       if (photoFile) {
         setUploadProgress("Uploading cover photo…");
-
-        // Now we have a real cardId — key goes to signatures/{cardId}/...
         const photoUrl = await uploadPhoto(photoFile);
 
-        // Step 4 — save the photo URL to the card
         setUploadProgress("Saving photo…");
         await fetch(`/api/cards/${cardId}`, {
           method: "PATCH",
@@ -161,7 +148,6 @@ export default function CreateCard() {
   function handleContinue() {
     if (!canProceed()) return;
     if (step === 3) {
-      // Step 3 → 4: create the card via API first
       handleCreateCard();
     } else {
       setStep(step + 1);
@@ -171,80 +157,85 @@ export default function CreateCard() {
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] min-h-screen overflow-x-hidden">
       {/* ── NAV ── */}
-      <nav className="sticky top-0 z-50 flex items-center justify-between px-12 h-16 bg-[rgba(253,248,242,0.92)] backdrop-blur-md border-b border-[#E8DDD0]">
+      <nav className="sticky top-0 z-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 lg:px-12 py-4 sm:py-0 sm:h-16 bg-[rgba(253,248,242,0.92)] backdrop-blur-md border-b border-[#E8DDD0]">
         <a
           href="/"
-          className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
+          className="font-playfair text-[20px] sm:text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
           together<span className="text-terracotta">.</span>
         </a>
-        <div className="flex items-center gap-3">
+
+        <div className="flex flex-col xs:flex-row sm:flex-row sm:items-center gap-3">
           <span className="text-sm text-muted-taupe">Creating a card</span>
-          <button className="text-sm text-muted-taupe border border-[#E8DDD0] px-4 py-1.5 rounded-full hover:border-terracotta hover:text-terracotta transition-all">
+          <button className="text-sm text-muted-taupe border border-[#E8DDD0] px-4 py-1.5 rounded-full hover:border-terracotta hover:text-terracotta transition-all w-fit">
             Save draft
           </button>
         </div>
       </nav>
 
       {/* ── PROGRESS ── */}
-      <div className="border-b border-[#E8DDD0] bg-white px-12 py-4">
-        <div className="max-w-[860px] mx-auto flex items-center gap-0">
-          {steps.map((s, i) => (
-            <div
-              key={s.num}
-              className="flex items-center flex-1 last:flex-none"
-            >
-              <button
-                onClick={() => s.num < step && setStep(s.num)}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                  s.num === step
-                    ? "text-terracotta"
-                    : s.num < step
-                      ? "text-[#7B9E87] cursor-pointer"
-                      : "text-[#C5B8AD] cursor-default"
-                }`}
+      <div className="border-b border-[#E8DDD0] bg-white px-4 sm:px-6 lg:px-12 py-4">
+        <div className="max-w-[860px] mx-auto overflow-x-auto">
+          <div className="min-w-[720px] flex items-center gap-0">
+            {steps.map((s, i) => (
+              <div
+                key={s.num}
+                className="flex items-center flex-1 last:flex-none"
               >
-                <span
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium border transition-all ${
+                <button
+                  onClick={() => s.num < step && setStep(s.num)}
+                  className={`flex items-center gap-2 text-sm font-medium transition-colors whitespace-nowrap ${
                     s.num === step
-                      ? "border-terracotta bg-terracotta text-white"
+                      ? "text-terracotta"
                       : s.num < step
-                        ? "border-[#7B9E87] bg-[#EEF3EE] text-[#7B9E87]"
-                        : "border-[#E8DDD0] bg-white text-[#C5B8AD]"
+                        ? "text-[#7B9E87] cursor-pointer"
+                        : "text-[#C5B8AD] cursor-default"
                   }`}
                 >
-                  {s.num < step ? "✓" : s.num}
-                </span>
-                {s.label}
-              </button>
-              {i < steps.length - 1 && (
-                <div className="flex-1 h-px mx-4 bg-[#E8DDD0]">
-                  <div
-                    className="h-full bg-terracotta transition-all duration-500"
-                    style={{ width: s.num < step ? "100%" : "0%" }}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
+                  <span
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium border transition-all shrink-0 ${
+                      s.num === step
+                        ? "border-terracotta bg-terracotta text-white"
+                        : s.num < step
+                          ? "border-[#7B9E87] bg-[#EEF3EE] text-[#7B9E87]"
+                          : "border-[#E8DDD0] bg-white text-[#C5B8AD]"
+                    }`}
+                  >
+                    {s.num < step ? "✓" : s.num}
+                  </span>
+                  {s.label}
+                </button>
+
+                {i < steps.length - 1 && (
+                  <div className="flex-1 h-px mx-4 bg-[#E8DDD0] min-w-[40px]">
+                    <div
+                      className="h-full bg-terracotta transition-all duration-500"
+                      style={{ width: s.num < step ? "100%" : "0%" }}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* ── MAIN ── */}
-      <div className="max-w-[860px] mx-auto px-12 py-12">
-        <div className="grid grid-cols-[1fr_280px] gap-10 items-start">
+      <div className="max-w-[860px] mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 lg:gap-10 items-start">
           {/* ── LEFT: FORM ── */}
           <div>
             {/* STEP 1 — Occasion */}
             {step === 1 && (
               <div>
-                <h2 className="font-playfair text-[32px] tracking-tight mb-2">
+                <h2 className="font-playfair text-[28px] sm:text-[32px] tracking-tight mb-2">
                   What's the occasion?
                 </h2>
                 <p className="text-sm text-muted-taupe font-light mb-8">
                   Pick the one that fits best — you can always change it later.
                 </p>
-                <div className="grid grid-cols-4 gap-3">
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                   {occasions.map((o) => (
                     <button
                       key={o.label}
@@ -259,7 +250,7 @@ export default function CreateCard() {
                       }`}
                     >
                       <span className="text-2xl">{o.emoji}</span>
-                      <span className="text-xs font-medium text-[#1A1208]">
+                      <span className="text-xs font-medium text-[#1A1208] leading-relaxed">
                         {o.label}
                       </span>
                     </button>
@@ -271,12 +262,13 @@ export default function CreateCard() {
             {/* STEP 2 — Details */}
             {step === 2 && (
               <div>
-                <h2 className="font-playfair text-[32px] tracking-tight mb-2">
+                <h2 className="font-playfair text-[28px] sm:text-[32px] tracking-tight mb-2">
                   Tell us about the card
                 </h2>
                 <p className="text-sm text-muted-taupe font-light mb-8">
                   This is for the recipient — make it personal.
                 </p>
+
                 <div className="flex flex-col gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-2">
@@ -291,6 +283,7 @@ export default function CreateCard() {
                       className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD]"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       Your opening message
@@ -312,6 +305,7 @@ export default function CreateCard() {
                       {message.length} / 300
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       Signing deadline
@@ -329,6 +323,7 @@ export default function CreateCard() {
                       Signers will see a reminder as the deadline approaches.
                     </p>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       Recipient's email
@@ -351,13 +346,14 @@ export default function CreateCard() {
             {/* STEP 3 — Theme */}
             {step === 3 && (
               <div>
-                <h2 className="font-playfair text-[32px] tracking-tight mb-2">
+                <h2 className="font-playfair text-[28px] sm:text-[32px] tracking-tight mb-2">
                   Choose a theme
                 </h2>
                 <p className="text-sm text-muted-taupe font-light mb-8">
                   Sets the mood for everyone who opens the card.
                 </p>
-                <div className="grid grid-cols-3 gap-4">
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {themes.map((cardTheme) => (
                     <button
                       key={cardTheme}
@@ -375,7 +371,7 @@ export default function CreateCard() {
                         }}
                       />
                       <div
-                        className={`px-3 py-2 text-xs font-medium text-left ${
+                        className={`px-3 py-2 text-xs font-medium text-left capitalize ${
                           cardTheme === "warm"
                             ? "bg-[#1A1208] text-[#FDF8F2]"
                             : "bg-white text-[#1A1208]"
@@ -393,7 +389,7 @@ export default function CreateCard() {
                 </div>
 
                 {/* Cover photo upload */}
-                <div className="border-t border-[#E8DDD0] pt-6">
+                <div className="border-t border-[#E8DDD0] pt-6 mt-6">
                   <label className="block text-sm font-medium mb-1">
                     Cover photo
                     <span className="text-muted-taupe font-light ml-2">
@@ -453,7 +449,6 @@ export default function CreateCard() {
                   />
                 </div>
 
-                {/* Error message */}
                 {submitError && (
                   <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
                     {submitError}
@@ -478,31 +473,34 @@ export default function CreateCard() {
             {/* STEP 4 — Share */}
             {step === 4 && (
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-[#EEF3EE] flex items-center justify-center text-xl">
+                <div className="flex items-start sm:items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-[#EEF3EE] flex items-center justify-center text-xl shrink-0">
                     🎉
                   </div>
-                  <h2 className="font-playfair text-[32px] tracking-tight">
+                  <h2 className="font-playfair text-[28px] sm:text-[32px] tracking-tight">
                     Your card is ready!
                   </h2>
                 </div>
+
                 <p className="text-sm text-muted-taupe font-light mb-8">
                   Share the signing link with everyone you'd like to contribute.
                 </p>
 
                 {/* Link box */}
-                <div className="bg-[#F5EAD8] rounded-xl p-5 mb-6">
+                <div className="bg-[#F5EAD8] rounded-xl p-4 sm:p-5 mb-6">
                   <div className="text-xs font-medium text-muted-taupe uppercase tracking-[1.5px] mb-3">
                     Signing link
                   </div>
-                  <div className="flex gap-2 items-center">
-                    <div className="flex-1 bg-white border border-[#E8DDD0] rounded-lg px-3 py-2.5 text-sm font-mono text-muted-taupe overflow-hidden text-ellipsis whitespace-nowrap">
+
+                  <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                    <div className="flex-1 bg-white border border-[#E8DDD0] rounded-lg px-3 py-2.5 text-sm font-mono text-muted-taupe overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
                       {shareLink}
                     </div>
+
                     <button
                       onClick={handleCopy}
                       disabled={!signingToken}
-                      className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all font-dm-sans ${
+                      className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all font-dm-sans whitespace-nowrap ${
                         copied
                           ? "bg-[#7B9E87] text-white"
                           : "bg-terracotta text-white hover:bg-[#C4734A]"
@@ -511,6 +509,7 @@ export default function CreateCard() {
                       {copied ? "Copied!" : "Copy"}
                     </button>
                   </div>
+
                   <p className="text-xs text-muted-taupe mt-2.5 font-light">
                     Only people with this link can view and sign the card.
                   </p>
@@ -520,7 +519,8 @@ export default function CreateCard() {
                 <div className="text-xs font-medium text-muted-taupe uppercase tracking-[1.5px] mb-3">
                   Share via
                 </div>
-                <div className="grid grid-cols-3 gap-3 mb-8">
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
                   {[
                     { icon: "✉️", label: "Email" },
                     { icon: "💬", label: "Slack" },
@@ -541,6 +541,7 @@ export default function CreateCard() {
                   <div className="text-xs font-medium text-muted-taupe uppercase tracking-[1.5px] mb-4">
                     What happens next
                   </div>
+
                   <div className="flex flex-col gap-4">
                     {[
                       {
@@ -567,7 +568,7 @@ export default function CreateCard() {
                           <div className="text-sm font-medium">
                             {item.title}
                           </div>
-                          <div className="text-xs text-muted-taupe font-light mt-0.5">
+                          <div className="text-xs text-muted-taupe font-light mt-0.5 leading-relaxed">
                             {item.desc}
                           </div>
                         </div>
@@ -579,7 +580,7 @@ export default function CreateCard() {
             )}
 
             {/* ── NAVIGATION BUTTONS ── */}
-            <div className="flex justify-between items-center mt-10 pt-6 border-t border-[#E8DDD0]">
+            <div className="flex justify-between items-center mt-10 pt-6 border-t border-[#E8DDD0] gap-4">
               {step > 1 && step < 4 ? (
                 <button
                   onClick={() => setStep(step - 1)}
@@ -595,7 +596,7 @@ export default function CreateCard() {
                 <button
                   onClick={handleContinue}
                   disabled={!canProceed() || isSubmitting}
-                  className={`px-8 py-3 rounded-full text-sm font-medium transition-all font-dm-sans ${
+                  className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all font-dm-sans whitespace-nowrap ${
                     canProceed() && !isSubmitting
                       ? "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.25)]"
                       : "bg-[#E8DDD0] text-[#C5B8AD] cursor-not-allowed"
@@ -606,7 +607,7 @@ export default function CreateCard() {
               ) : (
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="px-8 py-3 rounded-full text-sm font-medium bg-[#1A1208] text-[#FDF8F2] hover:opacity-85 transition-opacity font-dm-sans"
+                  className="px-6 sm:px-8 py-3 rounded-full text-sm font-medium bg-[#1A1208] text-[#FDF8F2] hover:opacity-85 transition-opacity font-dm-sans whitespace-nowrap"
                 >
                   Go to dashboard →
                 </button>
@@ -615,10 +616,11 @@ export default function CreateCard() {
           </div>
 
           {/* ── RIGHT: LIVE PREVIEW ── */}
-          <div className="sticky top-28">
+          <div className="lg:sticky lg:top-28">
             <div className="text-[11px] font-medium tracking-[1.5px] uppercase text-muted-taupe mb-3">
               Live preview
             </div>
+
             <div className="rounded-2xl border border-[#E8DDD0] overflow-hidden shadow-[0_8px_32px_rgba(26,18,8,0.07)]">
               <div
                 className="p-5"
@@ -632,6 +634,7 @@ export default function CreateCard() {
                 >
                   {occasionEmoji} {occasion}
                 </div>
+
                 <div
                   className="font-playfair text-xl tracking-tight"
                   style={{
@@ -647,6 +650,7 @@ export default function CreateCard() {
                         : occasion}
                   {recipientName ? `, ${recipientName}!` : "…"}
                 </div>
+
                 {message && (
                   <p
                     className="text-xs mt-2 leading-relaxed opacity-80"
@@ -658,7 +662,7 @@ export default function CreateCard() {
                   </p>
                 )}
               </div>
-              {/* Cover photo preview */}
+
               {coverPhotoPreview && (
                 <div className="w-full h-16 overflow-hidden">
                   <img
@@ -668,6 +672,7 @@ export default function CreateCard() {
                   />
                 </div>
               )}
+
               <div className="bg-white p-4">
                 <div className="border border-dashed border-[#E8DDD0] rounded-xl p-4 text-center">
                   <div className="text-2xl mb-1.5">🖊</div>
@@ -675,6 +680,7 @@ export default function CreateCard() {
                     Messages from signers will appear here
                   </div>
                 </div>
+
                 {deadline && (
                   <div className="mt-3 flex items-center gap-2 text-xs text-muted-taupe">
                     <span>⏰</span>
