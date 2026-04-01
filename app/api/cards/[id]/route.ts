@@ -210,13 +210,14 @@ export async function PATCH(
     // Check if meaningful fields actually changed
     let hasMeaningfulChanges = false;
     if (originalCard) {
-      hasMeaningfulChanges =
+      hasMeaningfulChanges = !!(
         (occasion && occasion !== originalCard.occasion) ||
         (recipientName && recipientName !== originalCard.recipientName) ||
         (openingMessage !== undefined &&
           openingMessage !== originalCard.openingMessage) ||
         (theme && theme !== originalCard.theme) ||
-        (status && status !== originalCard.status);
+        (status && status !== originalCard.status)
+      );
     }
 
     // Only create "card_edited" notification if:

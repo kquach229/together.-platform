@@ -121,7 +121,12 @@ export default function Dashboard({ user }) {
       value: signatures?.length ?? "0",
       sub: "Across all cards",
     },
-    { label: "Cards delivered", value: "3", sub: "This month" },
+
+    {
+      label: "Lifetime Cards Created",
+      value: user.lifetimeCardsCreated,
+      sub: "This account",
+    },
     { label: "Plan", value: user.plan, sub: "" },
   ];
 
