@@ -24,6 +24,8 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
         `http://localhost:3000/sign/${card.signingToken}`,
       ),
   };
+
+  console.log(card);
   return (
     <div
       key={card.id}
@@ -39,7 +41,9 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
         <div className="absolute top-3 left-4 text-[10px] font-medium tracking-[1.5px] uppercase text-[#C4734A]">
           {card.emoji} {card.occasion}
         </div>
-        <div className="absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight text-[#1A1208]">
+        <div
+          className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight ${card.cardTheme === "midnight" ? "text-white" : "text-[#1A1208]"}`}
+        >
           {card.recipient}
         </div>
         {/* Menu */}

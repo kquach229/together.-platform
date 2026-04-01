@@ -189,7 +189,7 @@ export default function EditCardPanel({
           <div>
             <label className="block text-sm font-medium mb-2">
               Recipient's email
-              <span className="text-[#8C7B6B] font-light ml-2">(optional)</span>
+              <span className="text-terracotta">*</span>
             </label>
             <input
               type="email"

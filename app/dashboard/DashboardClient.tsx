@@ -97,7 +97,7 @@ export default function Dashboard({ user }) {
     recipient: card.recipientName,
     status: card.status as CardStatus,
     signers: card.signerCount,
-
+    cardTheme: card.theme,
     deadline: card.signingDeadline
       ? new Date(card.signingDeadline).toLocaleDateString()
       : null,
@@ -113,8 +113,6 @@ export default function Dashboard({ user }) {
       to: CARD_THEMES[card.theme].to,
     },
   }));
-
-  console.log("ACTIVITY:", user.notifications);
 
   const stats = [
     { label: "Current cards", value: cards?.length ?? "0", sub: "" },
