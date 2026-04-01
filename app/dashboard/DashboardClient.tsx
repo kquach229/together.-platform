@@ -118,10 +118,10 @@ export default function Dashboard({ user }) {
   console.log("ACTIVITY:", user.notifications);
 
   const stats = [
-    { label: "Current cards", value: cards.length ?? "0", sub: "" },
+    { label: "Current cards", value: cards?.length ?? "0", sub: "" },
     {
       label: "Total signatures",
-      value: signatures.length ?? "0",
+      value: signatures?.length ?? "0",
       sub: "Across all cards",
     },
     { label: "Cards delivered", value: "3", sub: "This month" },
@@ -150,7 +150,7 @@ export default function Dashboard({ user }) {
         {/* Top bar */}
         <div className="sticky top-0 z-30 flex items-center justify-between px-8 h-16 bg-[rgba(245,240,232,0.95)] backdrop-blur-md border-b border-[#E8DDD0]">
           <h1 className="font-playfair text-[22px] tracking-tight">
-            Hi, {user?.name.split(" ")[0]}
+            Hi, {user?.name?.split(" ")[0]}
           </h1>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -212,12 +212,12 @@ export default function Dashboard({ user }) {
                   {t !== "All" && (
                     <span className="ml-1.5 text-[10px] opacity-60">
                       {t === "Collecting"
-                        ? cards.filter((card) => card.status === "collecting")
+                        ? cards?.filter((card) => card.status === "collecting")
                             .length
                         : t === "Delivered"
-                          ? cards.filter((card) => card.status === "delivered")
+                          ? cards?.filter((card) => card.status === "delivered")
                               .length
-                          : cards.filter((card) => card.status === "draft")
+                          : cards?.filter((card) => card.status === "draft")
                               .length}
                     </span>
                   )}

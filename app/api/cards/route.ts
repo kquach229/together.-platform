@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Authenticate and look up user
     const user = await getUser();
-    if (!user) {
+    console.log("user: ", user);
+    if (!user?.email) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
 

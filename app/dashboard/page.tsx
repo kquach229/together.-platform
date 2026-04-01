@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   // map + format
   const formattedUser = {
     ...user,
-    cards: user.cards.map((card) => ({
+    cards: user?.cards.map((card) => ({
       ...card,
       createdAt: card.createdAt.toISOString(),
       signingDeadline: card.signingDeadline?.toISOString() || null,
