@@ -63,10 +63,14 @@ export default async function CardDetailPage({ params }: Props) {
   });
 
   // Not found
-  if (!card) notFound();
+  if (!card) {
+    notFound();
+  }
 
   // Only the creator can view this page
-  if (card.creatorId !== user.id) notFound();
+  if (card?.creatorId !== user.id) {
+    notFound();
+  }
 
-  return <CardDetailView card={card} />;
+  return <CardDetailView card={card!} />;
 }

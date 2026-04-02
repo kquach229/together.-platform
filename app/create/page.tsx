@@ -27,7 +27,15 @@ const steps = [
   { num: 4, label: "Share" },
 ];
 
-const themes = ["warm", "lavender", "sage", "sky", "neutral", "midnight"];
+const themes = [
+  "warm",
+  "lavender",
+  "sage",
+  "sky",
+  "neutral",
+  "midnight",
+] as const;
+type Theme = (typeof themes)[number];
 
 export default function CreateCard() {
   const router = useRouter();
@@ -40,9 +48,11 @@ export default function CreateCard() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [message, setMessage] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [theme, setTheme] = useState("warm");
-  const [coverPhotoPreview, setCoverPhotoPreview] = useState();
-  const [photoFile, setPhotoFile] = useState();
+  const [theme, setTheme] = useState<Theme>("warm");
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState<string | null>(
+    null,
+  );
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
 
   const [signingToken, setSigningToken] = useState<string | null>(null);

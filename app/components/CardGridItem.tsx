@@ -3,7 +3,19 @@ import DeleteCardDialog from "./DeleteCardDialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
+interface CardGridItemProps {
+  card: any;
+  menuOpen: string | null;
+  setMenuOpen: (id: string | null) => void;
+  status: any;
+}
+
+const CardGridItem = ({
+  card,
+  menuOpen,
+  setMenuOpen,
+  status,
+}: CardGridItemProps) => {
   const [openDialog, setOpenDialog] = useState(false);
   const router = useRouter();
 
@@ -23,7 +35,7 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
       navigator.clipboard.writeText(
         `http://localhost:3000/sign/${card.signingToken}`,
       ),
-  };
+  } as const;
 
   console.log(card);
   return (
@@ -57,9 +69,9 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
           {menuOpen === card.id && (
             <div className="absolute right-0 top-8 bg-white border border-[#E8DDD0] rounded-xl shadow-lg z-20 min-w-[140px] py-1 overflow-hidden">
               {[
-                { key: "view", label: "View card" },
-                { key: "copy", label: "Copy link" },
-                { key: "delete", label: "Delete" },
+                { key: "view" as const, label: "View card" },
+                { key: "copy" as const, label: "Copy link" },
+                { key: "delete" as const, label: "Delete" },
               ].map((action) => (
                 <button
                   key={action.key}

@@ -36,6 +36,7 @@ interface Card {
   deliveredAt: Date | null;
   createdAt: Date;
   creator: { name: string };
+  creatorPhotoUrl: string | null;
   signatures: Signature[];
   _count: { views: number };
 }
@@ -331,8 +332,6 @@ export default function CardDetailView({ card }: Props) {
                     />
                   </div>
                 )}
-
-                {console.log(card.creatorPhotoUrl)}
 
                 {/* Card meta strip */}
                 <div className="bg-white px-6 py-4 flex items-center justify-between flex-wrap gap-3">

@@ -9,11 +9,23 @@ import AppSideBar from "./AppSideBar";
 
 const Navbar = async () => {
   const navItems = ["Dashboard", "How it works", "Pricing"];
-  const user = await currentUser();
+  const clerkUser = await currentUser();
+
+  // Only pick plain object properties
+  const user = clerkUser
+    ? {
+        id: clerkUser.id,
+        firstName: clerkUser.firstName,
+        lastName: clerkUser.lastName,
+        email: clerkUser.emailAddresses?.[0]?.emailAddress ?? null,
+        plan: (clerkUser.privateMetadata?.plan as string) ?? "Free", // if you store plan there
+      }
+    : null;
 
   const filteredNavItems = !user?.id
     ? navItems.filter((item) => item !== "Dashboard")
     : navItems;
+
   return (
     <nav className="bg-background font-dm-sans">
       <div className="">
@@ -40,7 +52,7 @@ const Navbar = async () => {
         </div>
       </div>
       <div className="block md:hidden">
-        <AppSideBar />
+        <AppSideBar user={user} />
       </div>
       <Separator />
     </nav>
