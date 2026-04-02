@@ -114,7 +114,7 @@ export default function Dashboard({ user }: { user: User }) {
     status: CardStatus;
     signers: number;
     cardTheme: string;
-    deadline: string | null;
+    signingDeadline: string | null;
     deliveredOn: string | null;
     createdAt: string;
     theme: {
@@ -130,15 +130,13 @@ export default function Dashboard({ user }: { user: User }) {
     status: card.status as CardStatus,
     signers: card.signerCount,
     cardTheme: card.theme,
-    deadline: card.signingDeadline
-      ? new Date(card.signingDeadline).toLocaleDateString()
-      : null,
+    signingDeadline: card.signingDeadline,
 
     deliveredOn: card.deliveredAt
       ? new Date(card.deliveredAt).toLocaleDateString()
       : null,
 
-    createdAt: new Date(card.createdAt).toLocaleDateString(),
+    createdAt: card.createdAt,
 
     theme: {
       from: CARD_THEMES[card.theme as keyof typeof CARD_THEMES].from,

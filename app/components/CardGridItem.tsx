@@ -1,13 +1,25 @@
+"use client";
+
 import { useState } from "react";
 import DeleteCardDialog from "./DeleteCardDialog";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { format } from "date-fns";
 
 interface CardGridItemProps {
   card: any;
   menuOpen: string | null;
   setMenuOpen: (id: string | null) => void;
   status: any;
+}
+
+function formatDate(dateStr: string | undefined | null) {
+  if (!dateStr) return "";
+  try {
+    const parsed = new Date(dateStr); // works for ISO strings
+    return format(parsed, "MMM d, yyyy");
+  } catch {
+    return dateStr;
+  }
 }
 
 const CardGridItem = ({
@@ -19,15 +31,6 @@ const CardGridItem = ({
   const [openDialog, setOpenDialog] = useState(false);
   const router = useRouter();
 
-  //   const mapActions = (action) => {
-  //     switch (action.toLowerCase()) {
-  //       case "view card":
-  //         return () => router.push(`/cards/${card.id}`);
-  //       case "delete":
-  //         return () => setOpenDialog(true);
-  //     }
-  //   };
-
   const actions = {
     view: () => router.push(`/cards/${card.id}`),
     delete: () => setOpenDialog(true),
@@ -37,7 +40,6 @@ const CardGridItem = ({
       ),
   } as const;
 
-  console.log(card);
   return (
     <div
       key={card.id}
@@ -54,7 +56,9 @@ const CardGridItem = ({
           {card.emoji} {card.occasion}
         </div>
         <div
-          className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight ${card.heme === "midnight" ? "text-white" : "text-[#1A1208]"}`}
+          className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight ${
+            card.theme === "midnight" ? "text-white" : "text-[#1A1208]"
+          }`}
         >
           {card.recipient}
         </div>
@@ -97,7 +101,9 @@ const CardGridItem = ({
             <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
             {status.label}
           </div>
-          <div className="text-xs text-muted-taupe">{card.createdAt}</div>
+          <div className="text-xs text-muted-taupe">
+            {formatDate(card.createdAt)}
+          </div>
         </div>
 
         <div className="flex items-center justify-between text-sm mb-4">
@@ -108,16 +114,18 @@ const CardGridItem = ({
               {card.signers === 1 ? "signer" : "signers"}
             </span>
           </div>
-          {card.deadline && (
+          {console.log(Boolean(card.signingDeadline))}
+          {card.signingDeadline && (
             <div className="flex items-center gap-1 text-muted-taupe text-xs">
               <span>⏰</span>
-              <span>Due {card.deadline}</span>
+              <span>Due {formatDate(card.signingDeadline)}</span>
             </div>
           )}
+          {console.log("DELIVERED ON:", card.signingDeadline)}
           {card.deliveredOn && (
             <div className="flex items-center gap-1 text-[#7B9E87] text-xs">
               <span>✓</span>
-              <span>Sent {card.deliveredOn}</span>
+              <span>Sent {formatDate(card.deliveredOn)}</span>
             </div>
           )}
         </div>
