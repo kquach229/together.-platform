@@ -42,7 +42,7 @@ const CardGridItem = ({ card, menuOpen, setMenuOpen, status }) => {
           {card.emoji} {card.occasion}
         </div>
         <div
-          className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight ${card.cardTheme === "midnight" ? "text-white" : "text-[#1A1208]"}`}
+          className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight ${card.heme === "midnight" ? "text-white" : "text-[#1A1208]"}`}
         >
           {card.recipient}
         </div>

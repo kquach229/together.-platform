@@ -35,13 +35,13 @@ export default async function SignPage({ params }: Props) {
   });
 
   // Not found
-  if (!card) notFound();
+  if (!card) return notFound();
 
   // Card is no longer collecting — show a closed page
   if (card.status !== "collecting") {
     return (
       <div className="font-dm-sans min-h-screen bg-[#FDF8F2] flex items-center justify-center px-12">
-        <div className="text-center max-w-[400px]">
+        <div className="text-center max-w-100">
           <div className="text-5xl mb-5">🔒</div>
           <h1 className="font-playfair text-[28px] tracking-tight mb-3">
             This card is closed
@@ -85,5 +85,13 @@ export default async function SignPage({ params }: Props) {
     );
   }
 
-  return <SignView card={card} signingToken={signingToken} />;
+  return (
+    <SignView
+      card={{
+        ...card,
+        creatorPhotoUrl: card.creatorPhotoUrl ?? undefined,
+      }}
+      signingToken={signingToken}
+    />
+  );
 }

@@ -47,7 +47,7 @@ const navItems = [
 
 const AppSideBar = ({ user }: Props) => {
   const pathname = usePathname();
-  const { setOpen, setOpenMobile } = useSidebar();
+  const { setOpenMobile } = useSidebar();
 
   return (
     <Sidebar className="bg-red-500">

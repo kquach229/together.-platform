@@ -5,7 +5,6 @@ import CardGridItem from "../components/CardGridItem";
 
 import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
-import ReusableDialog from "../components/ReusableDialog";
 
 type CardStatus = "collecting" | "delivered";
 
@@ -79,19 +78,52 @@ function formatTimeAgo(date?: string) {
   return `${Math.floor(mins / 1440)}d ago`;
 }
 
-export default function Dashboard({ user }) {
+type User = {
+  name?: string;
+  notifications?: Array<{
+    type: string;
+    payload: any;
+    createdAt?: string;
+  }>;
+  cards?: Array<any>;
+  signatures?: Array<any>;
+  lifetimeCardsCreated?: number;
+  plan?: string;
+};
+
+export default function Dashboard({ user }: { user: User }) {
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
   const activity = (user.notifications ?? [])
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort(
+      (a, b) =>
+        (b.createdAt ? new Date(b.createdAt).getTime() : 0) -
+        (a.createdAt ? new Date(a.createdAt).getTime() : 0),
+    )
     .slice(0, 5)
     .map((n) => mapActivity(n.type, n.payload, n.createdAt))
     .filter(Boolean);
 
   const { cards, signatures } = user;
-  const normalizedCards = (cards ?? []).map((card) => ({
+  type NormalizedCard = {
+    id: string;
+    occasion: string;
+    recipient: string;
+    status: CardStatus;
+    signers: number;
+    cardTheme: string;
+    deadline: string | null;
+    deliveredOn: string | null;
+    createdAt: string;
+    theme: {
+      from: string;
+      to: string;
+    };
+  };
+
+  const normalizedCards: NormalizedCard[] = (cards ?? []).map((card: any) => ({
     id: card.id,
     occasion: card.occasion,
     recipient: card.recipientName,
@@ -109,8 +141,8 @@ export default function Dashboard({ user }) {
     createdAt: new Date(card.createdAt).toLocaleDateString(),
 
     theme: {
-      from: CARD_THEMES[card.theme].from,
-      to: CARD_THEMES[card.theme].to,
+      from: CARD_THEMES[card.theme as keyof typeof CARD_THEMES].from,
+      to: CARD_THEMES[card.theme as keyof typeof CARD_THEMES].to,
     },
   }));
 
@@ -218,14 +250,15 @@ export default function Dashboard({ user }) {
                       <span className="ml-1.5 text-[10px] opacity-60">
                         {t === "Collecting"
                           ? cards?.filter(
-                              (card) => card.status === "collecting",
+                              (card: any) => card.status === "collecting",
                             ).length
                           : t === "Delivered"
                             ? cards?.filter(
-                                (card) => card.status === "delivered",
+                                (card: any) => card.status === "delivered",
                               ).length
-                            : cards?.filter((card) => card.status === "draft")
-                                .length}
+                            : cards?.filter(
+                                (card: any) => card.status === "draft",
+                              ).length}
                       </span>
                     )}
                   </button>
@@ -249,7 +282,7 @@ export default function Dashboard({ user }) {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
               {filtered.map((card) => {
-                const status = statusConfig[card.status];
+                const status = statusConfig[card.status as CardStatus];
                 return (
                   <CardGridItem
                     key={card.id}
@@ -290,17 +323,17 @@ export default function Dashboard({ user }) {
                 >
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0"
-                    style={{ background: a.color }}
+                    style={{ background: a && a.color ? a.color : undefined }}
                   >
-                    {a.icon}
+                    {a && a.icon}
                   </div>
 
                   <div className="flex-1 text-sm leading-relaxed min-w-0 break-words">
-                    {a.text}
+                    {a && a.text}
                   </div>
 
                   <div className="text-xs text-muted-taupe shrink-0 whitespace-nowrap self-start sm:self-auto">
-                    {a.time}
+                    {a && a.time}
                   </div>
                 </div>
               ))}

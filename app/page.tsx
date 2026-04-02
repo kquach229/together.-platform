@@ -41,13 +41,13 @@ const fadeUp = {
   visible: (i = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, delay: i * 0.15, ease: "easeOut" },
+    transition: { duration: 0.6, delay: i * 0.15 },
   }),
 };
 
 const fadeIn = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+  visible: { opacity: 1, transition: { duration: 0.8 } },
 };
 
 const scaleIn = {
@@ -55,7 +55,7 @@ const scaleIn = {
   visible: (i = 0) => ({
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.5, delay: i * 0.1, ease: "easeOut" },
+    transition: { duration: 0.5, delay: i * 0.1 },
   }),
 };
 
@@ -72,7 +72,7 @@ export default function Home() {
                 className="text-foreground text-3xl"
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
+                transition={{ duration: 0.7 }}
               >
                 GROUP GREETING CARDS,
               </motion.h1>
@@ -80,7 +80,7 @@ export default function Home() {
                 className="text-terracotta text-5xl font-bold italic text-right"
                 initial={{ opacity: 0, x: 40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+                transition={{ duration: 0.7, delay: 0.2 }}
               >
                 REIMAGINED.
               </motion.h1>
@@ -90,7 +90,7 @@ export default function Home() {
               className="text-muted-taupe max-w-sm"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.45, ease: "easeOut" }}
+              transition={{ duration: 0.6, delay: 0.45 }}
             >
               Create a card for any occasion. Share a link. Watch everyone's
               messages and photos come together in one beautiful place.
@@ -99,9 +99,9 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.65, ease: "easeOut" }}
+              transition={{ duration: 0.6, delay: 0.65 }}
             >
-              <ReusableButton className="mt-8 w-fit">
+              <ReusableButton style={{ marginTop: 6 }}>
                 Create Your First Card
                 <ArrowRight />
               </ReusableButton>
@@ -109,12 +109,12 @@ export default function Home() {
           </div>
 
           {/* Right — image collage */}
-          <div className="flex-1 relative h-[480px] hidden md:block">
+          <div className="flex-1 relative h-120 hidden md:block">
             <motion.div
               className="absolute top-0 left-4 w-64 h-72 rounded-2xl overflow-hidden shadow-md"
               initial={{ opacity: 0, y: 40, rotate: -2 }}
               animate={{ opacity: 1, y: 0, rotate: -2 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              transition={{ duration: 0.8, delay: 0.3 }}
               whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
             >
               <Image
@@ -129,7 +129,7 @@ export default function Home() {
               className="absolute top-0 right-0 w-44 h-44 rounded-2xl overflow-hidden shadow-md"
               initial={{ opacity: 0, y: -30, rotate: 2 }}
               animate={{ opacity: 1, y: 0, rotate: 2 }}
-              transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+              transition={{ duration: 0.8, delay: 0.5 }}
               whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
             >
               <Image
@@ -144,7 +144,7 @@ export default function Home() {
               className="absolute bottom-0 right-0 w-52 h-52 rounded-2xl overflow-hidden shadow-md"
               initial={{ opacity: 0, y: 40, rotate: 1 }}
               animate={{ opacity: 1, y: 0, rotate: 1 }}
-              transition={{ duration: 0.8, delay: 0.65, ease: "easeOut" }}
+              transition={{ duration: 0.8, delay: 0.65 }}
               whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
             >
               <Image
@@ -159,7 +159,7 @@ export default function Home() {
               className="absolute bottom-10 left-0 w-36 h-36 rounded-2xl overflow-hidden shadow-md"
               initial={{ opacity: 0, x: -30, rotate: -1 }}
               animate={{ opacity: 1, x: 0, rotate: -1 }}
-              transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+              transition={{ duration: 0.8, delay: 0.8 }}
               whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
             >
               <Image
@@ -208,7 +208,7 @@ export default function Home() {
                 viewport={{ once: true, amount: 0.3 }}
                 whileHover={{
                   y: -6,
-                  shadow: "lg",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
                   transition: { duration: 0.2 },
                 }}
               >

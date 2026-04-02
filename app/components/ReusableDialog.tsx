@@ -34,7 +34,7 @@ const ReusableDialog = ({
           shadow-[0_24px_60px_rgba(26,18,8,0.12)]
           p-0
           overflow-hidden
-          max-w-[480px]
+          max-w-120
           w-full
           gap-0
         "

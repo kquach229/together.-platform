@@ -2,7 +2,11 @@ import ReusableDialog from "./ReusableDialog";
 import ReusableButton from "./ReusableButton";
 import { useRouter } from "next/navigation";
 
-const handleDelete = async (cardId, router, onOpenChange) => {
+const handleDelete = async (
+  cardId: string,
+  router: ReturnType<typeof useRouter>,
+  onOpenChange: (open: boolean) => void,
+) => {
   const res = await fetch(`/api/cards/${cardId}`, {
     method: "DELETE",
   });
@@ -13,7 +17,17 @@ const handleDelete = async (cardId, router, onOpenChange) => {
   router.push("/dashboard");
 };
 
-const DeleteCardDialog = ({ open, onOpenChange, cardId }) => {
+interface DeleteCardDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  cardId: string;
+}
+
+const DeleteCardDialog = ({
+  open,
+  onOpenChange,
+  cardId,
+}: DeleteCardDialogProps) => {
   const router = useRouter();
   return (
     <ReusableDialog

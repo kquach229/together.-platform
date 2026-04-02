@@ -1,5 +1,9 @@
-export default async function IndexPage({ searchParams }) {
-  const { canceled } = await searchParams;
+export default async function IndexPage({
+  searchParams,
+}: {
+  searchParams: { canceled?: string };
+}) {
+  const { canceled } = searchParams || {};
 
   if (canceled) {
     console.log(
@@ -7,17 +11,20 @@ export default async function IndexPage({ searchParams }) {
     );
   }
 
-  const handleCheckout = async (priceId, mode) => {
+  const handleCheckout = async (priceId: string, mode: string) => {
     "use server";
     const req = await fetch("/api/checkout_sessions", {
       method: "POST",
-      body: {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         price_id: priceId,
         mode,
-      },
+      }),
     });
 
-    const data = req.json();
+    const data = await req.json();
     return data;
   };
   return (

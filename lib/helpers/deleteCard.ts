@@ -1,4 +1,4 @@
-const deleteCard = async (cardId) => {
+const deleteCard = async (cardId: string) => {
   const res = await fetch(`/api/card/${cardId}`, { method: "DELETE" });
   const data = await res.json();
   return data;

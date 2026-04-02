@@ -64,7 +64,7 @@ const logos = ["STRIPE", "NOTION", "FIGMA", "VERCEL", "LINEAR", "LOOM"];
 
 export default function Pricing() {
   const router = useRouter();
-  const { loadingUser, user } = useUser();
+  const { isLoaded, user } = useUser();
 
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -129,7 +129,7 @@ export default function Pricing() {
   };
 
   const handlePlanClick = async (planName: Plan["name"]) => {
-    if (!user && !loadingUser) {
+    if (!user && isLoaded) {
       router.push("/dashboard");
       return;
     }
@@ -499,7 +499,7 @@ export default function Pricing() {
 
       {/* ── FAQ ── */}
       <div className="bg-[#F5EAD8] py-16 sm:py-20 px-4 sm:px-6 md:px-12">
-        <div className="max-w-[640px] mx-auto">
+        <div className="max-w-160 mx-auto">
           <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-[#D4845A] mb-3">
             Got questions?
           </p>

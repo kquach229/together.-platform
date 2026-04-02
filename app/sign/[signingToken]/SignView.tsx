@@ -53,15 +53,6 @@ const occasionEmojis: Record<string, string> = {
   Sympathy: "💔",
 };
 
-// function getInitials(name: string) {
-//   return name
-//     .split(" ")
-//     .map((n) => n[0])
-//     .join("")
-//     .toUpperCase()
-//     .slice(0, 2);
-// }
-
 function daysUntil(date: Date) {
   const diff = new Date(date).getTime() - Date.now();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -83,6 +74,7 @@ interface Card {
   signerCount: number;
   creator: { name: string };
   signatures: Signer[];
+  creatorPhotoUrl?: string;
 }
 
 interface Props {
@@ -283,7 +275,7 @@ export default function SignView({ card, signingToken }: Props) {
         </div>
       </nav>
 
-      <div className="max-w-[1000px] mx-auto px-12 py-12 grid grid-cols-[1fr_300px] gap-12 items-start">
+      <div className="max-w-250 mx-auto px-12 py-12 grid grid-cols-[1fr_300px] gap-12 items-start">
         {/* ── LEFT: FORM ── */}
         <div>
           {/* Card banner */}

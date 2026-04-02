@@ -1,8 +1,5 @@
 "use client";
 
-// app/card/[deliveryToken]/RecipientView.tsx
-// Client component — handles copy/download interactions
-
 import { useState } from "react";
 
 const themes: Record<string, { from: string; to: string }> = {
@@ -43,6 +40,7 @@ interface Card {
   signerCount: number;
   creator: { name: string };
   signatures: Signature[];
+  creatorPhotoUrl?: string | null;
 }
 
 interface Props {

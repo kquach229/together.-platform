@@ -15,8 +15,12 @@ export default async function DashboardPage() {
     cards: user?.cards.map((card) => ({
       ...card,
       createdAt: card.createdAt.toISOString(),
-      signingDeadline: card.signingDeadline?.toISOString() || null,
-      deliveredAt: card.deliveredAt?.toISOString() || null,
+      signingDeadline: "signingDeadline" in card && {
+        signingDeadline: card.signingDeadline?.toISOString() || null,
+      },
+      ...("deliveredAt" in card && {
+        deliveredAt: card.deliveredAt?.toISOString() || null,
+      }),
     })),
   };
 
