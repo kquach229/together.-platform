@@ -57,7 +57,7 @@ const CardGridItem = ({
         </div>
         <div
           className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight ${
-            card.theme === "midnight" ? "text-white" : "text-[#1A1208]"
+            card.cardTheme === "midnight" ? "text-white" : "text-[#1A1208]"
           }`}
         >
           {card.recipient}
@@ -114,14 +114,14 @@ const CardGridItem = ({
               {card.signers === 1 ? "signer" : "signers"}
             </span>
           </div>
-          {console.log(Boolean(card.signingDeadline))}
+
           {card.signingDeadline && (
             <div className="flex items-center gap-1 text-muted-taupe text-xs">
               <span>⏰</span>
               <span>Due {formatDate(card.signingDeadline)}</span>
             </div>
           )}
-          {console.log("DELIVERED ON:", card.signingDeadline)}
+
           {card.deliveredOn && (
             <div className="flex items-center gap-1 text-[#7B9E87] text-xs">
               <span>✓</span>

@@ -117,6 +117,7 @@ export default function Dashboard({ user }: { user: User }) {
     signingDeadline: string | null;
     deliveredOn: string | null;
     createdAt: string;
+
     theme: {
       from: string;
       to: string;
@@ -172,8 +173,6 @@ export default function Dashboard({ user }: { user: User }) {
   });
 
   const router = useRouter();
-
-  console.log(cards);
 
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
