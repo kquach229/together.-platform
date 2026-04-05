@@ -42,8 +42,10 @@ enum NotificationType {
 enum SubscriptionStatus {
   active
   past_due
-  cancelled
+  canceled
   trialing
+  incomplete
+  unpaid
 }
 
 enum BillingInterval {
@@ -62,7 +64,7 @@ model User {
   email String @unique
   name String
   plan Plan @default(free)
-  stripeCustomerId String?
+  stripeCustomerId String? @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   cards Card[]
@@ -152,6 +154,8 @@ model UserSubscription {
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelledAt          DateTime?
+  metadata Json?
+  cancelAtPeriodEnd Boolean @default(false)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
@@ -190,7 +194,12 @@ model Price {
   active Boolean @default(true)
   createdAt DateTime @default(now())
 
-
+  @@unique([plan, billingInterval])
 }
 
 
+model StripeEvent {
+  id String @id
+  type String
+  createdAt DateTime @default(now())
+}
