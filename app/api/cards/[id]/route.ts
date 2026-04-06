@@ -32,11 +32,12 @@ async function getAuthedUserAndCard(clerkId: string, cardId: string) {
 // Returns a single card with its signatures (creator only)
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId: clerkId } = await auth();
     const { id: cardId } = await params;
+
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
@@ -49,7 +50,6 @@ export async function GET(
       );
     }
 
-    // Return full card with signatures for creator dashboard
     const card = await prisma.card.findUnique({
       where: { id: cardId },
       include: {
@@ -83,16 +83,14 @@ export async function GET(
 }
 
 // ─── PATCH /api/cards/[id] ───────────────────────────────────
-// Updates a card — only allowed while status is 'draft' or 'collecting'
-// Special case: status can be set to 'collecting' to publish the card,
-// or 'delivered' to deliver it to the recipient
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id: cardId } = await params;
     const { userId: clerkId } = await auth();
+
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
@@ -107,7 +105,6 @@ export async function PATCH(
 
     const { card, user } = result;
 
-    // Can't edit a delivered or archived card
     if (card.status === "delivered" || card.status === "archived") {
       return NextResponse.json(
         {
@@ -120,6 +117,7 @@ export async function PATCH(
 
     const body = await req.json();
     const parsed = updateCardSchema.safeParse(body);
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Validation failed", details: parsed.error.flatten() },
@@ -139,10 +137,8 @@ export async function PATCH(
       creatorPhotoUrl,
     } = parsed.data;
 
-    // If delivering, set deliveredAt timestamp
     const deliveredAt = status === "delivered" ? new Date() : undefined;
 
-    // Store the original card data before update to detect meaningful changes
     const originalCard = await prisma.card.findUnique({
       where: { id: cardId },
       select: {
@@ -196,18 +192,12 @@ export async function PATCH(
       },
     });
 
-    // ─── NOTIFICATION LOGIC ───────────────────────────────────
-    // Determine if this is a meaningful edit (not just a photo upload)
+    const isNewCard = card.createdAt.getTime() > Date.now() - 60000;
 
-    // Check if this is a brand new card (created within last minute)
-    const isNewCard = card.createdAt.getTime() > Date.now() - 60000; // 1 minute
-
-    // Check if this update only contains creatorPhotoUrl
     const updateKeys = Object.keys(parsed.data);
     const isOnlyPhotoUpdate =
       updateKeys.length === 1 && updateKeys[0] === "creatorPhotoUrl";
 
-    // Check if meaningful fields actually changed
     let hasMeaningfulChanges = false;
     if (originalCard) {
       hasMeaningfulChanges = !!(
@@ -220,10 +210,6 @@ export async function PATCH(
       );
     }
 
-    // Only create "card_edited" notification if:
-    // 1. Card is not brand new
-    // 2. It's not just a photo upload
-    // 3. There are meaningful changes OR we're not sure (fallback)
     const shouldCreateEditNotification =
       !isNewCard &&
       !isOnlyPhotoUpdate &&
@@ -249,7 +235,6 @@ export async function PATCH(
       });
     }
 
-    // If card was just set to 'delivered', create a notification
     if (status === "delivered") {
       await prisma.notification.create({
         data: {
@@ -277,11 +262,12 @@ export async function PATCH(
 // ─── DELETE /api/cards/[id] ──────────────────────────────────
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId: clerkId } = await auth();
     const { id: cardId } = await params;
+
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
@@ -294,13 +280,11 @@ export async function DELETE(
       );
     }
 
-    // Use a transaction to ensure atomicity
     await prisma.$transaction(async (tx) => {
-      // Create audit notification before deletion
       await tx.notification.create({
         data: {
           userId: result.user.id,
-          cardId: null, // 👈 Prevents cascade deletion
+          cardId: null,
           type: "card_deleted",
           payload: {
             title: `You deleted ${result.card.occasion} card for ${result.card.recipientName}`,
@@ -312,7 +296,6 @@ export async function DELETE(
         },
       });
 
-      // Delete the card (this will cascade delete signatures, views, and notifications)
       await tx.card.delete({ where: { id: cardId } });
     });
 
