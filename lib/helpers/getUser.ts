@@ -27,6 +27,7 @@ export async function getUser(include: IncludeOptions = {}) {
   if (!user) return null;
 
   // Merge in Clerk fields for firstName, lastName, email
+  // redeploy
   return {
     ...user,
   };
