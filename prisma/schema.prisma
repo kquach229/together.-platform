@@ -145,7 +145,7 @@ model Notification {
 
 model UserSubscription {
   id                   String             @id @default(uuid())
-  userId               String?            @unique
+  userId               String             @unique
   stripeSubscriptionId String             @unique
   stripePriceId        String
   plan                 Plan
@@ -154,13 +154,13 @@ model UserSubscription {
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelledAt          DateTime?
-  metadata Json?
-  cancelAtPeriodEnd Boolean @default(false)
+  cancelAtPeriodEnd    Boolean            @default(false)
+  metadata             Json?
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
   // Relations
-  user User? @relation("UserSubscription", fields: [userId], references: [id], onDelete: SetNull)
+  user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 

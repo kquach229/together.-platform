@@ -4,12 +4,19 @@ import Stripe from "stripe";
 import prisma from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-08-16",
+  apiVersion: "2025-03-31.basil", // Use the version matching your installed stripe package
 });
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
-  const sig = req.headers.get("stripe-signature")!;
+  const sig = req.headers.get("stripe-signature");
+
+  if (!sig) {
+    return NextResponse.json(
+      { error: "No stripe signature found" },
+      { status: 400 },
+    );
+  }
 
   let event: Stripe.Event;
 
@@ -27,71 +34,94 @@ export async function POST(req: NextRequest) {
   }
 
   switch (event.type) {
-    case "checkout.session.completed":
+    case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      if (!session.customer_email || !session.subscription) break;
 
-      const stripeSub = await stripe.subscriptions.retrieve(
-        session.subscription.toString(),
-      );
+      if (!session.customer_email || !session.subscription) {
+        break;
+      }
 
-      // Map Stripe status and interval to your enums
-      const statusMap: Record<string, string> = {
+      const subscriptionId =
+        typeof session.subscription === "string"
+          ? session.subscription
+          : session.subscription.id;
+
+      const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+
+      const statusMap: Record<Stripe.Subscription.Status, string> = {
         active: "active",
         incomplete: "incomplete",
+        incomplete_expired: "incomplete",
         past_due: "past_due",
         canceled: "canceled",
         unpaid: "unpaid",
+        paused: "paused",
+        trialing: "trialing",
       };
 
       const user = await prisma.user.findUnique({
         where: { email: session.customer_email },
       });
+
       if (!user) break;
+
+      const price = stripeSub.items.data[0]?.price;
+      if (!price) break;
+
+      // In Stripe SDK v14+, period info moved to the subscription item
+      const periodStart =
+        stripeSub.items.data[0]?.current_period_start ??
+        stripeSub.billing_cycle_anchor;
+      const periodEnd =
+        stripeSub.items.data[0]?.current_period_end ??
+        stripeSub.billing_cycle_anchor;
 
       await prisma.userSubscription.upsert({
         where: { userId: user.id },
         create: {
           userId: user.id,
           stripeSubscriptionId: stripeSub.id,
-          stripePriceId: stripeSub.items.data[0].price.id,
-          plan: stripeSub.items.data[0].price.nickname as any, // or map to your Plan enum
-          billingInterval: stripeSub.items.data[0].price.recurring!
-            .interval as any,
-          status: statusMap[stripeSub.status] as any,
-          currentPeriodStart: new Date(stripeSub.current_period_start * 1000),
-          currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+          stripePriceId: price.id,
+          plan: price.nickname ?? "default",
+          billingInterval: price.recurring?.interval ?? "month",
+          status: statusMap[stripeSub.status],
+          currentPeriodStart: new Date(periodStart * 1000),
+          currentPeriodEnd: new Date(periodEnd * 1000),
           cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
-          metadata: stripeSub.metadata,
+          metadata: (stripeSub.metadata as Record<string, string>) ?? {},
         },
         update: {
           stripeSubscriptionId: stripeSub.id,
-          stripePriceId: stripeSub.items.data[0].price.id,
-          plan: stripeSub.items.data[0].price.nickname as any,
-          billingInterval: stripeSub.items.data[0].price.recurring!
-            .interval as any,
-          status: statusMap[stripeSub.status] as any,
-          currentPeriodStart: new Date(stripeSub.current_period_start * 1000),
-          currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+          stripePriceId: price.id,
+          plan: price.nickname ?? "default",
+          billingInterval: price.recurring?.interval ?? "month",
+          status: statusMap[stripeSub.status],
+          currentPeriodStart: new Date(periodStart * 1000),
+          currentPeriodEnd: new Date(periodEnd * 1000),
           cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
-          metadata: stripeSub.metadata,
+          metadata: (stripeSub.metadata as Record<string, string>) ?? {},
         },
       });
-
       break;
+    }
 
-    case "invoice.payment_failed":
+    case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice;
-      const sub = await prisma.userSubscription.findUnique({
-        where: { stripeSubscriptionId: invoice.subscription as string },
-      });
-      if (sub) {
-        await prisma.userSubscription.update({
-          where: { id: sub.id },
-          data: { status: "past_due" },
+
+      if (invoice.subscription && typeof invoice.subscription === "string") {
+        const sub = await prisma.userSubscription.findUnique({
+          where: { stripeSubscriptionId: invoice.subscription },
         });
+
+        if (sub) {
+          await prisma.userSubscription.update({
+            where: { id: sub.id },
+            data: { status: "past_due" },
+          });
+        }
       }
       break;
+    }
 
     default:
       console.log(`Unhandled event type ${event.type}`);
