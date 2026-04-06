@@ -1,5 +1,5 @@
 import * as React from "react";
-const LogoComponent = (props) => (
+const LogoComponent = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     viewBox="0 0 160 36"
     width={150}
