@@ -87,11 +87,9 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(
-      payload,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!,
-    );
+    // Use environment variable for webhook secret
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+    event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
   } catch (err) {
     console.error("[Stripe webhook] Signature verification failed:", err);
     return NextResponse.json(
@@ -101,8 +99,6 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Idempotency check ──────────────────────────────────────
-  // The StripeEvent table prevents double-processing if Stripe
-  // retries an event (which it will on any non-200 response).
   const alreadyProcessed = await prisma.stripeEvent.findUnique({
     where: { id: event.id },
   });
@@ -120,7 +116,12 @@ export async function POST(req: NextRequest) {
       // ── First successful payment ───────────────────────────
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.mode !== "subscription" || !session.subscription) break;
+
+        // Only process subscription checkouts
+        if (session.mode !== "subscription" || !session.subscription) {
+          console.log(`[Stripe webhook] Skipping non-subscription checkout`);
+          break;
+        }
 
         const customerId = session.customer as string;
         const subscriptionId =
@@ -128,34 +129,53 @@ export async function POST(req: NextRequest) {
             ? session.subscription
             : session.subscription.id;
 
+        console.log(
+          `[Stripe webhook] Processing subscription: ${subscriptionId}`,
+        );
+
         // Fetch full subscription details
         const sub = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId = sub.items.data[0]?.price.id;
-        if (!priceId) break;
 
-        const price = await resolvePlan(priceId);
-        if (!price) {
-          console.error(`[Stripe webhook] No Price row found for ${priceId}`);
+        if (!priceId) {
+          console.error(
+            `[Stripe webhook] No price ID found for subscription ${subscriptionId}`,
+          );
           break;
         }
 
-        // Resolve user — try customer ID, then clerkId metadata, then email
+        const price = await resolvePlan(priceId);
+        if (!price) {
+          console.error(
+            `[Stripe webhook] No Price row found for ${priceId}. Make sure your Price table has this Stripe price ID.`,
+          );
+          break;
+        }
+
+        // Resolve user
         const customerEmail = session.customer_details?.email;
         const user = await findUser(customerId, sub.metadata, customerEmail);
+
         if (!user) {
           console.error(
             `[Stripe webhook] No user found for customer ${customerId}`,
           );
+          console.log(
+            `[Stripe webhook] Attempted to find by: customerId=${customerId}, metadata.clerkId=${sub.metadata?.clerkId}, email=${customerEmail}`,
+          );
           break;
         }
+
+        console.log(`[Stripe webhook] Found user: ${user.id} (${user.email})`);
 
         const periodStart =
           sub.items.data[0]?.current_period_start ?? sub.billing_cycle_anchor;
         const periodEnd =
           sub.items.data[0]?.current_period_end ?? sub.billing_cycle_anchor;
 
+        // Update database with subscription
         await prisma.$transaction([
-          // 1. Activate the plan and store the Stripe customer ID
+          // 1. Update user with plan and Stripe customer ID
           prisma.user.update({
             where: { id: user.id },
             data: {
@@ -163,7 +183,7 @@ export async function POST(req: NextRequest) {
               stripeCustomerId: customerId,
             },
           }),
-          // 2. Upsert the subscription record
+          // 2. Upsert subscription record
           prisma.userSubscription.upsert({
             where: { userId: user.id },
             create: {
@@ -194,7 +214,13 @@ export async function POST(req: NextRequest) {
         ]);
 
         console.log(
-          `[Stripe webhook] Activated ${price.plan} for user ${user.id}`,
+          `[Stripe webhook] ✅ Successfully activated ${price.plan} plan for user ${user.id}`,
+        );
+        console.log(
+          `[Stripe webhook] 📊 User ${user.id} now has: plan=${price.plan}, stripeCustomerId=${customerId}`,
+        );
+        console.log(
+          `[Stripe webhook] 📝 Subscription ${sub.id} created with status=${sub.status}, period=${new Date(periodStart * 1000).toISOString()} to ${new Date(periodEnd * 1000).toISOString()}`,
         );
         break;
       }
@@ -204,18 +230,28 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as Stripe.Subscription;
         const customerId = sub.customer as string;
         const priceId = sub.items.data[0]?.price.id;
-        if (!priceId) break;
+
+        if (!priceId) {
+          console.error(
+            `[Stripe webhook] No price ID found for subscription update`,
+          );
+          break;
+        }
 
         const price = await resolvePlan(priceId);
         const user = await findUser(customerId, sub.metadata);
-        if (!user) break;
+
+        if (!user) {
+          console.error(
+            `[Stripe webhook] No user found for subscription update, customerId=${customerId}`,
+          );
+          break;
+        }
 
         const periodStart =
           sub.items.data[0]?.current_period_start ?? sub.billing_cycle_anchor;
         const periodEnd =
           sub.items.data[0]?.current_period_end ?? sub.billing_cycle_anchor;
-
-        // If the subscription is no longer active, downgrade to free
         const newUserPlan =
           isActiveStatus(sub.status) && price ? price.plan : "free";
 
@@ -243,7 +279,7 @@ export async function POST(req: NextRequest) {
         ]);
 
         console.log(
-          `[Stripe webhook] Updated subscription for user ${user.id} → ${newUserPlan}`,
+          `[Stripe webhook] ✅ Updated subscription for user ${user.id} → ${newUserPlan} (status: ${sub.status})`,
         );
         break;
       }
@@ -254,7 +290,12 @@ export async function POST(req: NextRequest) {
         const customerId = sub.customer as string;
 
         const user = await findUser(customerId, sub.metadata);
-        if (!user) break;
+        if (!user) {
+          console.error(
+            `[Stripe webhook] No user found for cancellation, customerId=${customerId}`,
+          );
+          break;
+        }
 
         await prisma.$transaction([
           prisma.user.update({
@@ -271,26 +312,27 @@ export async function POST(req: NextRequest) {
         ]);
 
         console.log(
-          `[Stripe webhook] Cancelled subscription for user ${user.id} → free`,
+          `[Stripe webhook] ✅ Cancelled subscription for user ${user.id} → free plan`,
         );
         break;
       }
 
       // ── Payment failed ─────────────────────────────────────
-      // Don't downgrade immediately — Stripe will retry.
-      // Downgrade only happens via customer.subscription.deleted
-      // if all retries fail.
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription?: string | Stripe.Subscription | null;
+        };
         const subId =
           typeof invoice.subscription === "string"
             ? invoice.subscription
             : invoice.subscription?.id;
+
         if (!subId) break;
 
         const existing = await prisma.userSubscription.findUnique({
           where: { stripeSubscriptionId: subId },
         });
+
         if (!existing) break;
 
         await prisma.userSubscription.update({
@@ -298,26 +340,28 @@ export async function POST(req: NextRequest) {
           data: { status: "past_due" },
         });
 
-        // TODO: trigger a "payment failed" email to the user
         console.log(
-          `[Stripe webhook] Payment failed for subscription ${subId}`,
+          `[Stripe webhook] ⚠️ Payment failed for subscription ${subId} - status updated to past_due`,
         );
         break;
       }
 
       default:
-        // Safe to ignore unhandled events
+        console.log(
+          `[Stripe webhook] Ignoring unhandled event type: ${event.type}`,
+        );
         break;
     }
 
-    // Mark event as processed — prevents double-processing on retry
+    // Mark event as processed
     await prisma.stripeEvent.create({
       data: { id: event.id, type: event.type },
     });
+
+    console.log(`[Stripe webhook] ✅ Successfully processed event ${event.id}`);
   } catch (err) {
-    console.error(`[Stripe webhook] Error processing ${event.type}:`, err);
-    // Return 200 even on error — if you return 4xx/5xx Stripe retries,
-    // which can cause double-processing. Log and investigate instead.
+    console.error(`[Stripe webhook] ❌ Error processing ${event.type}:`, err);
+    // Return 200 to prevent retries that could cause double-processing
     return NextResponse.json(
       { error: "Handler error — logged for investigation" },
       { status: 200 },

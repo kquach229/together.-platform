@@ -46,8 +46,6 @@ enum SubscriptionStatus {
   trialing
   incomplete
   unpaid
-  incomplete_expired
-  paused
 }
 
 enum BillingInterval {

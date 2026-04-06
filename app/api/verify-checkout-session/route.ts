@@ -6,9 +6,7 @@ import prisma from "@/lib/prisma";
 enum Plan {
   free = "free",
   plus = "plus",
-  plus_annual = "plus_annual",
   team = "team",
-  team_annual = "team_annual",
 }
 
 enum BillingInterval {
@@ -32,8 +30,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function POST(req: NextRequest) {
   try {
     const { sessionId } = await req.json();
-    if (!sessionId)
+
+    if (!sessionId) {
       return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });
+    }
 
     // Retrieve the checkout session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
@@ -47,13 +47,18 @@ export async function POST(req: NextRequest) {
     const subscription = session.subscription as Stripe.Subscription;
     const customer = session.customer as Stripe.Customer;
 
-    // Find the user by stripeCustomerId if exists
+    // Find the user by stripeCustomerId
     const user = await prisma.user.findUnique({
       where: { stripeCustomerId: customer.id },
     });
 
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     // Get the first subscription item's price
     const priceId = subscription.items.data[0]?.price.id;
+
     if (!priceId) {
       return NextResponse.json(
         { error: "No price found on subscription" },
@@ -62,30 +67,36 @@ export async function POST(req: NextRequest) {
     }
 
     const stripePrice = await stripe.prices.retrieve(priceId);
+
     const plan = (stripePrice.metadata?.plan ?? "free") as Plan;
-    const billingInterval =
-      stripePrice.recurring?.interval === "year" ? "annual" : "monthly";
+
+    const billingInterval: BillingInterval =
+      stripePrice.recurring?.interval === "year"
+        ? BillingInterval.annual
+        : BillingInterval.monthly;
 
     // Map Stripe status to Prisma enum
     const planStatusMap: Record<string, SubscriptionStatus> = {
-      active: "active",
-      past_due: "past_due",
-      canceled: "canceled",
-      trialing: "trialing",
-      incomplete: "incomplete",
-      unpaid: "unpaid",
+      active: SubscriptionStatus.active,
+      past_due: SubscriptionStatus.past_due,
+      canceled: SubscriptionStatus.canceled,
+      trialing: SubscriptionStatus.trialing,
+      incomplete: SubscriptionStatus.incomplete,
+      unpaid: SubscriptionStatus.unpaid,
     };
-    const prismaStatus: SubscriptionStatus =
-      planStatusMap[subscription.status] ?? "incomplete";
 
-    // Determine period start/end
+    const prismaStatus: SubscriptionStatus =
+      planStatusMap[subscription.status] ?? SubscriptionStatus.incomplete;
+
+    // Stripe uses snake_case here
     const periodStart =
-      subscription.current_period_start != null
-        ? new Date(subscription.current_period_start * 1000)
+      subscription.start_date != null
+        ? new Date(subscription.start_date * 1000)
         : null;
+
     const periodEnd =
-      subscription.current_period_end != null
-        ? new Date(subscription.current_period_end * 1000)
+      subscription.ended_at != null
+        ? new Date(subscription.ended_at * 1000)
         : null;
 
     const subscriptionData = {
@@ -95,7 +106,7 @@ export async function POST(req: NextRequest) {
       status: prismaStatus,
       currentPeriodStart: periodStart,
       currentPeriodEnd: periodEnd,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      cancelAtPeriodEnd: subscription.ended_at !== null,
     };
 
     // Upsert the subscription
@@ -105,21 +116,22 @@ export async function POST(req: NextRequest) {
       create: {
         ...subscriptionData,
         stripeSubscriptionId: subscription.id,
-        ...(user ? { userId: user.id } : {}),
+        user: { connect: { id: user.id } },
       },
     });
 
-    // Update user's plan if user exists
-    if (user) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { plan },
-      });
-    }
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { plan },
+    });
 
-    return NextResponse.json({ success: true, subscription: userSubscription });
+    return NextResponse.json({
+      success: true,
+      subscription: userSubscription,
+    });
   } catch (err) {
     console.error("Stripe checkout verification error:", err);
+
     return NextResponse.json(
       { error: "Failed to verify checkout session" },
       { status: 500 },
