@@ -177,9 +177,6 @@ export default function CreateCard() {
 
         <div className="flex flex-col xs:flex-row sm:flex-row sm:items-center gap-3">
           <span className="text-sm text-muted-taupe">Creating a card</span>
-          <button className="text-sm text-muted-taupe border border-[#E8DDD0] px-4 py-1.5 rounded-full hover:border-terracotta hover:text-terracotta transition-all w-fit">
-            Save draft
-          </button>
         </div>
       </nav>
 

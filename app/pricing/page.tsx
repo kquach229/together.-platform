@@ -264,10 +264,6 @@ export default function Pricing() {
         <div className="absolute w-[480px] h-[480px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-24 -left-32 opacity-60 pointer-events-none" />
         <div className="absolute w-[380px] h-[380px] rounded-full bg-[radial-gradient(circle,#EEF3EE_0%,transparent_70%)] -bottom-16 -right-16 opacity-50 pointer-events-none" />
         <div className="relative z-10 max-w-[640px] mx-auto">
-          <div className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-medium tracking-[2px] uppercase text-[#D4845A] border border-[#EDD5C5] rounded-full px-3 sm:px-4 py-2 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#D4845A]" />
-            Simple, honest pricing
-          </div>
           <h1 className="font-playfair text-[clamp(34px,8vw,64px)] leading-[1.05] tracking-[-2px] mb-4">
             Start free.
             <br />

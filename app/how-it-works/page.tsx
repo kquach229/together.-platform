@@ -341,10 +341,6 @@ export default function HowItWorks() {
         <div className="absolute w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-32 -left-40 opacity-70 pointer-events-none" />
         <div className="absolute w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,#EEF3EE_0%,transparent_70%)] -bottom-20 -right-24 opacity-60 pointer-events-none" />
         <div className="relative z-10 max-w-[680px] mx-auto">
-          <div className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[2px] uppercase text-terracotta border border-[#EDD5C5] rounded-full px-4 py-2 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-terracotta" />
-            How it works
-          </div>
           <h1 className="font-playfair text-[clamp(44px,6vw,72px)] leading-[1.03] tracking-[-2.5px] mb-5">
             From idea to <em className="text-terracotta">delivered</em>
             <br />
