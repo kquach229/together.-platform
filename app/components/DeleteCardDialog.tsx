@@ -41,6 +41,7 @@ const DeleteCardDialog = ({
           Cancel
         </ReusableButton>
         <ReusableButton
+          style={{ backgroundColor: "#EF4444", color: "white" }}
           onClick={() => handleDelete(cardId, router, onOpenChange)}
         >
           Delete
