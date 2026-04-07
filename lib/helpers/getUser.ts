@@ -6,6 +6,7 @@ type IncludeOptions = {
   cards?: boolean;
   notifications?: boolean;
   signatures?: boolean;
+  userSubscription?: boolean;
 };
 
 export async function getUser(include: IncludeOptions = {}) {
@@ -17,18 +18,21 @@ export async function getUser(include: IncludeOptions = {}) {
   if (include.cards) includeObj.cards = true;
   if (include.notifications) includeObj.notifications = true;
   if (include.signatures) includeObj.signatures = true;
+  if (include.userSubscription) includeObj.userSubscription = true;
 
-  // Get the user record from Prisma
-  let user = await prisma.user.findUnique({
+  // Fetch from Prisma
+  const user = await prisma.user.findUnique({
     where: { clerkId: clerkUser.id },
     include: includeObj,
   });
 
   if (!user) return null;
 
-  // Merge in Clerk fields for firstName, lastName, email
-  // redeploy
+  // Merge Clerk fields
   return {
     ...user,
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+    email: clerkUser.emailAddresses[0]?.emailAddress || "",
   };
 }

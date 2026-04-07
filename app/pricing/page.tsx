@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getUser } from "@/lib/helpers/getUser";
 import { useUser } from "@clerk/nextjs";
 
 interface Feature {
@@ -60,8 +59,6 @@ const faqs = [
   },
 ];
 
-const logos = ["STRIPE", "NOTION", "FIGMA", "VERCEL", "LINEAR", "LOOM"];
-
 export default function Pricing() {
   const router = useRouter();
   const { isLoaded, user } = useUser();
@@ -71,6 +68,7 @@ export default function Pricing() {
   const [prices, setPrices] = useState<DbPrice[]>([]);
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
   const [loadingPrices, setLoadingPrices] = useState(true);
+  const [dbUser, setDbUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchPrices = async () => {
