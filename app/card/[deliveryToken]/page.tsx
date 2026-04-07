@@ -41,11 +41,6 @@ export default async function CardPage({ params }: Props) {
     },
   });
 
-  // Card not found or not yet delivered — show 404
-  //   if (!card || card.status !== "delivered") {
-  //     notFound();
-  //   }
-
   if (!card) {
     return notFound();
   }
