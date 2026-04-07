@@ -498,11 +498,11 @@ export default function CardDetailView({ card }: Props) {
                               {sig.message}
                             </p>
                             {sig.photoUrl && (
-                              <div className="mt-3 rounded-xl overflow-hidden border border-[#E8DDD0] max-w-[280px]">
+                              <div className="mt-3 rounded-xl overflow-hidden border border-[#E8DDD0] max-w-70">
                                 <img
-                                  src={`https://together-uploads-bucket.s3.us-east-1.amazonaws.com/${sig.photoUrl}`}
+                                  src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${sig.photoUrl}`}
                                   alt={`Photo from ${sig.signerName}`}
-                                  className="w-full h-auto object-cover max-h-[420px]"
+                                  className="w-full h-auto object-cover max-h-105"
                                 />
                               </div>
                             )}
