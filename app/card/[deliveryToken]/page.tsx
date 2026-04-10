@@ -47,6 +47,6 @@ export default async function CardPage({ params }: Props) {
 
   // Log the view (fire and forget — don't block rendering)
   prisma.cardView.create({ data: { cardId: card.id } }).catch(() => {});
-
+  console.log(`creator photo url from page.tsx: ${card.creatorPhotoUrl}`);
   return <RecipientView card={card} />;
 }
