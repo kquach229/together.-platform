@@ -624,15 +624,15 @@ export default function SignView({ card, signingToken }: Props) {
           )}
 
           {/* Share nudge */}
-          <p className="text-xs text-[#8C7B6B] text-center font-light leading-[1.7]">
-            <div>Know someone else who'd want to sign?</div>
+          <div className="text-xs text-[#8C7B6B] text-center font-light leading-[1.7]">
+            <p>Know someone else who'd want to sign?</p>
             <button
               onClick={handleCopyLink}
               className="text-terracotta font-medium hover:underline bg-transparent border-none cursor-pointer p-0"
             >
               {linkCopied ? "Link copied!" : "Share the link →"}
             </button>
-          </p>
+          </div>
         </div>
       </div>
     </div>

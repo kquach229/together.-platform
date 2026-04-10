@@ -185,21 +185,6 @@ export default function EditCardPanel({
             />
           </div>
 
-          {/* Recipient email */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Recipient's email
-              <span className="text-terracotta">*</span>
-            </label>
-            <input
-              type="email"
-              value={recipientEmail}
-              onChange={(e) => setRecipientEmail(e.target.value)}
-              placeholder="sarah@example.com"
-              className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD]"
-            />
-          </div>
-
           {/* Opening message */}
           <div>
             <label className="block text-sm font-medium mb-2">
