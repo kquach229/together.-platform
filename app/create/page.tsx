@@ -354,7 +354,7 @@ export default function CreateCard() {
                     </p>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium mb-2">
                       Recipient's email
                       <span className="text-muted-taupe font-light ml-2">
@@ -368,7 +368,7 @@ export default function CreateCard() {
                       placeholder="sarah@example.com"
                       className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD]"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             )}
