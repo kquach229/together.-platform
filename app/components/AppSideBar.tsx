@@ -14,6 +14,7 @@ import {
 import { UserButton } from "@clerk/nextjs";
 import {
   CreditCardIcon,
+  InfoIcon,
   LayoutDashboardIcon,
   WorkflowIcon,
 } from "lucide-react";
@@ -32,6 +33,11 @@ const navItems = [
     icon: <LayoutDashboardIcon className="w-4 h-4" />,
     label: "Dashboard",
     path: "/dashboard",
+  },
+  {
+    icon: <InfoIcon className="w-4 h-4" />,
+    label: "About",
+    path: "/about",
   },
   {
     icon: <WorkflowIcon className="w-4 h-4" />,

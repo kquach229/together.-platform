@@ -137,20 +137,24 @@ export default function About() {
 
           <div>
             <h2 className="font-playfair text-[32px] tracking-tight mb-5">
-              It started with a farewell card that almost didn't happen.
+              Built to make group cards simple for teams and personal moments.
             </h2>
+
             <p className="text-[15px] text-[#8C7B6B] font-light leading-[1.85] mb-5">
-              In 2022, a team of remote workers scrambled to put together
-              something meaningful for a colleague who was leaving. They tried
-              Google Docs, shared folders, email chains. It was chaotic, someone
-              spoiled the surprise, and the final result felt like an
-              afterthought.
+              The idea came from a common problem in both remote teams and
+              personal groups: creating a meaningful farewell, birthday, or
+              celebration card often turns into a messy coordination process.
+              People end up using Google Docs, email threads, and chat messages,
+              which can lead to missed contributions and a rushed final result.
             </p>
+
             <p className="text-[15px] text-[#8C7B6B] font-light leading-[1.85]">
-              So they built the tool they wished existed — something that makes
-              it genuinely easy to organise a group card, collect real messages
-              from real people, and deliver it at just the right moment. That
-              tool became Together.
+              Together brings everything into one place so anyone can collect
+              messages and photos, collaborate easily, and deliver a shared
+              digital card at the right time. It works for workplace moments
+              like team farewells and promotions, as well as personal occasions
+              like birthdays, weddings, and celebrations with friends and
+              family.
             </p>
           </div>
         </div>
@@ -181,128 +185,6 @@ export default function About() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* TIMELINE */}
-      <section className="max-w-[680px] mx-auto px-8 py-24">
-        <p className="text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3 text-center">
-          How we got here
-        </p>
-        <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-14">
-          A brief history
-        </h2>
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-[52px] top-0 bottom-0 w-px bg-[#E8DDD0]" />
-          <div className="flex flex-col gap-10">
-            {timeline.map((item, i) => (
-              <div key={i} className="flex gap-6 items-start">
-                <div className="shrink-0 w-[52px] text-right">
-                  <span className="text-sm font-medium text-terracotta">
-                    {item.year}
-                  </span>
-                </div>
-                {/* Dot */}
-                <div className="shrink-0 w-3 h-3 rounded-full bg-terracotta border-2 border-[#FDF8F2] mt-1 relative z-10" />
-                <p className="text-[15px] text-[#8C7B6B] font-light leading-[1.75] flex-1">
-                  {item.event}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TEAM */}
-      <section className="bg-white border-t border-[#E8DDD0] py-24 px-8">
-        <div className="max-w-[1060px] mx-auto">
-          <p className="text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3 text-center">
-            The people behind it
-          </p>
-          <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-14">
-            Our team
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {team.map((member) => (
-              <div
-                key={member.name}
-                className="flex flex-col items-center text-center gap-4 p-6 rounded-2xl border border-[#E8DDD0]"
-              >
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-lg font-medium font-dm-sans"
-                  style={{
-                    background: member.color.bg,
-                    color: member.color.text,
-                  }}
-                >
-                  {member.initials}
-                </div>
-                <div>
-                  <div className="font-medium text-sm">{member.name}</div>
-                  <div className="text-xs text-[#8C7B6B] font-light mt-1">
-                    {member.role}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-sm text-[#8C7B6B] font-light mt-10 max-w-[480px] mx-auto leading-[1.75]">
-            We're a small, remote-first team. We use Together for our own
-            milestones — which means we feel every bug and every improvement
-            personally.
-          </p>
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section className="bg-[#1A1208] py-20 px-8">
-        <div className="max-w-[1060px] mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#2E2820] rounded-2xl overflow-hidden">
-            {[
-              { number: "500K+", label: "Messages delivered" },
-              { number: "80K+", label: "Cards created" },
-              { number: "150+", label: "Countries" },
-              { number: "4.9★", label: "Average rating" },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="bg-[#1A1208] px-8 py-10 text-center"
-              >
-                <div className="font-playfair text-[clamp(28px,3vw,40px)] tracking-tight text-[#FDF8F2] mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-xs text-[#8C7B6B] font-light tracking-wide uppercase">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-[#FDF8F2] border-t border-[#E8DDD0] py-24 px-8 text-center">
-        <h2 className="font-playfair text-[clamp(28px,4vw,48px)] tracking-tight mb-4">
-          Want to work with us?
-        </h2>
-        <p className="text-[16px] text-[#8C7B6B] font-light leading-[1.75] max-w-[420px] mx-auto mb-10">
-          We're always open to meeting people who care about the same things we
-          do. Drop us a line.
-        </p>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link
-            href="mailto:hello@together.so"
-            className="bg-terracotta text-white px-8 py-3.5 rounded-full text-sm font-medium hover:bg-[#C4734A] transition-colors no-underline"
-          >
-            Say hello →
-          </Link>
-          <Link
-            href="/create"
-            className="border border-[#E8DDD0] text-[#1A1208] px-8 py-3.5 rounded-full text-sm font-medium hover:border-terracotta hover:text-terracotta transition-all no-underline"
-          >
-            Try Together free
-          </Link>
         </div>
       </section>
     </div>
