@@ -308,11 +308,11 @@ export default function SignView({ card, signingToken }: Props) {
             <div>
               {/* Cover photo preview */}
               {card.creatorPhotoUrl && (
-                <div className="w-full h16 overflow-hidden mt-5">
+                <div className="w-full max-h-100 overflow-hidden mt-5">
                   <img
                     src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
                     alt="Cover"
-                    className="w-full h-28 object-cover rounded-xl"
+                    className="w-full h-full object-contain rounded-sm"
                   />
                 </div>
               )}
@@ -457,7 +457,7 @@ export default function SignView({ card, signingToken }: Props) {
                   <img
                     src={photoPreview}
                     alt="Preview"
-                    className="w-full h-auto object-cover max-h-[420px]"
+                    className="w-full h-auto object-cover"
                   />
                   <button
                     onClick={removePhoto}

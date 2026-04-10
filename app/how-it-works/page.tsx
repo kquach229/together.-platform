@@ -24,8 +24,8 @@ const steps = [
   {
     num: "02",
     label: "Invite",
-    title: "Share a link — no accounts needed",
-    desc: "Copy your private signing link and drop it anywhere — Slack, email, WhatsApp. Anyone who clicks it can sign, without creating an account or downloading anything.",
+    title: "Share a link",
+    desc: "Copy your private signing link and drop it anywhere. Anyone who clicks it can sign.",
     detail: [
       "One private link, shareable anywhere",
       "Signers add text messages and optional photos",

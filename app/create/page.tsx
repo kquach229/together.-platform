@@ -412,7 +412,7 @@ export default function CreateCard() {
                       <img
                         src={coverPhotoPreview}
                         alt="Cover preview"
-                        className="w-full max-h-48 object-cover"
+                        className="w-full max-h-48 object-contain"
                       />
                       <div className="absolute top-2 right-2 flex gap-1.5">
                         <button
@@ -671,11 +671,11 @@ export default function CreateCard() {
               </div>
 
               {coverPhotoPreview && (
-                <div className="w-full h-16 overflow-hidden">
+                <div className="overflow-hidden w-full max-h-100">
                   <img
                     src={coverPhotoPreview}
                     alt="Cover"
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-contain"
                   />
                 </div>
               )}
