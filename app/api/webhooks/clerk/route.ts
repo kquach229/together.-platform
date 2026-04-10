@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("Received Clerk webhook, verifying...");
     const evt = await verifyWebhook(req);
     const { id } = evt.data;
     const eventType = evt.type;

@@ -4,7 +4,9 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const user = await getUser();
-  if (!user) return;
+  if (!user) {
+    return NextResponse.json(null, { status: 401 });
+  }
 
   try {
     const subscriptionData = await prisma.userSubscription.findUnique({
