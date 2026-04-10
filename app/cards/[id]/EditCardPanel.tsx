@@ -312,7 +312,6 @@ export default function EditCardPanel({
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-[#E8DDD0] flex gap-3 bg-[#FDF8F2]">
           <button
             type="button"
