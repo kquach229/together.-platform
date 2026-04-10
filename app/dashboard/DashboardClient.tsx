@@ -174,6 +174,12 @@ export default function Dashboard({ user }: { user: User }) {
 
   const router = useRouter();
 
+  const handleCreateCard = () => {
+    if (disableCreate) return;
+
+    router.push("/create");
+  };
+  const disableCreate = user.plan === "free" && user?.lifetimeCardsCreated > 0;
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
       {/* ── MAIN ── */}
@@ -199,8 +205,9 @@ export default function Dashboard({ user }: { user: User }) {
             </div>
 
             <button
-              onClick={() => router.push("/create")}
-              className="flex items-center justify-center gap-2 bg-terracotta text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#C4734A] transition-colors shadow-[0_4px_12px_rgba(212,132,90,0.25)] font-dm-sans border-none cursor-pointer whitespace-nowrap"
+              disabled={disableCreate}
+              onClick={handleCreateCard}
+              className={`flex items-center justify-center gap-2 bg-terracotta text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#C4734A] transition-colors shadow-[0_4px_12px_rgba(212,132,90,0.25)] font-dm-sans border-none cursor-pointer whitespace-nowrap ${disableCreate && "cursor-not-allowed opacity-50 hover:bg-terracotta"}`}
             >
               <span>＋</span> New card
             </button>
@@ -292,8 +299,9 @@ export default function Dashboard({ user }: { user: User }) {
               })}
 
               <button
-                onClick={() => router.push("/create")}
-                className="border-2 border-dashed border-[#E8DDD0] rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-terracotta hover:bg-[#FEF3ED]/30 transition-all group cursor-pointer bg-transparent min-h-[200px]"
+                onClick={handleCreateCard}
+                disabled={disableCreate}
+                className={`border-2 border-dashed border-[#E8DDD0] rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-terracotta hover:bg-[#FEF3ED]/30 transition-all group cursor-pointer bg-transparent min-h-[200px] ${disableCreate && "cursor-not-allowed opacity-50 hover:border-[#E8DDD0] hover:bg-transparent"}`}
               >
                 <div className="w-12 h-12 rounded-full border-2 border-dashed border-[#E8DDD0] group-hover:border-terracotta flex items-center justify-center text-xl text-muted-taupe group-hover:text-terracotta transition-all">
                   ＋

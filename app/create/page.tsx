@@ -1,9 +1,11 @@
 "use client";
 
+import { getUser } from "@/lib/helpers/getUser";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
 import { CARD_THEMES } from "@/lib/theme";
+
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const occasions = [
   { emoji: "🎂", label: "Birthday" },
@@ -41,6 +43,7 @@ export default function CreateCard() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [user, setUser] = useState(null);
   const [step, setStep] = useState(1);
   const [occasion, setOccasion] = useState("Birthday");
   const [occasionEmoji, setOccasionEmoji] = useState("🎂");
@@ -59,6 +62,25 @@ export default function CreateCard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const disableCardCreation =
+    user?.plan === "free" && user?.lifetimeCardsCreated > 0;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user");
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   function handlePhoto(ev: React.ChangeEvent<HTMLInputElement>) {
     const file = ev.target.files?.[0];
@@ -91,10 +113,6 @@ export default function CreateCard() {
     if (step === 2) return recipientName.trim().length > 0;
     if (step === 3) return !!theme;
     return true;
-  }
-
-  function buildS3Url(key: string): string {
-    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
   }
 
   async function handleCreateCard() {
@@ -602,9 +620,11 @@ export default function CreateCard() {
               {step < 4 ? (
                 <button
                   onClick={handleContinue}
-                  disabled={!canProceed() || isSubmitting}
+                  disabled={
+                    !canProceed() || isSubmitting || disableCardCreation
+                  }
                   className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all font-dm-sans whitespace-nowrap ${
-                    canProceed() && !isSubmitting
+                    canProceed() && !isSubmitting && !disableCardCreation
                       ? "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.25)]"
                       : "bg-[#E8DDD0] text-[#C5B8AD] cursor-not-allowed"
                   }`}
