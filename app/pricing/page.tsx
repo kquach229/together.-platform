@@ -32,6 +32,37 @@ interface DbPrice {
   createdAt: string;
 }
 
+interface UserSubscription {
+  id: string;
+  userId: string;
+  stripeSubscriptionId: string;
+  stripePriceId: string;
+  plan: "free" | "plus" | "plus_annual" | "team" | "team_annual";
+  billingInterval: "monthly" | "annual";
+  cancelAtPeriodEnd: boolean;
+  canceledAt: string | null;
+}
+
+// model UserSubscription {
+//   id                   String             @id @default(uuid())
+//   userId               String             @unique
+//   stripeSubscriptionId String             @unique
+//   stripePriceId        String
+//   plan                 Plan
+//   billingInterval      BillingInterval
+//   status               SubscriptionStatus
+//   currentPeriodStart   DateTime?
+//   currentPeriodEnd     DateTime?
+//   cancelledAt          DateTime?
+//   cancelAtPeriodEnd    Boolean            @default(false)
+//   metadata             Json?
+//   createdAt            DateTime           @default(now())
+//   updatedAt            DateTime           @updatedAt
+
+//   // Relations
+//   user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
+// }
+
 const faqs = [
   {
     q: "Do signers need an account?",
@@ -68,7 +99,8 @@ export default function Pricing() {
   const [prices, setPrices] = useState<DbPrice[]>([]);
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
   const [loadingPrices, setLoadingPrices] = useState(true);
-  const [userSubscription, setUserSubscription] = useState(null);
+  const [userSubscription, setUserSubscription] =
+    useState<UserSubscription | null>(null);
 
   useEffect(() => {
     const fetchPrices = async () => {

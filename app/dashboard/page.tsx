@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   // deploy agian
   const formattedUser = {
     ...user,
-    cards: user?.cards.map((card) => ({
+    cards: (user as any)?.cards?.map((card: any) => ({
       ...card,
       createdAt: card.createdAt.toISOString(),
       ...("signingDeadline" in card && {
