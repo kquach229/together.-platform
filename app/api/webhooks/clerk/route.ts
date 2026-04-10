@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       await prisma.userSubscription.create({
         data: {
           userId: user.id,
-          stripeSubscriptionId: "temp-id", // optional placeholder
+          stripeSubscriptionId: "temp-id", // optional place
           stripePriceId: "price_free", //
           plan: "free",
           billingInterval: "monthly",
