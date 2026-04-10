@@ -4,6 +4,7 @@ import Image from "next/image";
 import ReusableButton from "./components/ReusableButton";
 import { ArrowRight, Link, ImagePlus, Send } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const steps = [
   {
@@ -60,6 +61,11 @@ const scaleIn = {
 };
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleCreateCard = () => {
+    router.push("/create");
+  };
   return (
     <div className="font-dm-sans">
       {/* Hero */}
@@ -101,7 +107,10 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.65 }}
             >
-              <ReusableButton style={{ marginTop: 6 }}>
+              <ReusableButton
+                onClick={handleCreateCard}
+                style={{ marginTop: 28, padding: 24 }}
+              >
                 Create Your First Card
                 <ArrowRight />
               </ReusableButton>
@@ -304,7 +313,7 @@ export default function Home() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          <ReusableButton>
+          <ReusableButton onClick={handleCreateCard}>
             Get Started Free
             <ArrowRight />
           </ReusableButton>

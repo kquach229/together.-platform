@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const steps = [
@@ -140,6 +141,7 @@ function CreateMockup() {
 
 function InviteMockup() {
   const [copied, setCopied] = useState(false);
+
   return (
     <div className="bg-white rounded-2xl border border-[#E8DDD0] p-5 shadow-[0_8px_32px_rgba(26,18,8,0.07)]">
       <div className="text-[10px] font-medium tracking-[1.5px] uppercase text-muted-taupe mb-3">
@@ -334,12 +336,18 @@ const mockupMap = {
 export default function HowItWorks() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const router = useRouter();
+
+  const handleCreateCard = () => {
+    router.push("/create");
+  };
+
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] min-h-screen overflow-x-hidden">
       {/* HERO */}
       <section className="relative overflow-hidden px-4 sm:px-8 md:px-12 py-16 sm:py-20 md:py-24 text-center">
         <div className="absolute w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-32 -left-40 opacity-70 pointer-events-none" />
-        <div className="absolute w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,#EEF3EE_0%,transparent_70%)] -bottom-20 -right-24 opacity-60 pointer-events-none" />
+        <div className="absolute w-100 h-100 rounded-full bg-[radial-gradient(circle,#EEF3EE_0%,transparent_70%)] -bottom-20 -right-24 opacity-60 pointer-events-none" />
         <div className="relative z-10 max-w-[680px] mx-auto">
           <h1 className="font-playfair text-[clamp(44px,6vw,72px)] leading-[1.03] tracking-[-2.5px] mb-5">
             From idea to <em className="text-terracotta">delivered</em>
@@ -351,11 +359,11 @@ export default function HowItWorks() {
             and the people signing.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <button className="bg-terracotta text-white px-6 sm:px-8 py-3.5 rounded-full text-sm font-medium shadow-[0_6px_20px_rgba(212,132,90,0.3)] hover:bg-[#C4734A] transition-all border-none cursor-pointer font-dm-sans w-full sm:w-auto">
+            <button
+              onClick={handleCreateCard}
+              className="bg-terracotta text-white px-6 sm:px-8 py-3.5 rounded-full text-sm font-medium shadow-[0_6px_20px_rgba(212,132,90,0.3)] hover:bg-[#C4734A] transition-all border-none cursor-pointer font-dm-sans w-full sm:w-auto"
+            >
               Create your first card
-            </button>
-            <button className="bg-transparent text-[#1A1208] px-6 sm:px-7 py-3.5 rounded-full text-sm border border-[#E8DDD0] hover:border-terracotta hover:text-terracotta transition-all cursor-pointer font-dm-sans w-full sm:w-auto">
-              See an example →
             </button>
           </div>
         </div>
@@ -568,7 +576,10 @@ export default function HowItWorks() {
           <p className="text-[16px] sm:text-[17px] text-white/75 mb-7 sm:mb-9 font-light">
             Create your first card in 60 seconds — it's free.
           </p>
-          <button className="bg-[#FDF8F2] text-terracotta px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-[14px] sm:text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity font-dm-sans border-none cursor-pointer w-full sm:w-auto">
+          <button
+            onClick={handleCreateCard}
+            className="bg-[#FDF8F2] text-terracotta px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-[14px] sm:text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity font-dm-sans border-none cursor-pointer w-full sm:w-auto"
+          >
             Create your first card →
           </button>
           <p className="text-xs text-white/50 mt-4">
