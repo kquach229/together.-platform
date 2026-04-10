@@ -68,7 +68,7 @@ export default function Pricing() {
   const [prices, setPrices] = useState<DbPrice[]>([]);
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
   const [loadingPrices, setLoadingPrices] = useState(true);
-  const [dbUser, setDbUser] = useState<any>(null);
+  const [userSubscription, setUserSubscription] = useState(null);
 
   useEffect(() => {
     const fetchPrices = async () => {
@@ -93,6 +93,24 @@ export default function Pricing() {
 
     fetchPrices();
   }, []);
+
+  useEffect(() => {
+    const fetchUserSubscription = async () => {
+      try {
+        const response = await fetch("/api/user_subscription", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+        setUserSubscription(data);
+      } catch (error) {
+        console.error("Error fetching user subscription:", error);
+      }
+    };
+
+    fetchUserSubscription();
+  }, [user, isLoaded]);
 
   const priceMap = useMemo(() => {
     return {
@@ -255,6 +273,8 @@ export default function Pricing() {
     },
   ];
 
+  console.log("User subscription:", userSubscription);
+
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
       {/* ── HERO ── */}
@@ -315,6 +335,22 @@ export default function Pricing() {
                   : `$${formatPrice(plan.annualPrice)}`;
 
             const isLoading = loadingCheckout === plan.name;
+
+            const getBasePlan = (plan?: string | null) => {
+              if (!plan) return null;
+
+              if (plan.includes("plus")) return "plus";
+              if (plan.includes("team")) return "team";
+              return "free";
+            };
+
+            const currentPlan = getBasePlan(userSubscription?.plan);
+
+            const isCurrentPlan = (planName: Plan["name"]) => {
+              if (!currentPlan) return false;
+
+              return currentPlan === planName.toLowerCase();
+            };
 
             return (
               <div
@@ -390,18 +426,23 @@ export default function Pricing() {
 
                 <button
                   onClick={() => handlePlanClick(plan.name)}
-                  disabled={isLoading || loadingPrices}
-                  type="submit"
-                  role="link"
-                  className={`w-full py-3 rounded-full text-sm font-medium font-dm-sans transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                  disabled={
+                    isLoading || loadingPrices || isCurrentPlan(plan.name)
+                  }
+                  type="button"
+                  className={`w-full py-3 rounded-full text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                     plan.ctaStyle === "primary"
-                      ? "bg-[#D4845A] text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.3)]"
+                      ? "bg-[#D4845A] text-white"
                       : plan.ctaStyle === "dark"
-                        ? "bg-[#1A1208] text-[#FDF8F2] hover:opacity-85"
-                        : "border border-[#E8DDD0] text-[#1A1208] hover:border-[#D4845A] hover:text-[#D4845A] bg-transparent"
+                        ? "bg-[#1A1208] text-[#FDF8F2]"
+                        : "border border-[#E8DDD0]"
                   }`}
                 >
-                  {isLoading ? "Redirecting..." : plan.cta}
+                  {isCurrentPlan(plan.name)
+                    ? "Current plan"
+                    : isLoading
+                      ? "Redirecting..."
+                      : plan.cta}
                 </button>
               </div>
             );
