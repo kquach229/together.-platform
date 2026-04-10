@@ -305,8 +305,6 @@ export default function Pricing() {
     },
   ];
 
-  console.log("User subscription:", userSubscription);
-
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
       {/* ── HERO ── */}
