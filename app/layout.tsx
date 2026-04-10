@@ -5,8 +5,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSideBar from "./components/AppSideBar";
-import ReusableDialog from "./components/ReusableDialog";
 
 const dmSans = localFont({
   src: "../public/dmsans.ttf",
@@ -40,9 +38,7 @@ export default function RootLayout({
               <div className="block md:hidden h-16 p-5">
                 <SidebarTrigger />
               </div>
-
               <Navbar />
-
               {children}
               <Footer />
             </div>
