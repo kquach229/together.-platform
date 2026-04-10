@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("Received Clerk webhook, verifying...");
     const evt = await verifyWebhook(req);
     const { id } = evt.data;
     const eventType = evt.type;
@@ -27,45 +26,13 @@ export async function POST(req: NextRequest) {
       await prisma.userSubscription.create({
         data: {
           userId: user.id,
-          stripeSubscriptionId: "temp-id", // optional place
-          stripePriceId: "price_free", //
+          stripeSubscriptionId: "temp-id", // optional placeholder
+          stripePriceId: "price_free", // default free plan price ID
           plan: "free",
           billingInterval: "monthly",
           status: "active",
         },
       });
-    }
-
-    return new Response("Webhook received", { status: 200 });
-  } catch (err) {
-    console.error("Error verifying webhook:", err);
-    return new Response("Error verifying webhook", { status: 400 });
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  try {
-    const evt = await verifyWebhook(req);
-    const { id } = evt.data;
-    const eventType = evt.type;
-    console.log(
-      `Received webhook with ID ${id} and event type of ${eventType}`,
-    );
-
-    if (eventType === "user.deleted") {
-      const user = await prisma.user.findUnique({
-        where: { clerkId: id },
-      });
-
-      if (user) {
-        await prisma.userSubscription.deleteMany({
-          where: { userId: user.id },
-        });
-
-        await prisma.user.delete({
-          where: { id: user.id },
-        });
-      }
     }
 
     return new Response("Webhook received", { status: 200 });
