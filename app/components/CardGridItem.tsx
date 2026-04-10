@@ -37,7 +37,7 @@ const CardGridItem = ({
     delete: () => setOpenDialog(true),
     copy: () =>
       navigator.clipboard.writeText(
-        `http://localhost:3000/sign/${card.signingToken}`,
+        `http://${window.location.origin}/sign/${card.signingToken}`,
       ),
   } as const;
 
