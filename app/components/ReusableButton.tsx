@@ -2,6 +2,7 @@ interface ReusableButtonProps {
   children: React.ReactNode;
   style?: React.CSSProperties;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 import { Button } from "@/components/ui/button";

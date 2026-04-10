@@ -5,6 +5,7 @@ import DeleteCardDialog from "./DeleteCardDialog";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Image } from "lucide-react";
+import DeliverCardDialog from "./DeliverCardDialog";
 
 interface CardGridItemProps {
   card: any;
@@ -29,12 +30,13 @@ const CardGridItem = ({
   setMenuOpen,
   status,
 }: CardGridItemProps) => {
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openDeliverDialog, setOpenDeliverDialog] = useState(false);
   const router = useRouter();
 
   const actions = {
     view: () => router.push(`/cards/${card.id}`),
-    delete: () => setOpenDialog(true),
+    delete: () => setOpenDeleteDialog(true),
     copy: () =>
       navigator.clipboard.writeText(
         `http://${window.location.origin}/sign/${card.signingToken}`,
@@ -140,7 +142,10 @@ const CardGridItem = ({
         <div className="flex gap-2">
           {card.status === "collecting" && (
             <>
-              <button className="flex-1 py-2 rounded-full text-xs font-medium bg-terracotta text-white hover:bg-[#C4734A] transition-colors font-dm-sans border-none cursor-pointer">
+              <button
+                onClick={() => setOpenDeliverDialog(true)}
+                className="flex-1 py-2 rounded-full text-xs font-medium bg-terracotta text-white hover:bg-[#C4734A] transition-colors font-dm-sans border-none cursor-pointer"
+              >
                 Deliver card
               </button>
             </>
@@ -156,9 +161,15 @@ const CardGridItem = ({
         </div>
       </div>
       <DeleteCardDialog
-        open={openDialog}
-        onOpenChange={setOpenDialog}
+        open={openDeleteDialog}
+        onOpenChange={setOpenDeleteDialog}
         cardId={card.id}
+      />
+      {console.log("Rendering DeliverCardDialog with card:", card)}
+      <DeliverCardDialog
+        open={openDeliverDialog}
+        onOpenChange={setOpenDeliverDialog}
+        card={card}
       />
     </div>
   );
