@@ -143,9 +143,6 @@ const CardGridItem = ({
               <button className="flex-1 py-2 rounded-full text-xs font-medium bg-terracotta text-white hover:bg-[#C4734A] transition-colors font-dm-sans border-none cursor-pointer">
                 Deliver card
               </button>
-              <button className="py-2 px-3 rounded-full text-xs font-medium border border-[#E8DDD0] text-muted-taupe hover:border-terracotta hover:text-terracotta transition-all font-dm-sans cursor-pointer bg-white">
-                Copy link
-              </button>
             </>
           )}
           {card.status === "delivered" && (

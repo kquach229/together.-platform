@@ -98,6 +98,7 @@ export default function SignView({ card, signingToken }: Props) {
   const [screen, setScreen] = useState<Screen>("form");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const MAX_CHARS = 300;
   const theme = themes[card.theme] ?? themes.warm;
@@ -135,6 +136,14 @@ export default function SignView({ card, signingToken }: Props) {
       errs.message = `Message must be ${MAX_CHARS} characters or less.`;
     return errs;
   }
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(
+      `${window.location.origin}/sign/${signingToken}`,
+    );
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 3000);
+  };
 
   async function handleSubmit() {
     const errs = validate();
@@ -616,16 +625,12 @@ export default function SignView({ card, signingToken }: Props) {
 
           {/* Share nudge */}
           <p className="text-xs text-[#8C7B6B] text-center font-light leading-[1.7]">
-            Know someone else who'd want to sign?{" "}
+            <div>Know someone else who'd want to sign?</div>
             <button
-              onClick={() => {
-                navigator.clipboard
-                  .writeText(window.location.href)
-                  .catch(() => {});
-              }}
+              onClick={handleCopyLink}
               className="text-terracotta font-medium hover:underline bg-transparent border-none cursor-pointer p-0"
             >
-              Copy this link
+              {linkCopied ? "Link copied!" : "Share the link →"}
             </button>
           </p>
         </div>
