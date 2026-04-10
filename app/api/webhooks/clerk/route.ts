@@ -35,6 +35,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (eventType === "user.deleted") {
+      const { id } = evt.data;
+      await prisma.user.delete({
+        where: { clerkId: id },
+      });
+    }
+
     return new Response("Webhook received", { status: 200 });
   } catch (err) {
     console.error("Error verifying webhook:", err);
