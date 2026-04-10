@@ -77,7 +77,7 @@ const CardGridItem = ({
             <div className="absolute right-0 top-8 bg-white border border-[#E8DDD0] rounded-xl shadow-lg z-20 min-w-[140px] py-1 overflow-hidden">
               {[
                 { key: "view" as const, label: "View card" },
-                { key: "copy" as const, label: "Copy link" },
+
                 { key: "delete" as const, label: "Delete" },
               ].map((action) => (
                 <button

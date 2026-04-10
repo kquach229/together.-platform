@@ -237,17 +237,13 @@ export default function RecipientView({ card }: Props) {
           </div>
         </div>
       </div>
-
-      <div>
-        {/* Cover photo preview */}
+      <div className="w-full h-[70vh] overflow-hidden">
         {card.creatorPhotoUrl && (
-          <div className="w-full max-h-100 flex items-center justify-center bg-[#F5F4F2] overflow-hidden">
-            <img
-              src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
-              alt="Cover"
-              className="w-full h-auto object-contain"
-            />
-          </div>
+          <img
+            src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
+            alt="Cover"
+            className="w-full h-full object-cover object-[center_30%] rounded-br-sm rounded-bl-sm"
+          />
         )}
       </div>
 
