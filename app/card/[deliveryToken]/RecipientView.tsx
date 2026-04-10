@@ -109,7 +109,6 @@ export default function RecipientView({ card }: Props) {
 
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] min-h-screen overflow-x-hidden">
-      {/* NAV */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-12 h-16 bg-[rgba(253,248,242,0.92)] backdrop-blur-md border-b border-[#E8DDD0]">
         <a
           href="/"
