@@ -39,11 +39,16 @@ const themes = [
 ] as const;
 type Theme = (typeof themes)[number];
 
+interface User {
+  plan: "free" | "plus" | "pro";
+  lifetimeCardsCreated: number;
+}
+
 export default function CreateCard() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [step, setStep] = useState(1);
   const [occasion, setOccasion] = useState("Birthday");
   const [occasionEmoji, setOccasionEmoji] = useState("🎂");

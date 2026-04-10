@@ -179,7 +179,8 @@ export default function Dashboard({ user }: { user: User }) {
 
     router.push("/create");
   };
-  const disableCreate = user.plan === "free" && user?.lifetimeCardsCreated > 0;
+  const disableCreate =
+    user.plan === "free" && (user?.lifetimeCardsCreated ?? 0) > 0;
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
       {/* ── MAIN ── */}

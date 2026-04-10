@@ -23,56 +23,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      import { verifyWebhook } from "@clerk/nextjs/webhooks";
-      import { NextRequest } from "next/server";
-      import prisma from "@/lib/prisma";
-
-      export async function POST(req: NextRequest) {
-        try {
-          const evt = await verifyWebhook(req);
-          const { id } = evt.data;
-          const eventType = evt.type;
-          console.log(
-            `Received webhook with ID ${id} and event type of ${eventType}`,
-          );
-
-          if (eventType === "user.created") {
-            const { id, email_addresses, first_name, last_name } = evt.data;
-            const user = await prisma.user.upsert({
-              where: { clerkId: id },
-              update: {},
-              create: {
-                clerkId: id,
-                email: email_addresses[0].email_address,
-                name: `${first_name} ${last_name}`,
-              },
-            });
-
-            await prisma.userSubscription.create({
-              data: {
-                userId: user.id,
-                stripeSubscriptionId: "temp-id", // optional placeholder
-                stripePriceId: "price_free", // default free plan price ID
-                plan: "free",
-                billingInterval: "monthly",
-                status: "active",
-              },
-            });
-          }
-
-          if (eventType === "user.deleted") {
-            const { id } = evt.data;
-            await prisma.user.delete({
-              where: { clerkId: id },
-            });
-          }
-
-          return new Response("Webhook received", { status: 200 });
-        } catch (err) {
-          console.error("Error verifying webhook:", err);
-          return new Response("Error verifying webhook", { status: 400 });
-        }
-      }
+      await prisma.userSubscription.upsert({
+        where: {
+          userId: user.id, // must be UNIQUE in schema
+        },
+        update: {},
+        create: {
+          userId: user.id,
+          stripeSubscriptionId: "temp-id",
+          stripePriceId: "price_free",
+          plan: "free",
+          billingInterval: "monthly",
+          status: "active",
+        },
+      });
     }
 
     if (eventType === "user.deleted") {

@@ -165,7 +165,6 @@ const CardGridItem = ({
         onOpenChange={setOpenDeleteDialog}
         cardId={card.id}
       />
-      {console.log("Rendering DeliverCardDialog with card:", card)}
       <DeliverCardDialog
         open={openDeliverDialog}
         onOpenChange={setOpenDeliverDialog}
