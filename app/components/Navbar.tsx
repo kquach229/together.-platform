@@ -1,14 +1,13 @@
 import LogoComponent from "./LogoComponent";
 import { Separator } from "@/components/ui/separator";
-import { Show, UserAvatar, UserButton } from "@clerk/nextjs";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { get } from "http";
+import { Show, UserButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import SignUpButton from "./SignUpButton";
 import AppSideBar from "./AppSideBar";
 
 const Navbar = async () => {
-  const navItems = ["Dashboard", "How it works", "Pricing"];
+  const navItems = ["Dashboard", "About", "How it works", "Pricing"];
   const clerkUser = await currentUser();
 
   // Only pick plain object properties

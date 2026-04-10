@@ -1,11 +1,36 @@
-import { ArrowRight, Mail, Instagram, Twitter, Facebook } from "lucide-react";
+import { link } from "fs";
 import Link from "next/link";
 
-const footerLinks = {
-  Product: ["How it Works", "Occasions", "Pricing", "Examples"],
-  Company: ["About", "Blog", "Careers", "Press"],
-  Support: ["Help Center", "Contact Us", "Privacy Policy", "Terms of Service"],
-};
+const footerLinks = [
+  {
+    heading: "Product",
+    links: [
+      { label: "How it works", href: "/how-it-works" },
+      { label: "Occasions", href: "/occasions" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "For Teams", href: "/for-teams" },
+      { label: "Examples", href: "/examples" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Blog", href: "/blog" },
+      { label: "Careers", href: "/careers" },
+      { label: "Press", href: "/press" },
+    ],
+  },
+  {
+    heading: "Support",
+    links: [
+      { label: "Help centre", href: "/help-center" },
+      { label: "Contact us", href: "/contact-us" },
+      { label: "Privacy policy", href: "/privacy-policy" },
+      { label: "Terms of service", href: "/terms-of-service" },
+    ],
+  },
+];
 
 export default function Footer() {
   return (
@@ -21,33 +46,20 @@ export default function Footer() {
               occasion, every team, every moment.
             </p>
           </div>
-          {Object.entries({
-            Product: [
-              "How it works",
-              "Occasions",
-              "Pricing",
-              "For Teams",
-              "Examples",
-            ],
-            Company: ["About", "Blog", "Careers", "Press"],
-            Support: [
-              "Help centre",
-              "Contact us",
-              "Privacy policy",
-              "Terms of service",
-            ],
-          }).map(([heading, links]) => (
-            <div key={heading}>
+          {footerLinks.map((section) => (
+            <div key={section.heading}>
               <h5 className="text-[11px] font-bold tracking-[1.5px] uppercase text-[#8A7F74] mb-4">
-                {heading}
+                {section.heading}
               </h5>
-              {links.map((l) => (
-                <a
-                  key={l}
-                  className="block text-sm text-[#6A635D] mb-2.5 cursor-pointer hover:text-terracotta transition-colors no-underline"
+
+              {section.links.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="block text-sm text-[#8A7F74] hover:text-terracotta transition-colors mb-2 no-underline"
                 >
-                  {l}
-                </a>
+                  {link.label}
+                </Link>
               ))}
             </div>
           ))}

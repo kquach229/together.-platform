@@ -132,7 +132,7 @@ export default function Dashboard({ user }: { user: User }) {
     signers: card.signerCount,
     cardTheme: card.theme,
     signingDeadline: card.signingDeadline,
-
+    creatorPhotoUrl: card.creatorPhotoUrl,
     deliveredOn: card.deliveredAt
       ? new Date(card.deliveredAt).toLocaleDateString()
       : null,

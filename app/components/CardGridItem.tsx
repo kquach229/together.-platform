@@ -4,6 +4,7 @@ import { useState } from "react";
 import DeleteCardDialog from "./DeleteCardDialog";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import { Image } from "lucide-react";
 
 interface CardGridItemProps {
   card: any;
@@ -90,6 +91,11 @@ const CardGridItem = ({
             </div>
           )}
         </div>
+        {card.creatorPhotoUrl && (
+          <div className="absolute right-3 bottom-2">
+            <Image className="h-5 w-full text-muted-taupe" />
+          </div>
+        )}
       </div>
 
       {/* Body */}

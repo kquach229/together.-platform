@@ -400,29 +400,6 @@ export default function RecipientView({ card }: Props) {
           </p>
         </div>
       </div>
-
-      {/* FOOTER */}
-      <footer className="bg-[#1A1208] px-12 pt-12 pb-8">
-        <div className="max-w-[1060px] mx-auto flex items-center justify-between flex-wrap gap-6">
-          <div className="font-playfair text-xl text-[#FDF8F2]">
-            together<span className="text-terracotta">.</span>
-          </div>
-          <p className="text-xs text-[#6A635D]">
-            © {new Date().getFullYear()} Together. All rights reserved.
-          </p>
-          <div className="flex gap-5">
-            {["Privacy policy", "Terms of service", "Help centre"].map((l) => (
-              <a
-                key={l}
-                href="#"
-                className="text-xs text-[#6A635D] hover:text-[#FDF8F2] transition-colors no-underline"
-              >
-                {l}
-              </a>
-            ))}
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
