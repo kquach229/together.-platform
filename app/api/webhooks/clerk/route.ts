@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: user.id,
           stripeSubscriptionId: "temp-id", // optional placeholder
-          stripePriceId: "price_free", // default free plan price ID
+          stripePriceId: "price_free", //
           plan: "free",
           billingInterval: "monthly",
           status: "active",
