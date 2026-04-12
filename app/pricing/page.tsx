@@ -103,19 +103,25 @@ export default function Pricing() {
     return { saved, pct };
   }
 
-  const handlePlanClick = async (packSize: CardPackPrice) => {
+  const handlePlanClick = async (
+    packSize:
+      | CardPackPrice
+      | Omit<CardPackPrice, "id" | "stripePriceId" | "active">,
+  ) => {
     if (!user && isLoaded) {
       router.push("/dashboard");
       return;
     }
 
-    if (!packSize?.stripePriceId) {
+    if (!("stripePriceId" in packSize) || !packSize.stripePriceId) {
       alert("Pricing is not available right now. Please try again.");
       return;
     }
 
     try {
-      setLoadingCheckout(packSize);
+      setLoadingCheckout(
+        "stripePriceId" in packSize ? packSize.stripePriceId : "",
+      );
 
       const response = await fetch("/api/checkout_sessions", {
         method: "POST",
@@ -123,7 +129,7 @@ export default function Pricing() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: packSize.stripePriceId,
+          priceId: "stripePriceId" in packSize ? packSize.stripePriceId : "",
           mode: "payment",
         }),
       });
