@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -12,24 +7,209 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id                   String             @id @default(uuid())
+  email                String             @unique
+  name                 String
+  plan                 Plan               @default(free)
+  stripeCustomerId     String?            @unique
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  clerkId              String?            @unique
+  lifetimeCardsCreated Int                @default(0)
+  cardsRemaining       Int                @default(0)
+  cards                Card[]
+  cardBalanceEvents    CardBalanceEvent[]
+  cardPurchases        CardPurchase[]
+  notifications        Notification[]
+  signatures           Signature[]
+  subscription         UserSubscription?  @relation("UserSubscription")
+}
 
-// =============================================================
-// ENUMS
-// =============================================================
+model Card {
+  id                  String             @id @default(uuid())
+  occasion            String
+  recipientName       String
+  recipientEmail      String?
+  openingMessage      String?
+  signingDeadline     DateTime?
+  theme               String             @default("warm")
+  status              String             @default("collecting")
+  creatorId           String
+  scheduledDeliveryAt DateTime?
+  deliveredAt         DateTime?
+  signerCount         Int                @default(0)
+  signingToken        String             @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex'::text)")) @map("signing_token")
+  deliveryToken       String             @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex'::text)")) @map("delivery_token")
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  creatorPhotoUrl     String?
+  creator             User               @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  cardBalanceEvents   CardBalanceEvent[]
+  views               CardView[]
+  notifications       Notification[]
+  signatures          Signature[]
+}
+
+model Signature {
+  id          String   @id @default(uuid())
+  userId      String?
+  isHidden    Boolean  @default(false)
+  cardId      String
+  signerName  String
+  signerEmail String?
+  message     String
+  photoUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@unique([cardId, userId])
+}
+
+model CardView {
+  id              String   @id @default(uuid())
+  cardId          String
+  viewerIp        String?
+  viewerUserAgent String?
+  viewedAt        DateTime @default(now())
+  card            Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  cardId    String?
+  type      String
+  payload   Json?
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  card      Card?     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserSubscription {
+  id                   String             @id @default(uuid())
+  userId               String             @unique
+  stripeSubscriptionId String             @unique
+  stripePriceId        String
+  plan                 Plan
+  billingInterval      BillingInterval
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelledAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  cancelAtPeriodEnd    Boolean            @default(false)
+  metadata             Json?
+  user                 User               @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PlanLimit {
+  plan               Plan    @id
+  cardsPerMonth      Int?
+  signersPerCard     Int?
+  photoUploads       Boolean @default(false)
+  pdfDownload        Boolean @default(false)
+  scheduledDelivery  Boolean @default(false)
+  teamDashboard      Boolean @default(false)
+  customBranding     Boolean @default(false)
+  slackIntegration   Boolean @default(false)
+  prioritySupport    Boolean @default(false)
+  premiumThemes      Boolean @default(false)
+  analyticsDashboard Boolean @default(false)
+  cardStorageHours   Int?
+
+  @@map("plan_limits")
+}
+
+model Price {
+  id              String          @id @default(uuid())
+  plan            Plan
+  billingInterval BillingInterval
+  stripePriceId   String          @unique
+  amountCents     Int
+  currency        String          @default("usd")
+  active          Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+
+  @@unique([plan, billingInterval])
+}
+
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model CardBalanceEvent {
+  id         String               @id @default(uuid())
+  userId     String
+  type       CardBalanceEventType
+  delta      Int
+  note       String?
+  createdAt  DateTime             @default(now())
+  purchaseId String?
+  cardId     String?
+  card       Card?                @relation(fields: [cardId], references: [id])
+  purchase   CardPurchase?        @relation(fields: [purchaseId], references: [id])
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CardPurchase {
+  id                    String             @id @default(uuid())
+  userId                String
+  packSize              CardPackSize
+  cardsAdded            Int
+  amountCents           Int
+  currency              String             @default("usd")
+  stripePaymentIntentId String             @unique
+  stripeSessionId       String?            @unique
+  createdAt             DateTime           @default(now())
+  balanceEvents         CardBalanceEvent[]
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CardPackPrice {
+  id            String       @id @default(uuid())
+  packSize      CardPackSize
+  cardsIncluded Int
+  amountCents   Int
+  currency      String       @default("usd")
+  stripePriceId String       @unique
+  active        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+
+  @@unique([packSize, currency])
+}
 
 enum Plan {
   free
   plus
-  plus_annual
   team
+  plus_annual
   team_annual
 }
 
+enum CardBalanceEventType {
+  purchased
+  used
+  refunded
+  granted
+}
 
-enum CardStatus {  
+enum CardPackSize {
+  pack_1
+  pack_5
+  pack_10
+}
+
+enum CardStatus {
   collecting
   delivered
-
 }
 
 enum NotificationType {
@@ -51,155 +231,4 @@ enum SubscriptionStatus {
 enum BillingInterval {
   monthly
   annual
-}
-
-// =============================================================
-// MODELS
-// =============================================================
-
-
-model User {
-  id String @id @default(uuid())
-  clerkId String? @unique
-  email String @unique
-  name String
-  plan Plan @default(free)
-  stripeCustomerId String? @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  cards Card[]
-  lifetimeCardsCreated Int @default(0)
-  signatures Signature[]
-  notifications Notification[]
-  subscription UserSubscription?  @relation("UserSubscription")
-}
-
-
-model Card {
-  id String @id @default(uuid())
-  occasion String
-  recipientName String
-  recipientEmail String?
-  openingMessage String?
-  signingDeadline DateTime?
-  theme String @default("warm")
-  status String @default("collecting")
-  creatorId String
-  creatorPhotoUrl String?
-  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  scheduledDeliveryAt DateTime?
-  deliveredAt DateTime?
-  signerCount Int @default(0)
-  signingToken   String     @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex')")) @map("signing_token")
-  deliveryToken  String    @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex')")) @map("delivery_token")
-  signatures Signature[]
-  views CardView[]
-  notifications Notification[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-}
-
-model Signature {
-  id String @id @default(uuid())
-  userId String?
-  isHidden Boolean @default(false)
-  cardId String
-  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  signerName String
-  signerEmail String?
-  message String
-  photoUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user User? @relation(fields: [userId], references: [id])
-
-@@unique([cardId, userId])
-
-}
-
-
-model CardView {
-  id String @id @default(uuid())
-  cardId String
-  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  viewerIp String?
-  viewerUserAgent String?
-  viewedAt DateTime @default(now())
-}
-
-
-model Notification {
-  id String @id @default(uuid())
-  userId String
-  cardId String?
-  type String
-  payload Json?
-  sentAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  card Card? @relation(fields: [cardId], references: [id], onDelete: Cascade)
-}
-
-
-model UserSubscription {
-  id                   String             @id @default(uuid())
-  userId               String             @unique
-  stripeSubscriptionId String             @unique
-  stripePriceId        String
-  plan                 Plan
-  billingInterval      BillingInterval
-  status               SubscriptionStatus
-  currentPeriodStart   DateTime?
-  currentPeriodEnd     DateTime?
-  cancelledAt          DateTime?
-  cancelAtPeriodEnd    Boolean            @default(false)
-  metadata             Json?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-
-  // Relations
-  user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
-}
-
-
-
-model PlanLimit {
-  plan              Plan   @id
-  cardsPerMonth     Int?   // Free = 1 card, Plus = unlimited, Team = unlimited
-  signersPerCard    Int?   // Free = 1, Plus = unlimited, Team = unlimited
-  cardStorageHours  Int?   // Free = 24, Plus = null, Team = null
-  photoUploads      Boolean @default(false) // Free = false, Plus/Team = true
-  pdfDownload       Boolean @default(false)
-  scheduledDelivery Boolean @default(false)
-  teamDashboard     Boolean @default(false)
-  customBranding    Boolean @default(false)
-  slackIntegration  Boolean @default(false)
-  analyticsDashboard Boolean @default(false)
-  prioritySupport   Boolean @default(false)
-  premiumThemes     Boolean @default(false)
-
-  @@map("plan_limits")
-}
-
-
-model Price {
-  id String @id @default(uuid())
-  plan Plan
-  billingInterval BillingInterval
-  stripePriceId String @unique
-  amountCents Int
-  currency String @default("usd")
-  active Boolean @default(true)
-  createdAt DateTime @default(now())
-
-  @@unique([plan, billingInterval])
-}
-
-
-model StripeEvent {
-  id String @id
-  type String
-  createdAt DateTime @default(now())
 }

@@ -1,207 +1,121 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { set } from "date-fns";
 
-interface Feature {
-  text: string;
-  included: boolean;
-}
-
-interface Plan {
-  name: "Free" | "Plus" | "Team";
-  monthlyPrice: number;
-  annualPrice: number;
-  desc: string;
-  cta: string;
-  ctaStyle: "ghost" | "primary" | "dark";
-  featured: boolean;
-  badge?: string;
-  features: Feature[];
-}
-
-interface DbPrice {
+// ─── Types ───────────────────────────────────────────────────
+interface CardPackPrice {
   id: string;
-  plan: "free" | "plus" | "plus_annual" | "team" | "team_annual";
-  billingInterval: "monthly" | "annual";
-  stripePriceId: string;
+  packSize: "pack_1" | "pack_5" | "pack_10";
+  cardsIncluded: number;
   amountCents: number;
-  currency: string;
-  active: boolean;
-  createdAt: string;
-}
-
-interface UserSubscription {
-  id: string;
-  userId: string;
-  stripeSubscriptionId: string;
   stripePriceId: string;
-  plan: "free" | "plus" | "plus_annual" | "team" | "team_annual";
-  billingInterval: "monthly" | "annual";
-  cancelAtPeriodEnd: boolean;
-  canceledAt: string | null;
+  active: boolean;
 }
 
-// model UserSubscription {
-//   id                   String             @id @default(uuid())
-//   userId               String             @unique
-//   stripeSubscriptionId String             @unique
-//   stripePriceId        String
-//   plan                 Plan
-//   billingInterval      BillingInterval
-//   status               SubscriptionStatus
-//   currentPeriodStart   DateTime?
-//   currentPeriodEnd     DateTime?
-//   cancelledAt          DateTime?
-//   cancelAtPeriodEnd    Boolean            @default(false)
-//   metadata             Json?
-//   createdAt            DateTime           @default(now())
-//   updatedAt            DateTime           @updatedAt
-
-//   // Relations
-//   user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
-// }
-
+// ─── Static content ──────────────────────────────────────────
 const faqs = [
   {
-    q: "Do signers need an account?",
-    a: "No — anyone with a signing link can add their message without creating an account. Only the card creator needs one.",
+    q: "Is the first card really free?",
+    a: "Yes — completely. No credit card required. Create a card, share the signing link, collect messages and photos, and deliver it. The full experience, on us.",
   },
   {
-    q: "Can the recipient see messages before I send?",
-    a: "Never. All messages stay private until you choose to deliver the card. You control the timing completely.",
+    q: "Do cards expire?",
+    a: "No. Once you buy a card, it's yours to use whenever you need it. There's no expiry date and no pressure to use them by a certain time.",
   },
   {
-    q: "What happens to my cards if I downgrade?",
-    a: "All your sent cards remain accessible. You'll just lose access to premium features on future cards.",
+    q: "Do I need a subscription?",
+    a: "No. There are no subscriptions, no monthly fees, and no recurring charges. You pay once when you buy a pack and that's it.",
   },
   {
-    q: "Is there a limit on how long a card stays live?",
-    a: "Free cards are kept for 24 hours. Plus and Team cards are stored for the duration of your active plan.",
+    q: "What do signers pay?",
+    a: "Nothing, ever. Anyone with the signing link can add their message and a photo for free — no account, no download, no payment required.",
   },
   {
-    q: "Can I use Together for my whole company?",
-    a: "Absolutely. The Team plan includes a shared dashboard so multiple people can create and manage cards together. For larger orgs with 50+ members, contact us for Enterprise pricing with SSO, advanced analytics, and dedicated support.",
+    q: "Can I get a refund for unused cards?",
+    a: "Yes — if you haven't used your cards and want a refund, contact us within 30 days of purchase and we'll sort it out.",
   },
   {
-    q: "Do you offer refunds?",
-    a: "Yes — if you're not happy within 14 days of upgrading, we'll issue a full refund, no questions asked.",
+    q: "What's included with every card?",
+    a: "Unlimited signers, photo uploads, all themes, scheduled delivery, PDF download, and permanent storage. Every card gets everything — there are no feature tiers.",
   },
 ];
 
+const features = [
+  { emoji: "🖊", label: "Unlimited signers" },
+  { emoji: "📷", label: "Photo uploads" },
+  { emoji: "🎨", label: "All themes" },
+  { emoji: "📬", label: "Scheduled delivery" },
+  { emoji: "📄", label: "PDF download" },
+  { emoji: "🔒", label: "Permanent storage" },
+];
+
+// ─── Component ───────────────────────────────────────────────
 export default function Pricing() {
   const router = useRouter();
-  const { isLoaded, user } = useUser();
 
-  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [prices, setPrices] = useState<DbPrice[]>([]);
-  const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
+  const [packs, setPacks] = useState<CardPackPrice[]>([]);
   const [loadingPrices, setLoadingPrices] = useState(true);
-  const [userSubscription, setUserSubscription] =
-    useState<UserSubscription | null>(null);
+  const [loadingPack, setLoadingPack] = useState<string | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const response = await fetch("/api/prices", {
-          method: "GET",
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch prices");
-        }
-
-        const data = await response.json();
-        setPrices(data);
-      } catch (error) {
-        console.error("Error fetching pricing:", error);
-      } finally {
+    fetch("/api/card-packs", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setPacks(data);
         setLoadingPrices(false);
-      }
-    };
-
-    fetchPrices();
+      })
+      .catch((err) => {
+        console.error("Error fetching prices:", err);
+        setLoadingPrices(false);
+      });
   }, []);
 
-  useEffect(() => {
-    const fetchUserSubscription = async () => {
-      try {
-        const response = await fetch("/api/user_subscription", {
-          method: "GET",
-          cache: "no-store",
-        });
+  // Static fallback prices while loading (matches your Stripe data)
+  const fallback: Omit<CardPackPrice, "id" | "stripePriceId" | "active">[] = [
+    { packSize: "pack_1", cardsIncluded: 1, amountCents: 299 },
+    { packSize: "pack_5", cardsIncluded: 5, amountCents: 1199 },
+    { packSize: "pack_10", cardsIncluded: 10, amountCents: 1999 },
+  ];
 
-        const data = await response.json();
-        setUserSubscription(data);
-      } catch (error) {
-        console.error("Error fetching user subscription:", error);
-      }
-    };
+  const displayPacks = packs.length > 0 ? packs : fallback;
 
-    fetchUserSubscription();
-  }, [user, isLoaded]);
+  function formatPrice(cents: number) {
+    return `$${(cents / 100).toFixed(2)}`;
+  }
 
-  const priceMap = useMemo(() => {
-    return {
-      plus: {
-        monthly: prices.find(
-          (p) => p.plan === "plus" && p.billingInterval === "monthly",
-        ),
-        annual: prices.find(
-          (p) => p.plan === "plus_annual" && p.billingInterval === "annual",
-        ),
-      },
-      team: {
-        monthly: prices.find(
-          (p) => p.plan === "team" && p.billingInterval === "monthly",
-        ),
-        annual: prices.find(
-          (p) => p.plan === "team_annual" && p.billingInterval === "annual",
-        ),
-      },
-    };
-  }, [prices]);
+  function perCardPrice(total: number, cards: number) {
+    return `$${(total / 100 / cards).toFixed(2)}/card`;
+  }
 
-  const calculateSavings = (monthlyPrice: number, annualPrice: number) => {
-    const yearlyTotal = monthlyPrice * 12;
-    const savings = yearlyTotal - annualPrice;
-    const percentage = yearlyTotal > 0 ? (savings / yearlyTotal) * 100 : 0;
-    return { savings, percentage: Math.round(percentage) };
-  };
+  function savings(pack: (typeof fallback)[0]) {
+    if (pack.cardsIncluded === 1) return null;
+    const fullPrice = 299 * pack.cardsIncluded;
+    const saved = fullPrice - pack.amountCents;
+    const pct = Math.round((saved / fullPrice) * 100);
+    return { saved, pct };
+  }
 
-  const formatPrice = (amount: number) => {
-    return Number.isInteger(amount) ? amount.toString() : amount.toFixed(2);
-  };
-
-  const handlePlanClick = async (planName: Plan["name"]) => {
+  const handlePlanClick = async (packSize: CardPackPrice) => {
     if (!user && isLoaded) {
       router.push("/dashboard");
       return;
     }
-    if (planName === "Free") {
-      router.push("/create");
-      return;
-    }
 
-    const selectedPrice =
-      planName === "Plus"
-        ? billing === "monthly"
-          ? priceMap.plus.monthly
-          : priceMap.plus.annual
-        : billing === "monthly"
-          ? priceMap.team.monthly
-          : priceMap.team.annual;
-
-    if (!selectedPrice?.stripePriceId) {
+    if (!packSize?.stripePriceId) {
       alert("Pricing is not available right now. Please try again.");
       return;
     }
 
     try {
-      setLoadingCheckout(planName);
+      setLoadingCheckout(packSize);
 
       const response = await fetch("/api/checkout_sessions", {
         method: "POST",
@@ -209,8 +123,8 @@ export default function Pricing() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: selectedPrice.stripePriceId,
-          mode: "subscription",
+          priceId: packSize.stripePriceId,
+          mode: "payment",
         }),
       });
 
@@ -228,347 +142,208 @@ export default function Pricing() {
     }
   };
 
-  const handleCreateCard = () => {
-    router.push("/create");
+  // Card config — badge, featured state, CTA label
+  const packMeta: Record<
+    string,
+    { badge?: string; featured: boolean; cta: string }
+  > = {
+    pack_1: { featured: false, cta: "Buy 1 card" },
+    pack_5: { featured: true, cta: "Buy 5 cards", badge: "Best value" },
+    pack_10: { featured: false, cta: "Buy 10 cards" },
   };
 
-  const plans: Plan[] = [
-    {
-      name: "Free",
-      monthlyPrice: 0,
-      annualPrice: 0,
-      desc: "Perfect for occasional personal cards and trying things out.",
-      cta: "Start for free",
-      ctaStyle: "ghost",
-      featured: false,
-      features: [
-        { text: "First card free", included: true },
-        { text: "You are the only signer", included: true },
-        { text: "Text messages", included: true },
-        { text: "Standard themes", included: true },
-        { text: "Card stored for 24 hours", included: true },
-        { text: "Photo uploads (1 per card)", included: false },
-        { text: "PDF download", included: false },
-        { text: "Scheduled delivery", included: false },
-        { text: "Team dashboard", included: false },
-      ],
-    },
-    {
-      name: "Plus",
-      monthlyPrice: priceMap.plus.monthly
-        ? priceMap.plus.monthly.amountCents / 100
-        : 6,
-      annualPrice: priceMap.plus.annual
-        ? priceMap.plus.annual.amountCents / 100
-        : 58,
-      desc: "For people who send cards regularly and want the full experience.",
-      cta: "Get Plus",
-      ctaStyle: "primary",
-      featured: true,
-      badge: "Most popular",
-      features: [
-        { text: "Unlimited cards", included: true },
-        { text: "Unlimited signers", included: true },
-        { text: "Text + photo messages", included: true },
-        { text: "Premium themes", included: true },
-        { text: "Unlimited photo uploads", included: true },
-        { text: "PDF download", included: true },
-        { text: "Scheduled delivery", included: true },
-        { text: "Cards stored for entirety of plan duration", included: true },
-        { text: "Team dashboard", included: false },
-      ],
-    },
-    {
-      name: "Team",
-      monthlyPrice: priceMap.team.monthly
-        ? priceMap.team.monthly.amountCents / 100
-        : 18,
-      annualPrice: priceMap.team.annual
-        ? priceMap.team.annual.amountCents / 100
-        : 173,
-      desc: "For workplaces sending cards together — HR, managers, team leads.",
-      cta: "Get Team",
-      ctaStyle: "dark",
-      featured: false,
-      features: [
-        { text: "Everything in Plus", included: true },
-        { text: "Team dashboard", included: true },
-        { text: "Up to 20 team members", included: true },
-        { text: "Custom branding", included: true },
-        { text: "Slack integration", included: true },
-        { text: "Priority support", included: true },
-        { text: "Billing receipts", included: true },
-        { text: "Analytics dashboard", included: true },
-        { text: "Cards stored for entirety of plan duration", included: true },
-        { text: "SSO / SAML", included: false },
-      ],
-    },
-  ];
-
+  const { isSignedIn, user, isLoaded } = useUser();
+  console.log("cardpackprices", packs);
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden pt-16 sm:pt-20 pb-14 sm:pb-16 px-4 sm:px-6 md:px-12 text-center">
-        <div className="absolute w-[480px] h-[480px] rounded-full bg-[radial-gradient(circle,#F5EAD8_0%,transparent_70%)] -top-24 -left-32 opacity-60 pointer-events-none" />
-        <div className="absolute w-[380px] h-[380px] rounded-full bg-[radial-gradient(circle,#EEF3EE_0%,transparent_70%)] -bottom-16 -right-16 opacity-50 pointer-events-none" />
-        <div className="relative z-10 max-w-[640px] mx-auto">
-          <h1 className="font-playfair text-[clamp(34px,8vw,64px)] leading-[1.05] tracking-[-2px] mb-4">
-            Start free.
-            <br />
-            <em className="text-[#D4845A]">Upgrade</em> when it feels right.
-          </h1>
-          <p className="text-[15px] sm:text-[17px] text-[#8B7A6B] font-light leading-[1.75] mb-8 sm:mb-10 px-2">
-            No hidden fees. No surprise charges. Cancel any time.
-          </p>
-
-          <div className="inline-flex flex-wrap justify-center bg-[#F5EAD8] rounded-full p-1 gap-1 max-w-full">
-            {(["monthly", "annual"] as const).map((b) => (
-              <button
-                key={b}
-                onClick={() => setBilling(b)}
-                className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all font-dm-sans whitespace-nowrap ${
-                  billing === b
-                    ? "bg-white text-[#1A1208] shadow-sm"
-                    : "text-[#8B7A6B]"
-                }`}
-              >
-                {b === "monthly" ? (
-                  "Monthly"
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Annual
-                    <span className="text-[11px] font-medium text-[#7B9E87]">
-                      Save 20%
-                    </span>
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+      <section className="max-w-[680px] mx-auto px-8 pt-20 pb-16 text-center">
+        <h1 className="font-playfair text-[clamp(36px,6vw,60px)] leading-[1.05] tracking-[-2px] mb-5">
+          Pay once.
+          <br />
+          <em className="text-terracotta">Use when you need it.</em>
+        </h1>
+        <p className="text-[17px] text-[#8C7B6B] font-light leading-[1.75]">
+          Buy a card or a bundle — no monthly fees, no commitments. Your cards
+          never expire.
+        </p>
       </section>
 
-      {/* ── PLANS ── */}
-      <section className="max-w-[1160px] mx-auto px-4 sm:px-6 md:px-12 pb-16 sm:pb-20 md:pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-          {plans.map((plan) => {
-            const savings =
-              plan.monthlyPrice > 0
-                ? calculateSavings(plan.monthlyPrice, plan.annualPrice)
-                : null;
-
-            const displayPrice =
-              plan.monthlyPrice === 0
-                ? "$0"
-                : billing === "monthly"
-                  ? `$${formatPrice(plan.monthlyPrice)}`
-                  : `$${formatPrice(plan.annualPrice)}`;
-
-            const isLoading = loadingCheckout === plan.name;
-
-            const getBasePlan = (plan?: string | null) => {
-              if (!plan) return null;
-
-              if (plan.includes("plus")) return "plus";
-              if (plan.includes("team")) return "team";
-              return "free";
-            };
-
-            const currentPlan = getBasePlan(userSubscription?.plan);
-
-            const isCurrentPlan = (planName: Plan["name"]) => {
-              if (!currentPlan) return false;
-
-              return currentPlan === planName.toLowerCase();
-            };
+      {/* ── PACKS ── */}
+      <section className="max-w-[860px] mx-auto px-8 pb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {displayPacks.map((pack) => {
+            const meta = packMeta[pack.packSize];
+            const saved = savings(pack);
+            const isLoading = loadingPack === pack.packSize;
+            const hasPriceId = "stripePriceId" in pack && !!pack.stripePriceId;
 
             return (
               <div
-                key={plan.name}
-                className={`relative rounded-2xl p-6 sm:p-8 flex flex-col ${
-                  plan.featured
-                    ? "border-2 border-[#D4845A] bg-white shadow-[0_8px_40px_rgba(212,132,90,0.15)]"
-                    : "border border-[#E8DDD0] bg-white"
+                key={pack.packSize}
+                className={`relative rounded-2xl p-7 flex flex-col bg-white transition-all ${
+                  meta.featured
+                    ? "border-2 border-terracotta shadow-[0_8px_40px_rgba(212,132,90,0.12)]"
+                    : "border border-[#E8DDD0]"
                 }`}
               >
-                {plan.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#D4845A] text-white text-[11px] font-medium px-4 py-1 rounded-full whitespace-nowrap">
-                    {plan.badge}
+                {/* Badge */}
+                {meta.badge && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-medium px-4 py-1 rounded-full whitespace-nowrap">
+                    {meta.badge}
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <div className="text-sm font-medium text-[#8B7A6B] mb-2">
-                    {plan.name}
-                  </div>
-                  <div className="flex items-end sm:items-baseline gap-1 mb-3 flex-wrap">
-                    <span className="font-playfair text-[40px] sm:text-[48px] tracking-[-2px] leading-none break-words">
-                      {displayPrice}
-                    </span>
-                    <span className="text-sm text-[#8B7A6B] font-light">
-                      {plan.monthlyPrice === 0
-                        ? "forever"
-                        : billing === "monthly"
-                          ? "/ month"
-                          : "/ year"}
-                    </span>
-                  </div>
-
-                  {plan.monthlyPrice > 0 && billing === "annual" && savings && (
-                    <div className="text-xs text-[#7B9E87] font-medium mb-2 leading-relaxed">
-                      Billed annually · saves ${formatPrice(savings.savings)}/yr
-                      ({savings.percentage}% off)
-                    </div>
-                  )}
-
-                  <p className="text-sm text-[#8B7A6B] leading-[1.7] font-light">
-                    {plan.desc}
-                  </p>
+                {/* Pack size label */}
+                <div className="text-[11px] font-medium tracking-[1.5px] uppercase text-[#8C7B6B] mb-4">
+                  {pack.cardsIncluded === 1
+                    ? "Single card"
+                    : `${pack.cardsIncluded} card bundle`}
                 </div>
 
-                <div className="h-px bg-[#E8DDD0] mb-5" />
+                {/* Price */}
+                <div className="mb-1">
+                  <span className="font-playfair text-[48px] tracking-[-2px] leading-none">
+                    {loadingPrices && packs.length === 0
+                      ? "—"
+                      : formatPrice(pack.amountCents)}
+                  </span>
+                </div>
 
-                <ul className="flex flex-col gap-3 mb-8 flex-1">
-                  {plan.features.map((f) => (
-                    <li
-                      key={f.text}
-                      className="flex items-start gap-2.5 text-sm"
-                    >
-                      <span
-                        className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] mt-0.5 shrink-0 ${
-                          f.included
-                            ? "bg-[#EEF3EE] text-[#5A7D66]"
-                            : "bg-[#F5F4F2] text-[#C0B8B0]"
-                        }`}
-                      >
-                        {f.included ? "✓" : "–"}
-                      </span>
-                      <span
-                        className={`leading-relaxed ${
-                          f.included ? "text-[#1A1208]" : "text-[#8B7A6B]"
-                        }`}
-                      >
-                        {f.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                {/* Per-card breakdown */}
+                <div className="text-sm text-[#8C7B6B] font-light mb-2">
+                  {perCardPrice(pack.amountCents, pack.cardsIncluded)}
+                  {saved && (
+                    <span className="ml-2 text-[#5A7D66] font-medium">
+                      · save {saved.pct}%
+                    </span>
+                  )}
+                </div>
 
+                {/* Cards included pill */}
+                <div className="inline-flex items-center gap-1.5 bg-[#F5EAD8] text-[#C4734A] text-xs font-medium px-3 py-1.5 rounded-full w-fit mb-6">
+                  <span>🎴</span>
+                  {pack.cardsIncluded === 1
+                    ? "1 card"
+                    : `${pack.cardsIncluded} cards`}
+                  {" · never expire"}
+                </div>
+
+                <div className="flex-1" />
+
+                {/* CTA */}
                 <button
-                  onClick={() => handlePlanClick(plan.name)}
-                  disabled={
-                    isLoading || loadingPrices || isCurrentPlan(plan.name)
-                  }
-                  type="button"
-                  className={`w-full py-3 rounded-full text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
-                    plan.ctaStyle === "primary"
-                      ? "bg-[#D4845A] text-white"
-                      : plan.ctaStyle === "dark"
-                        ? "bg-[#1A1208] text-[#FDF8F2]"
-                        : "border border-[#E8DDD0]"
-                  }`}
+                  onClick={() => handlePlanClick(pack)}
+                  disabled={isLoading || (loadingPrices && packs.length === 0)}
+                  className={`w-full py-3 rounded-full text-sm font-medium transition-all font-dm-sans border-none ${
+                    meta.featured
+                      ? "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.25)] cursor-pointer"
+                      : "bg-[#1A1208] text-[#FDF8F2] hover:opacity-85 cursor-pointer"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  {isCurrentPlan(plan.name)
-                    ? "Current plan"
-                    : isLoading
-                      ? "Redirecting..."
-                      : plan.cta}
+                  {isLoading ? "Redirecting…" : meta.cta}
                 </button>
               </div>
             );
           })}
         </div>
+
+        {/* Volume note */}
+        <p className="text-center text-sm text-[#8C7B6B] font-light mt-6">
+          Need more than 10 cards?{" "}
+          <a
+            href="mailto:hello@together.so"
+            className="text-terracotta hover:underline no-underline"
+          >
+            Contact us
+          </a>{" "}
+          for volume pricing.
+        </p>
       </section>
 
-      {/* ── COMPARE TABLE ── */}
-      <section className="max-w-[1160px] mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-20 md:py-24">
-        <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-[#D4845A] mb-3">
-          Full breakdown
-        </p>
-        <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-10 sm:mb-12">
-          Compare plans
-        </h2>
-        <div className="border border-[#E8DDD0] rounded-2xl overflow-hidden bg-white overflow-x-auto -mx-1 sm:mx-0">
-          <table className="w-full text-sm min-w-[640px]">
-            <thead>
-              <tr className="border-b border-[#E8DDD0]">
-                <th className="text-left p-4 sm:p-5 text-[#8B7A6B] font-medium text-[11px] tracking-[1.5px] uppercase w-1/2">
-                  Feature
-                </th>
-                {plans.map((p) => (
-                  <th
-                    key={p.name}
-                    className={`p-4 sm:p-5 text-center font-medium ${
-                      p.featured ? "text-[#D4845A]" : "text-[#1A1208]"
-                    }`}
-                  >
-                    {p.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Cards per month", "1", "Unlimited", "Unlimited"],
-                ["Signers per card", "1", "Unlimited", "Unlimited"],
-                ["Text messages", "✓", "✓", "✓"],
-                ["Photo uploads", "–", "Unlimited", "Unlimited"],
-                ["Premium themes", "–", "✓", "✓"],
-                ["Scheduled delivery", "–", "✓", "✓"],
-                ["PDF download", "–", "✓", "✓"],
-                ["Team dashboard", "–", "–", "✓"],
-                ["Custom branding", "–", "–", "✓"],
-                ["Slack integration", "–", "–", "✓"],
-                ["Analytics dashboard", "–", "–", "✓"],
-                ["Priority support", "–", "–", "✓"],
-              ].map(([feature, free, plus, team], i) => (
-                <tr
-                  key={feature}
-                  className={i % 2 === 0 ? "bg-[#FDF8F2]" : "bg-white"}
-                >
-                  <td className="p-4 sm:p-5 text-[#1A1208] font-medium whitespace-nowrap">
-                    {feature}
-                  </td>
-                  {[free, plus, team].map((val, j) => (
-                    <td
-                      key={j}
-                      className={`p-4 sm:p-5 text-center whitespace-nowrap ${
-                        val === "✓"
-                          ? "text-[#5A7D66] font-medium"
-                          : val === "–"
-                            ? "text-[#C0B8B0]"
-                            : "text-[#1A1208]"
-                      }`}
-                    >
-                      {val}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="text-center mt-8 px-2">
-          <p className="text-sm text-[#8B7A6B] leading-relaxed">
-            Need SSO, advanced analytics, or 50+ team members?{" "}
-            <button
-              onClick={() => router.push("/contact")}
-              className="text-[#D4845A] font-medium hover:underline"
-            >
-              Contact us for Enterprise →
-            </button>
+      {/* ── WHAT'S INCLUDED ── */}
+      <section className="bg-[#F5EAD8] py-20 px-8">
+        <div className="max-w-[860px] mx-auto">
+          <p className="text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3 text-center">
+            Every card includes
           </p>
+          <h2 className="font-playfair text-[clamp(26px,3vw,38px)] tracking-tight text-center mb-12">
+            No feature tiers. No add-ons.
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {features.map((f) => (
+              <div
+                key={f.label}
+                className="bg-white border border-[#E8DDD0] rounded-xl px-5 py-4 flex items-center gap-3"
+              >
+                <span className="text-xl shrink-0">{f.emoji}</span>
+                <span className="text-sm font-medium">{f.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="max-w-[680px] mx-auto px-8 py-20 text-center">
+        <p className="text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3">
+          Simple by design
+        </p>
+        <h2 className="font-playfair text-[clamp(26px,3vw,38px)] tracking-tight mb-12">
+          How it works
+        </h2>
+        <div className="flex flex-col gap-0">
+          {[
+            {
+              step: "1",
+              title: "Buy a pack",
+              body: "Pick 1, 5, or 10 cards. Pay once. Cards go straight to your account — no subscription needed.",
+            },
+            {
+              step: "2",
+              title: "Create a card",
+              body: "Choose an occasion, add a recipient, pick a theme. Your card is live in under a minute.",
+            },
+            {
+              step: "3",
+              title: "Collect messages",
+              body: "Share your signing link. Colleagues and friends add their messages and photos — no account required.",
+            },
+            {
+              step: "4",
+              title: "Deliver it",
+              body: "When everyone's signed, hit deliver. The recipient gets a private link to open their card.",
+            },
+          ].map((item, i, arr) => (
+            <div key={item.step} className="flex gap-6 items-start text-left">
+              <div className="flex flex-col items-center shrink-0">
+                <div className="w-9 h-9 rounded-full bg-terracotta text-white flex items-center justify-center text-sm font-medium font-dm-sans">
+                  {item.step}
+                </div>
+                {i < arr.length - 1 && (
+                  <div className="w-px flex-1 bg-[#E8DDD0] my-2 min-h-[40px]" />
+                )}
+              </div>
+              <div className={`pb-8 ${i === arr.length - 1 ? "" : ""}`}>
+                <div className="font-playfair text-[20px] tracking-tight mb-1 pt-1">
+                  {item.title}
+                </div>
+                <p className="text-sm text-[#8C7B6B] font-light leading-[1.75]">
+                  {item.body}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <div className="bg-[#F5EAD8] py-16 sm:py-20 px-4 sm:px-6 md:px-12">
-        <div className="max-w-160 mx-auto">
-          <p className="text-center text-[11px] font-medium tracking-[2px] uppercase text-[#D4845A] mb-3">
+      <div className="bg-[#F5EAD8] py-20 px-8">
+        <div className="max-w-[640px] mx-auto">
+          <p className="text-[11px] font-medium tracking-[2px] uppercase text-terracotta mb-3 text-center">
             Got questions?
           </p>
-          <h2 className="font-playfair text-[clamp(28px,3vw,42px)] tracking-tight text-center mb-8 sm:mb-10">
+          <h2 className="font-playfair text-[clamp(26px,3vw,38px)] tracking-tight text-center mb-10">
             Common questions
           </h2>
           <div className="flex flex-col">
@@ -576,21 +351,19 @@ export default function Pricing() {
               <div key={i} className="border-t border-[#D8CEBE] last:border-b">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex justify-between items-center py-5 text-left font-dm-sans cursor-pointer bg-transparent border-none gap-4"
+                  className="w-full flex justify-between items-center py-5 text-left font-dm-sans cursor-pointer bg-transparent border-none"
                 >
-                  <span className="text-[15px] font-medium text-[#1A1208] pr-2 sm:pr-6 leading-relaxed">
+                  <span className="text-[15px] font-medium text-[#1A1208] pr-6">
                     {faq.q}
                   </span>
                   <span
-                    className={`text-[#8B7A6B] text-sm transition-transform duration-200 shrink-0 ${
-                      openFaq === i ? "rotate-180" : ""
-                    }`}
+                    className={`text-[#8C7B6B] text-sm transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-180" : ""}`}
                   >
                     ▾
                   </span>
                 </button>
                 {openFaq === i && (
-                  <p className="text-sm text-[#8B7A6B] leading-[1.75] font-light pb-5 pr-6">
+                  <p className="text-sm text-[#8C7B6B] leading-[1.75] font-light pb-5">
                     {faq.a}
                   </p>
                 )}
@@ -601,24 +374,22 @@ export default function Pricing() {
       </div>
 
       {/* ── CTA ── */}
-      <div className="bg-[#D4845A] relative overflow-hidden py-18 sm:py-24 px-4 sm:px-6 md:px-12 text-center">
-        <div className="absolute w-[400px] h-[400px] rounded-full bg-white/10 -top-28 -left-24 pointer-events-none" />
-        <div className="absolute w-[300px] h-[300px] rounded-full bg-white/10 -bottom-16 -right-14 pointer-events-none" />
-        <h2 className="font-playfair text-[clamp(30px,7vw,52px)] text-white tracking-[-2px] mb-4 relative z-10">
-          Someone deserves to feel
-          <br />
-          celebrated today.
+      <div className="bg-[#1A1208] py-24 px-8 text-center relative overflow-hidden">
+        <div className="absolute w-[400px] h-[400px] rounded-full bg-white/5 -top-28 -left-24 pointer-events-none" />
+        <div className="absolute w-[300px] h-[300px] rounded-full bg-white/5 -bottom-16 -right-14 pointer-events-none" />
+        <h2 className="font-playfair text-[clamp(28px,4vw,48px)] text-[#FDF8F2] tracking-[-2px] mb-4 relative z-10">
+          Someone deserves to feel celebrated today.
         </h2>
-        <p className="text-[15px] sm:text-[17px] text-white/75 mb-8 sm:mb-9 font-light relative z-10 px-2">
-          Start a card in 60 seconds — it's free.
+        <p className="text-[16px] text-[#FDF8F2]/60 mb-9 font-light relative z-10">
+          Your first card is free. No credit card required.
         </p>
-        <button
-          onClick={handleCreateCard}
-          className="bg-[#FDF8F2] text-[#D4845A] px-8 sm:px-10 py-4 rounded-full text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity relative z-10"
+        <a
+          href="/create"
+          className="inline-block bg-terracotta text-white px-10 py-4 rounded-full text-[15px] font-medium hover:bg-[#C4734A] transition-colors no-underline relative z-10"
         >
           Create your first card →
-        </button>
-        <p className="text-xs text-white/50 mt-4 relative z-10 px-2">
+        </a>
+        <p className="text-xs text-[#FDF8F2]/30 mt-4 relative z-10">
           No account needed to sign. No credit card to start.
         </p>
       </div>
