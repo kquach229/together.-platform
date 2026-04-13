@@ -1,78 +1,7 @@
-// app/api/webhooks/stripe/route.ts
-// Single source of truth for all subscription state changes.
-// Never trust the client to report payment status — always use webhooks.
-
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
-
-// ─── Helpers ─────────────────────────────────────────────────
-
-// Looks up the internal User by every available identifier, in priority order:
-//   1. Stripe customer ID (most reliable after first payment)
-//   2. clerkId from subscription metadata (set during checkout)
-//   3. Email from the Stripe customer object (fallback)
-async function findUser(
-  customerId: string,
-  metadata?: Stripe.Metadata | null,
-  customerEmail?: string | null,
-) {
-  // 1. Stripe customer ID
-  const byCustomerId = await prisma.user.findFirst({
-    where: { stripeCustomerId: customerId },
-  });
-  if (byCustomerId) return byCustomerId;
-
-  // 2. clerkId stored in subscription metadata during checkout
-  if (metadata?.clerkId) {
-    const byClerkId = await prisma.user.findUnique({
-      where: { clerkId: metadata.clerkId },
-    });
-    if (byClerkId) return byClerkId;
-  }
-
-  // 3. Email — least reliable but catches edge cases
-  if (customerEmail) {
-    const byEmail = await prisma.user.findFirst({
-      where: { email: customerEmail },
-    });
-    if (byEmail) return byEmail;
-  }
-
-  return null;
-}
-
-// Resolves a Plan enum value from a Stripe price ID by querying
-// our own Price table — never rely on Stripe metadata or nicknames.
-async function resolvePlan(stripePriceId: string) {
-  const price = await prisma.price.findUnique({
-    where: { stripePriceId },
-  });
-  return price ?? null;
-}
-
-// Maps Stripe's subscription status string to our SubscriptionStatus enum.
-function mapStatus(stripeStatus: Stripe.Subscription.Status) {
-  const map: Record<Stripe.Subscription.Status, string> = {
-    active: "active",
-    trialing: "trialing",
-    past_due: "past_due",
-    canceled: "canceled",
-    incomplete: "incomplete",
-    incomplete_expired: "incomplete_expired",
-    unpaid: "unpaid",
-    paused: "paused",
-  };
-  return (map[stripeStatus] ?? "incomplete") as any;
-}
-
-// Returns true if the subscription should grant access.
-function isActiveStatus(status: Stripe.Subscription.Status) {
-  return status === "active" || status === "trialing";
-}
-
-// ─── Main handler ─────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
@@ -86,287 +15,131 @@ export async function POST(req: NextRequest) {
   }
 
   let event: Stripe.Event;
+
   try {
-    // Use environment variable for webhook secret
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-    event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
-  } catch (err) {
-    console.error("[Stripe webhook] Signature verification failed:", err);
-    return NextResponse.json(
-      { error: `Webhook signature error: ${(err as Error).message}` },
-      { status: 400 },
+    event = stripe.webhooks.constructEvent(
+      payload,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
+  } catch (err) {
+    console.error("❌ Stripe signature error:", err);
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // ── Idempotency check ──────────────────────────────────────
-  const alreadyProcessed = await prisma.stripeEvent.findUnique({
+  // idempotency check
+  const exists = await prisma.stripeEvent.findUnique({
     where: { id: event.id },
   });
-  if (alreadyProcessed) {
-    console.log(
-      `[Stripe webhook] Already processed event ${event.id}, skipping`,
-    );
+
+  if (exists) {
+    console.log(`🔁 Duplicate event ignored: ${event.id}`);
     return NextResponse.json({ received: true });
   }
 
-  console.log(`[Stripe webhook] Processing: ${event.type} (${event.id})`);
-
   try {
     switch (event.type) {
-      // ── First successful payment ───────────────────────────
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
 
-        // Only process subscription checkouts
-        if (session.mode !== "subscription" || !session.subscription) {
-          console.log(`[Stripe webhook] Skipping non-subscription checkout`);
+        if (session.mode !== "payment") {
+          console.log("⏭ Skipping non-payment session");
           break;
         }
+
+        console.log("💳 Processing checkout session:", session.id);
 
         const customerId = session.customer as string;
-        const subscriptionId =
-          typeof session.subscription === "string"
-            ? session.subscription
-            : session.subscription.id;
+        const paymentIntentId = session.payment_intent as string;
 
-        console.log(
-          `[Stripe webhook] Processing subscription: ${subscriptionId}`,
+        // IMPORTANT: expand line items properly
+        const lineItems = await stripe.checkout.sessions.listLineItems(
+          session.id,
+          { limit: 1 },
         );
 
-        // Fetch full subscription details
-        const sub = await stripe.subscriptions.retrieve(subscriptionId);
-        const priceId = sub.items.data[0]?.price.id;
+        const priceId = lineItems.data?.[0]?.price?.id;
+
+        console.log("🔎 Price ID:", priceId);
 
         if (!priceId) {
-          console.error(
-            `[Stripe webhook] No price ID found for subscription ${subscriptionId}`,
-          );
+          console.error("❌ Missing priceId from line items");
           break;
         }
 
-        const price = await resolvePlan(priceId);
-        if (!price) {
-          console.error(
-            `[Stripe webhook] No Price row found for ${priceId}. Make sure your Price table has this Stripe price ID.`,
-          );
+        const pack = await prisma.cardPackPrice.findUnique({
+          where: { stripePriceId: priceId },
+        });
+
+        if (!pack) {
+          console.error("❌ No pack found for priceId:", priceId);
           break;
         }
 
-        // Resolve user
-        const customerEmail = session.customer_details?.email;
-        const user = await findUser(customerId, sub.metadata, customerEmail);
+        const email = session.customer_details?.email;
+
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { stripeCustomerId: customerId },
+              ...(email ? [{ email }] : []),
+            ],
+          },
+        });
 
         if (!user) {
-          console.error(
-            `[Stripe webhook] No user found for customer ${customerId}`,
-          );
-          console.log(
-            `[Stripe webhook] Attempted to find by: customerId=${customerId}, metadata.clerkId=${sub.metadata?.clerkId}, email=${customerEmail}`,
-          );
+          console.error("❌ User not found", { customerId, email });
           break;
         }
 
-        console.log(`[Stripe webhook] Found user: ${user.id} (${user.email})`);
+        console.log("👤 User found:", user.id);
 
-        const periodStart =
-          sub.items.data[0]?.current_period_start ?? sub.billing_cycle_anchor;
-        const periodEnd =
-          sub.items.data[0]?.current_period_end ?? sub.billing_cycle_anchor;
-
-        // Update database with subscription
-        await prisma.$transaction([
-          // 1. Update user with plan and Stripe customer ID
-          prisma.user.update({
-            where: { id: user.id },
+        await prisma.$transaction(async (tx) => {
+          await tx.cardPurchase.create({
             data: {
-              plan: price.plan,
-              stripeCustomerId: customerId,
-            },
-          }),
-          // 2. Upsert subscription record
-          prisma.userSubscription.upsert({
-            where: { userId: user.id },
-            create: {
               userId: user.id,
-              stripeSubscriptionId: sub.id,
-              stripePriceId: priceId,
-              plan: price.plan,
-              billingInterval: price.billingInterval,
-              status: mapStatus(sub.status),
-              currentPeriodStart: new Date(periodStart * 1000),
-              currentPeriodEnd: new Date(periodEnd * 1000),
-              cancelAtPeriodEnd: sub.cancel_at_period_end,
-              metadata: sub.metadata ?? {},
+              packSize: pack.packSize,
+              cardsAdded: pack.cardsIncluded,
+              amountCents: pack.amountCents,
+              stripePaymentIntentId: paymentIntentId,
+              stripeSessionId: session.id,
             },
-            update: {
-              stripeSubscriptionId: sub.id,
-              stripePriceId: priceId,
-              plan: price.plan,
-              billingInterval: price.billingInterval,
-              status: mapStatus(sub.status),
-              currentPeriodStart: new Date(periodStart * 1000),
-              currentPeriodEnd: new Date(periodEnd * 1000),
-              cancelAtPeriodEnd: sub.cancel_at_period_end,
-              cancelledAt: null,
-              metadata: sub.metadata ?? {},
-            },
-          }),
-        ]);
+          });
 
-        console.log(
-          `[Stripe webhook] ✅ Successfully activated ${price.plan} plan for user ${user.id}`,
-        );
-        console.log(
-          `[Stripe webhook] 📊 User ${user.id} now has: plan=${price.plan}, stripeCustomerId=${customerId}`,
-        );
-        console.log(
-          `[Stripe webhook] 📝 Subscription ${sub.id} created with status=${sub.status}, period=${new Date(periodStart * 1000).toISOString()} to ${new Date(periodEnd * 1000).toISOString()}`,
-        );
-        break;
-      }
-
-      // ── Renewal, upgrade, downgrade, or status change ──────
-      case "customer.subscription.updated": {
-        const sub = event.data.object as Stripe.Subscription;
-        const customerId = sub.customer as string;
-        const priceId = sub.items.data[0]?.price.id;
-
-        if (!priceId) {
-          console.error(
-            `[Stripe webhook] No price ID found for subscription update`,
-          );
-          break;
-        }
-
-        const price = await resolvePlan(priceId);
-        const user = await findUser(customerId, sub.metadata);
-
-        if (!user) {
-          console.error(
-            `[Stripe webhook] No user found for subscription update, customerId=${customerId}`,
-          );
-          break;
-        }
-
-        const periodStart =
-          sub.items.data[0]?.current_period_start ?? sub.billing_cycle_anchor;
-        const periodEnd =
-          sub.items.data[0]?.current_period_end ?? sub.billing_cycle_anchor;
-        const newUserPlan =
-          isActiveStatus(sub.status) && price ? price.plan : "free";
-
-        await prisma.$transaction([
-          prisma.user.update({
+          await tx.user.update({
             where: { id: user.id },
-            data: { plan: newUserPlan },
-          }),
-          prisma.userSubscription.update({
-            where: { userId: user.id },
             data: {
-              stripePriceId: priceId,
-              plan: price?.plan ?? "free",
-              billingInterval: price?.billingInterval ?? "monthly",
-              status: mapStatus(sub.status),
-              currentPeriodStart: new Date(periodStart * 1000),
-              currentPeriodEnd: new Date(periodEnd * 1000),
-              cancelAtPeriodEnd: sub.cancel_at_period_end,
-              cancelledAt: sub.canceled_at
-                ? new Date(sub.canceled_at * 1000)
-                : null,
-              metadata: sub.metadata ?? {},
+              cardsRemaining: {
+                increment: pack.cardsIncluded,
+              },
             },
-          }),
-        ]);
-
-        console.log(
-          `[Stripe webhook] ✅ Updated subscription for user ${user.id} → ${newUserPlan} (status: ${sub.status})`,
-        );
-        break;
-      }
-
-      // ── Subscription fully cancelled ───────────────────────
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        const customerId = sub.customer as string;
-
-        const user = await findUser(customerId, sub.metadata);
-        if (!user) {
-          console.error(
-            `[Stripe webhook] No user found for cancellation, customerId=${customerId}`,
-          );
-          break;
-        }
-
-        await prisma.$transaction([
-          prisma.user.update({
-            where: { id: user.id },
-            data: { plan: "free" },
-          }),
-          prisma.userSubscription.update({
-            where: { userId: user.id },
-            data: {
-              status: "canceled",
-              cancelledAt: new Date(),
-            },
-          }),
-        ]);
-
-        console.log(
-          `[Stripe webhook] ✅ Cancelled subscription for user ${user.id} → free plan`,
-        );
-        break;
-      }
-
-      // ── Payment failed ─────────────────────────────────────
-      case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice & {
-          subscription?: string | Stripe.Subscription | null;
-        };
-        const subId =
-          typeof invoice.subscription === "string"
-            ? invoice.subscription
-            : invoice.subscription?.id;
-
-        if (!subId) break;
-
-        const existing = await prisma.userSubscription.findUnique({
-          where: { stripeSubscriptionId: subId },
-        });
-
-        if (!existing) break;
-
-        await prisma.userSubscription.update({
-          where: { id: existing.id },
-          data: { status: "past_due" },
+          });
         });
 
         console.log(
-          `[Stripe webhook] ⚠️ Payment failed for subscription ${subId} - status updated to past_due`,
+          `✅ Successfully added ${pack.cardsIncluded} cards to user ${user.id}`,
         );
+
         break;
       }
 
       default:
-        console.log(
-          `[Stripe webhook] Ignoring unhandled event type: ${event.type}`,
-        );
+        console.log(`ℹ️ Unhandled event: ${event.type}`);
         break;
     }
 
-    // Mark event as processed
     await prisma.stripeEvent.create({
-      data: { id: event.id, type: event.type },
+      data: {
+        id: event.id,
+        type: event.type,
+      },
     });
 
-    console.log(`[Stripe webhook] ✅ Successfully processed event ${event.id}`);
+    return NextResponse.json({ received: true });
   } catch (err) {
-    console.error(`[Stripe webhook] ❌ Error processing ${event.type}:`, err);
-    // Return 200 to prevent retries that could cause double-processing
-    return NextResponse.json(
-      { error: "Handler error — logged for investigation" },
-      { status: 200 },
-    );
-  }
+    console.error("❌ Webhook crash:", err);
 
-  return NextResponse.json({ received: true });
+    // still return 200 so Stripe doesn't retry endlessly
+    return NextResponse.json({ error: "Webhook failed" }, { status: 200 });
+  }
 }

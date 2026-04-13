@@ -154,12 +154,12 @@ export default function Pricing() {
     { badge?: string; featured: boolean; cta: string }
   > = {
     pack_1: { featured: false, cta: "Buy 1 card" },
-    pack_5: { featured: true, cta: "Buy 5 cards", badge: "Best value" },
+    pack_5: { featured: true, cta: "Buy 5 cards", badge: "Most Popular" },
     pack_10: { featured: false, cta: "Buy 10 cards" },
   };
 
-  const { isSignedIn, user, isLoaded } = useUser();
-  console.log("cardpackprices", packs);
+  const { user, isLoaded } = useUser();
+  console.log("cardpackprices", packs.pack_size);
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
       {/* ── HERO ── */}
@@ -184,17 +184,19 @@ export default function Pricing() {
             const isLoading = loadingPack === pack.packSize;
             const hasPriceId = "stripePriceId" in pack && !!pack.stripePriceId;
 
+            console.log("packsize", pack);
+
             return (
               <div
                 key={pack.packSize}
                 className={`relative rounded-2xl p-7 flex flex-col bg-white transition-all ${
-                  meta.featured
+                  meta?.featured
                     ? "border-2 border-terracotta shadow-[0_8px_40px_rgba(212,132,90,0.12)]"
                     : "border border-[#E8DDD0]"
                 }`}
               >
                 {/* Badge */}
-                {meta.badge && (
+                {meta?.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-medium px-4 py-1 rounded-full whitespace-nowrap">
                     {meta.badge}
                   </div>
@@ -242,12 +244,12 @@ export default function Pricing() {
                   onClick={() => handlePlanClick(pack)}
                   disabled={isLoading || (loadingPrices && packs.length === 0)}
                   className={`w-full py-3 rounded-full text-sm font-medium transition-all font-dm-sans border-none ${
-                    meta.featured
+                    meta?.featured
                       ? "bg-terracotta text-white hover:bg-[#C4734A] shadow-[0_4px_16px_rgba(212,132,90,0.25)] cursor-pointer"
                       : "bg-[#1A1208] text-[#FDF8F2] hover:opacity-85 cursor-pointer"
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  {isLoading ? "Redirecting…" : meta.cta}
+                  {isLoading ? "Redirecting…" : meta?.cta}
                 </button>
               </div>
             );

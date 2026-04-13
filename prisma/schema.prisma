@@ -7,11 +7,31 @@ datasource db {
   provider = "postgresql"
 }
 
+
+enum CardPackSize {
+  pack_2
+  pack_1
+  pack_5
+  pack_10
+}
+
+enum CardStatus {
+  collecting
+  delivered
+}
+
+enum NotificationType {
+  new_signature
+  deadline_reminder
+  card_delivered
+  card_received
+}
+
+
 model User {
   id                   String             @id @default(uuid())
   email                String             @unique
   name                 String
-  plan                 Plan               @default(free)
   stripeCustomerId     String?            @unique
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
@@ -19,11 +39,9 @@ model User {
   lifetimeCardsCreated Int                @default(0)
   cardsRemaining       Int                @default(0)
   cards                Card[]
-  cardBalanceEvents    CardBalanceEvent[]
   cardPurchases        CardPurchase[]
   notifications        Notification[]
   signatures           Signature[]
-  subscription         UserSubscription?  @relation("UserSubscription")
 }
 
 model Card {
@@ -45,7 +63,6 @@ model Card {
   updatedAt           DateTime           @updatedAt
   creatorPhotoUrl     String?
   creator             User               @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  cardBalanceEvents   CardBalanceEvent[]
   views               CardView[]
   notifications       Notification[]
   signatures          Signature[]
@@ -90,73 +107,10 @@ model Notification {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model UserSubscription {
-  id                   String             @id @default(uuid())
-  userId               String             @unique
-  stripeSubscriptionId String             @unique
-  stripePriceId        String
-  plan                 Plan
-  billingInterval      BillingInterval
-  status               SubscriptionStatus
-  currentPeriodStart   DateTime?
-  currentPeriodEnd     DateTime?
-  cancelledAt          DateTime?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  cancelAtPeriodEnd    Boolean            @default(false)
-  metadata             Json?
-  user                 User               @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model PlanLimit {
-  plan               Plan    @id
-  cardsPerMonth      Int?
-  signersPerCard     Int?
-  photoUploads       Boolean @default(false)
-  pdfDownload        Boolean @default(false)
-  scheduledDelivery  Boolean @default(false)
-  teamDashboard      Boolean @default(false)
-  customBranding     Boolean @default(false)
-  slackIntegration   Boolean @default(false)
-  prioritySupport    Boolean @default(false)
-  premiumThemes      Boolean @default(false)
-  analyticsDashboard Boolean @default(false)
-  cardStorageHours   Int?
-
-  @@map("plan_limits")
-}
-
-model Price {
-  id              String          @id @default(uuid())
-  plan            Plan
-  billingInterval BillingInterval
-  stripePriceId   String          @unique
-  amountCents     Int
-  currency        String          @default("usd")
-  active          Boolean         @default(true)
-  createdAt       DateTime        @default(now())
-
-  @@unique([plan, billingInterval])
-}
-
 model StripeEvent {
   id        String   @id
   type      String
   createdAt DateTime @default(now())
-}
-
-model CardBalanceEvent {
-  id         String               @id @default(uuid())
-  userId     String
-  type       CardBalanceEventType
-  delta      Int
-  note       String?
-  createdAt  DateTime             @default(now())
-  purchaseId String?
-  cardId     String?
-  card       Card?                @relation(fields: [cardId], references: [id])
-  purchase   CardPurchase?        @relation(fields: [purchaseId], references: [id])
-  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CardPurchase {
@@ -169,7 +123,6 @@ model CardPurchase {
   stripePaymentIntentId String             @unique
   stripeSessionId       String?            @unique
   createdAt             DateTime           @default(now())
-  balanceEvents         CardBalanceEvent[]
   user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -186,49 +139,3 @@ model CardPackPrice {
   @@unique([packSize, currency])
 }
 
-enum Plan {
-  free
-  plus
-  team
-  plus_annual
-  team_annual
-}
-
-enum CardBalanceEventType {
-  purchased
-  used
-  refunded
-  granted
-}
-
-enum CardPackSize {
-  pack_1
-  pack_5
-  pack_10
-}
-
-enum CardStatus {
-  collecting
-  delivered
-}
-
-enum NotificationType {
-  new_signature
-  deadline_reminder
-  card_delivered
-  card_received
-}
-
-enum SubscriptionStatus {
-  active
-  past_due
-  canceled
-  trialing
-  incomplete
-  unpaid
-}
-
-enum BillingInterval {
-  monthly
-  annual
-}
