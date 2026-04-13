@@ -3,7 +3,6 @@ import { getUser } from "@/lib/helpers/getUser";
 
 export async function GET() {
   const user = await getUser({
-    subscription: true,
     cards: true,
   });
 

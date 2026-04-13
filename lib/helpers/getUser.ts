@@ -6,7 +6,6 @@ type IncludeOptions = {
   cards?: boolean;
   notifications?: boolean;
   signatures?: boolean;
-  userSubscription?: boolean;
 };
 
 export async function getUser(include: IncludeOptions = {}) {
@@ -14,11 +13,9 @@ export async function getUser(include: IncludeOptions = {}) {
   if (!clerkUser) return null;
 
   const includeObj: Record<string, boolean> = {};
-  if (include.subscription) includeObj.subscription = true;
   if (include.cards) includeObj.cards = true;
   if (include.notifications) includeObj.notifications = true;
   if (include.signatures) includeObj.signatures = true;
-  if (include.userSubscription) includeObj.userSubscription = true;
 
   // Fetch from Prisma
   const user = await prisma.user.findUnique({
