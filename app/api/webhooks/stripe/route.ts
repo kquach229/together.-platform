@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
   const sig = req.headers.get("stripe-signature");
+  const { userId: clerkId } = await auth();
 
   if (!sig) {
     return NextResponse.json(
@@ -80,10 +82,7 @@ export async function POST(req: NextRequest) {
 
         const user = await prisma.user.findFirst({
           where: {
-            OR: [
-              { stripeCustomerId: customerId },
-              ...(email ? [{ email }] : []),
-            ],
+            clerkId: clerkId,
           },
         });
 

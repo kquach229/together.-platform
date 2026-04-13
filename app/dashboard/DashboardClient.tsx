@@ -159,7 +159,7 @@ export default function Dashboard({ user }: { user: User }) {
       value: user.lifetimeCardsCreated,
       sub: "This account",
     },
-    { label: "Plan", value: user.cardsRemaining, sub: "" },
+    { label: "Cards Remaining", value: user.cardsRemaining, sub: "" },
   ];
 
   const filtered = normalizedCards.filter((card) => {
