@@ -6,8 +6,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
+  const { userId: clerkId } = await auth();
   try {
     const { sessionId } = await req.json();
 
@@ -37,14 +39,10 @@ export async function POST(req: NextRequest) {
 
     // Find the user — try customer ID first, fall back to email
     const customerId = session.customer as string | null;
-    const email = session.customer_details?.email;
 
-    const user = await prisma.user.findFirst({
+    const user = await prisma.user.findUnique({
       where: {
-        OR: [
-          ...(customerId ? [{ stripeCustomerId: customerId }] : []),
-          ...(email ? [{ email }] : []),
-        ],
+        clerkId: clerkId!!,
       },
       select: {
         id: true,
