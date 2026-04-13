@@ -22,21 +22,6 @@ export async function POST(req: NextRequest) {
           name: `${first_name} ${last_name}`,
         },
       });
-
-      await prisma.userSubscription.upsert({
-        where: {
-          userId: user.id, // must be UNIQUE in schema
-        },
-        update: {},
-        create: {
-          userId: user.id,
-          stripeSubscriptionId: "temp-id",
-          stripePriceId: "price_free",
-          plan: "free",
-          billingInterval: "monthly",
-          status: "active",
-        },
-      });
     }
 
     if (eventType === "user.deleted") {

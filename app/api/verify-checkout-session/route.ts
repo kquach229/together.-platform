@@ -109,25 +109,14 @@ export async function POST(req: NextRequest) {
       cancelAtPeriodEnd: subscription.ended_at !== null,
     };
 
-    // Upsert the subscription
-    const userSubscription = await prisma.userSubscription.upsert({
-      where: { stripeSubscriptionId: subscription.id },
-      update: subscriptionData,
-      create: {
-        ...subscriptionData,
-        stripeSubscriptionId: subscription.id,
-        user: { connect: { id: user.id } },
-      },
-    });
-
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: { plan },
     });
 
     return NextResponse.json({
       success: true,
-      subscription: userSubscription,
+      subscription: updatedUser,
     });
   } catch (err) {
     console.error("Stripe checkout verification error:", err);

@@ -159,7 +159,6 @@ export default function Pricing() {
   };
 
   const { user, isLoaded } = useUser();
-  console.log("cardpackprices", packs.pack_size);
   return (
     <div className="font-dm-sans bg-[#FDF8F2] text-[#1A1208] overflow-x-hidden">
       {/* ── HERO ── */}
