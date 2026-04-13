@@ -1,13 +1,13 @@
+// app/api/webhooks/stripe/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
   const sig = req.headers.get("stripe-signature");
-  const { userId: clerkId } = await auth();
 
   if (!sig) {
     return NextResponse.json(
@@ -17,7 +17,6 @@ export async function POST(req: NextRequest) {
   }
 
   let event: Stripe.Event;
-
   try {
     event = stripe.webhooks.constructEvent(
       payload,
@@ -29,11 +28,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // idempotency check
+  // Idempotency — ignore events already processed
   const exists = await prisma.stripeEvent.findUnique({
     where: { id: event.id },
   });
-
   if (exists) {
     console.log(`🔁 Duplicate event ignored: ${event.id}`);
     return NextResponse.json({ received: true });
@@ -51,15 +49,15 @@ export async function POST(req: NextRequest) {
 
         console.log("💳 Processing checkout session:", session.id);
 
-        const customerId = session.customer as string;
+        const customerId = session.customer as string | null;
         const paymentIntentId = session.payment_intent as string;
+        const email = session.customer_details?.email;
 
-        // IMPORTANT: expand line items properly
+        // Resolve the price ID from line items
         const lineItems = await stripe.checkout.sessions.listLineItems(
           session.id,
           { limit: 1 },
         );
-
         const priceId = lineItems.data?.[0]?.price?.id;
 
         if (!priceId) {
@@ -76,13 +74,18 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        const email = session.customer_details?.email;
+        // Try stripeCustomerId first (fast path for returning customers),
+        // then fall back to email for first-time buyers.
+        // findUnique requires separate queries since OR isn't supported.
+        let user = customerId
+          ? await prisma.user.findUnique({
+              where: { stripeCustomerId: customerId },
+            })
+          : null;
 
-        const user = await prisma.user.findFirst({
-          where: {
-            clerkId: clerkId,
-          },
-        });
+        if (!user && email) {
+          user = await prisma.user.findUnique({ where: { email } });
+        }
 
         if (!user) {
           console.error("❌ User not found", { customerId, email });
@@ -92,7 +95,8 @@ export async function POST(req: NextRequest) {
         console.log("👤 User found:", user.id);
 
         await prisma.$transaction(async (tx) => {
-          await tx.cardPurchase.create({
+          // Record the purchase
+          const purchase = await tx.cardPurchase.create({
             data: {
               userId: user.id,
               packSize: pack.packSize,
@@ -103,20 +107,19 @@ export async function POST(req: NextRequest) {
             },
           });
 
+          // Increment balance and backfill stripeCustomerId if missing
           await tx.user.update({
             where: { id: user.id },
             data: {
-              cardsRemaining: {
-                increment: pack.cardsIncluded,
-              },
+              cardsRemaining: { increment: pack.cardsIncluded },
+              ...(customerId && !user.stripeCustomerId
+                ? { stripeCustomerId: customerId }
+                : {}),
             },
           });
         });
 
-        console.log(
-          `✅ Successfully added ${pack.cardsIncluded} cards to user ${user.id}`,
-        );
-
+        console.log(`✅ Added ${pack.cardsIncluded} cards to user ${user.id}`);
         break;
       }
 
@@ -126,17 +129,12 @@ export async function POST(req: NextRequest) {
     }
 
     await prisma.stripeEvent.create({
-      data: {
-        id: event.id,
-        type: event.type,
-      },
+      data: { id: event.id, type: event.type },
     });
 
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error("❌ Webhook crash:", err);
-
-    // still return 200 so Stripe doesn't retry endlessly
     return NextResponse.json({ error: "Webhook failed" }, { status: 200 });
   }
 }
