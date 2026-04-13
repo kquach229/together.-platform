@@ -62,8 +62,6 @@ export async function POST(req: NextRequest) {
 
         const priceId = lineItems.data?.[0]?.price?.id;
 
-        console.log("🔎 Price ID:", priceId);
-
         if (!priceId) {
           console.error("❌ Missing priceId from line items");
           break;
