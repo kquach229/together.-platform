@@ -16,6 +16,7 @@ export default async function DashboardPage() {
     cards: (user as any)?.cards?.map((card: any) => ({
       ...card,
       createdAt: card.createdAt.toISOString(),
+
       ...("signingDeadline" in card && {
         signingDeadline: card.signingDeadline?.toISOString() ?? null,
       }),

@@ -48,31 +48,6 @@ export async function POST(req: NextRequest) {
     } = parsed.data;
 
     const card = await prisma.$transaction(async (tx) => {
-      // Check plan limits inside transaction
-      if (user.plan === "free") {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-
-        const [cardCount, limit] = await Promise.all([
-          tx.card.count({
-            where: {
-              creatorId: user.id,
-              createdAt: { gte: startOfMonth },
-            },
-          }),
-          tx.planLimit.findUnique({
-            where: { plan: "free" },
-          }),
-        ]);
-
-        if (limit?.cardsPerMonth && cardCount >= limit.cardsPerMonth) {
-          throw new Error(
-            `MONTHLY_LIMIT_REACHED::Free plan allows ${limit.cardsPerMonth} cards per month. Upgrade to Plus for unlimited cards.`,
-          );
-        }
-      }
-
       const createdCard = await tx.card.create({
         data: {
           creatorId: user.id,

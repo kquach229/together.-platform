@@ -89,6 +89,7 @@ type User = {
   signatures?: Array<any>;
   lifetimeCardsCreated?: number;
   plan?: string;
+  cardsRemaining?: number;
 };
 
 export default function Dashboard({ user }: { user: User }) {
@@ -158,7 +159,7 @@ export default function Dashboard({ user }: { user: User }) {
       value: user.lifetimeCardsCreated,
       sub: "This account",
     },
-    { label: "Plan", value: user.plan, sub: "" },
+    { label: "Plan", value: user.cardsRemaining, sub: "" },
   ];
 
   const filtered = normalizedCards.filter((card) => {
@@ -179,8 +180,7 @@ export default function Dashboard({ user }: { user: User }) {
 
     router.push("/create");
   };
-  const disableCreate =
-    user.plan === "free" && (user?.lifetimeCardsCreated ?? 0) > 0;
+  const disableCreate = (user.cardsRemaining ?? 0) < 1;
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
       {/* ── MAIN ── */}
