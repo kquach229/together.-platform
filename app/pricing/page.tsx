@@ -183,8 +183,6 @@ export default function Pricing() {
             const isLoading = loadingPack === pack.packSize;
             const hasPriceId = "stripePriceId" in pack && !!pack.stripePriceId;
 
-            console.log("packsize", pack);
-
             return (
               <div
                 key={pack.packSize}

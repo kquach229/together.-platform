@@ -98,13 +98,17 @@ const AppSideBar = ({ user }: Props) => {
 
         <SidebarGroup>
           <div className="border border-[#2E2820] rounded-xl p-3 mb-5">
-            <div className="text-xs text-[#8A7F74] mb-0.5">Current plan</div>
+            <div className="text-xs text-[#8A7F74] mb-0.5">Cards Remaining</div>
             <div className="text-sm font-medium text-[#FDF8F2]">
-              {user?.plan ?? "Free"}
+              {user.cardsRemaining}
             </div>
-            <button className="mt-1.5 text-xs text-terracotta hover:underline font-medium bg-transparent border-none cursor-pointer p-0">
-              Upgrade to Plus →
-            </button>
+            <Link
+              href={"/pricing"}
+              onClick={() => setOpenMobile(false)}
+              className="mt-1.5 text-xs text-terracotta hover:underline font-medium bg-transparent border-none cursor-pointer p-0"
+            >
+              Purchase Cards
+            </Link>
           </div>
         </SidebarGroup>
 
