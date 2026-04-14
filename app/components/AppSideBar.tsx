@@ -21,7 +21,7 @@ import {
 
 interface Props {
   user: {
-    plan?: string | null;
+    cardsRemaining: number;
     firstName?: string | null;
     lastName?: string | null;
     email?: string | null;
@@ -100,7 +100,7 @@ const AppSideBar = ({ user }: Props) => {
           <div className="border border-[#2E2820] rounded-xl p-3 mb-5">
             <div className="text-xs text-[#8A7F74] mb-0.5">Cards Remaining</div>
             <div className="text-sm font-medium text-[#FDF8F2]">
-              {user.cardsRemaining}
+              {user?.cardsRemaining ?? 0}
             </div>
             <Link
               href={"/pricing"}
