@@ -6,10 +6,8 @@ const footerLinks = [
     heading: "Product",
     links: [
       { label: "How it works", href: "/how-it-works" },
-      { label: "Occasions", href: "/occasions" },
+
       { label: "Pricing", href: "/pricing" },
-      { label: "For Teams", href: "/for-teams" },
-      { label: "Examples", href: "/examples" },
     ],
   },
   {
@@ -17,15 +15,11 @@ const footerLinks = [
     links: [
       { label: "About", href: "/about" },
       { label: "Blog", href: "/blog" },
-      { label: "Careers", href: "/careers" },
-      { label: "Press", href: "/press" },
     ],
   },
   {
     heading: "Support",
     links: [
-      { label: "Help centre", href: "/help-center" },
-      { label: "Contact us", href: "/contact-us" },
       { label: "Privacy policy", href: "/privacy-policy" },
       { label: "Terms of service", href: "/terms-of-service" },
     ],
