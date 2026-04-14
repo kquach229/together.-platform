@@ -17,7 +17,6 @@ const Navbar = async () => {
         firstName: clerkUser.firstName,
         lastName: clerkUser.lastName,
         email: clerkUser.emailAddresses?.[0]?.emailAddress ?? null,
-        plan: (clerkUser.privateMetadata?.plan as string) ?? "Free", // if you store plan there
       }
     : null;
 

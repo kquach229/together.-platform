@@ -87,6 +87,9 @@ export async function POST(req: NextRequest) {
           lifetimeCardsCreated: {
             increment: 1,
           },
+          cardsRemaining: {
+            decrement: 1,
+          },
         },
       });
 
