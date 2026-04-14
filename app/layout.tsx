@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import LogoComponent from "./components/LogoComponent";
 
 const dmSans = localFont({
   src: "../public/dmsans.ttf",
@@ -36,7 +37,10 @@ export default function RootLayout({
             <div className="max-w-450 mx-auto relative w-full">
               {/* Mobile sidebar */}
               <div className="block md:hidden h-16 p-5">
-                <SidebarTrigger />
+                <div className="flex items-center gap-5">
+                  <SidebarTrigger />
+                  <LogoComponent />
+                </div>
               </div>
               <Navbar />
               {children}
