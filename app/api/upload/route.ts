@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         ["content-length-range", 0, MAX_SIZE_BYTES],
         ["eq", "$Content-Type", contentType],
       ],
-      Fields: { "Content-Type": contentType },
+      Fields: { "Content-Type": contentType, acl: "public-read" },
       Expires: 60,
     });
 
