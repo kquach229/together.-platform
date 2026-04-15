@@ -319,7 +319,7 @@ export default function SignView({ card, signingToken }: Props) {
               {card.creatorPhotoUrl && (
                 <div className="w-full max-h-100 overflow-hidden mt-5">
                   <img
-                    src={`https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
+                    src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
                     alt="Cover"
                     className="w-full h-full object-contain rounded-sm"
                   />
