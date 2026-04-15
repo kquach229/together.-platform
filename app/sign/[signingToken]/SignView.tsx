@@ -158,7 +158,7 @@ export default function SignView({ card, signingToken }: Props) {
       let photoUrl: string | undefined;
       if (photoFile) {
         setUploadProgress("Uploading photo…");
-        photoUrl = await uploadPhoto(photoFile, card.id);
+        photoUrl = await uploadPhoto(photoFile);
         setUploadProgress(null);
       }
       const res = await fetch(`/api/cards/sign/${signingToken}`, {

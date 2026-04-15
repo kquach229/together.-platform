@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
       ],
       Fields: {
         "Content-Type": contentType,
-        acl: "true",
       },
       Expires: 60,
     });
