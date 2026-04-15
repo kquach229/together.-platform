@@ -48,6 +48,17 @@ export async function POST(req: NextRequest) {
     } = parsed.data;
 
     const card = await prisma.$transaction(async (tx) => {
+      // 1. Ensure user still has credits INSIDE transaction
+      const userRow = await tx.user.findUnique({
+        where: { id: user.id },
+        select: { cardsRemaining: true },
+      });
+
+      if (!userRow || userRow.cardsRemaining <= 0) {
+        throw new Error("INSUFFICIENT_CREDITS");
+      }
+
+      // 2. Create card first
       const createdCard = await tx.card.create({
         data: {
           creatorId: user.id,
@@ -79,20 +90,16 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // 3. NOW decrement safely
       await tx.user.update({
-        where: {
-          id: user.id,
-        },
+        where: { id: user.id },
         data: {
-          lifetimeCardsCreated: {
-            increment: 1,
-          },
-          cardsRemaining: {
-            decrement: 1,
-          },
+          lifetimeCardsCreated: { increment: 1 },
+          cardsRemaining: { decrement: 1 },
         },
       });
 
+      // 4. Notification only after success
       await tx.notification.create({
         data: {
           userId: user.id,
@@ -111,15 +118,9 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[POST /api/cards]", err);
 
-    if (
-      err instanceof Error &&
-      err.message.startsWith("MONTHLY_LIMIT_REACHED::")
-    ) {
+    if (err instanceof Error && err.message === "INSUFFICIENT_CREDITS") {
       return NextResponse.json(
-        {
-          error: "Monthly card limit reached",
-          message: err.message.replace("MONTHLY_LIMIT_REACHED::", ""),
-        },
+        { error: "Insufficient credits" },
         { status: 403 },
       );
     }
@@ -168,21 +169,6 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
-        select: {
-          id: true,
-          occasion: true,
-          recipientName: true,
-          recipientEmail: true,
-          theme: true,
-          status: true,
-          signingToken: true,
-          signerCount: true,
-          signingDeadline: true,
-          scheduledDeliveryAt: true,
-          deliveredAt: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       }),
       prisma.card.count({ where }),
     ]);

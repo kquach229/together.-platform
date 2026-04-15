@@ -125,7 +125,26 @@ export default function CreateCard() {
     setSubmitError(null);
 
     try {
+      let photoUrl: string | null = null;
+
+      // ─────────────────────────────
+      // 1. UPLOAD FIRST (must succeed)
+      // ─────────────────────────────
+      if (photoFile) {
+        try {
+          setUploadProgress("Uploading cover photo…");
+          photoUrl = await uploadPhoto(photoFile);
+        } catch (err) {
+          setSubmitError("Photo upload failed. Card was not created.");
+          return; // 🚨 STOP HERE (prevents credit loss)
+        }
+      }
+
+      // ─────────────────────────────
+      // 2. CREATE CARD (only if upload succeeds)
+      // ─────────────────────────────
       setUploadProgress("Creating your card…");
+
       const createRes = await fetch("/api/cards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -134,14 +153,16 @@ export default function CreateCard() {
           recipientName,
           recipientEmail: recipientEmail || undefined,
           openingMessage: message || undefined,
-          theme: theme,
+          theme,
           signingDeadline: deadline
             ? new Date(deadline).toISOString()
             : undefined,
+          photoUrl, // ✅ pass S3 key/url here
         }),
       });
 
       const createData = await createRes.json();
+
       if (!createRes.ok) {
         setSubmitError(
           createData.message ?? createData.error ?? "Something went wrong.",
@@ -150,18 +171,6 @@ export default function CreateCard() {
       }
 
       const { id: cardId, signingToken: token } = createData.card;
-
-      if (photoFile) {
-        setUploadProgress("Uploading cover photo…");
-        const photoUrl = await uploadPhoto(photoFile);
-
-        setUploadProgress("Saving photo…");
-        await fetch(`/api/cards/${cardId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ creatorPhotoUrl: photoUrl }),
-        });
-      }
 
       setSigningToken(token);
       setStep(4);
@@ -177,7 +186,6 @@ export default function CreateCard() {
       setUploadProgress(null);
     }
   }
-
   function handleContinue() {
     if (!canProceed()) return;
     if (step === 3) {
