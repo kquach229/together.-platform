@@ -254,6 +254,8 @@ export default function TermsOfService() {
   );
 }
 
+//
+
 function Section({
   title,
   children,
