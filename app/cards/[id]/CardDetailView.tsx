@@ -286,7 +286,7 @@ export default function CardDetailView({ card }: Props) {
         </nav>
 
         <div className="max-w-[1060px] mx-auto px-8 py-8">
-          <div className="grid grid-cols-[1fr_320px] gap-8 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-8 items-start">
             {/* ── LEFT: MAIN CONTENT ── */}
             <div className="flex flex-col gap-6">
               {/* Card preview banner */}
