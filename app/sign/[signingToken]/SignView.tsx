@@ -315,7 +315,6 @@ export default function SignView({ card, signingToken }: Props) {
             </p>
 
             <div>
-              {/* Cover photo preview */}
               {card.creatorPhotoUrl && (
                 <div className="w-full max-h-100 overflow-hidden mt-5">
                   <img
