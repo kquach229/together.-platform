@@ -312,7 +312,6 @@ export default function RecipientView({ card }: Props) {
               })}
             </div>
 
-            {/* Signed by strip */}
             <div className="mt-6 bg-white border border-[#E8DDD0] rounded-2xl p-6 flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
                 {/* Avatar stack */}
