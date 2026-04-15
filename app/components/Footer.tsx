@@ -30,7 +30,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#1A1208] px-12 pt-14 pb-8 font-dm-sans">
       <div className="max-w-[1160px] mx-auto">
-        <div className="grid grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-12 mb-12 ">
           <div>
             <div className="font-playfair text-2xl text-[#FDF8F2] mb-3">
               together<span className="text-terracotta">.</span>
