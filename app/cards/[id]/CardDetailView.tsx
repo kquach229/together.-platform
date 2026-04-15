@@ -326,7 +326,7 @@ export default function CardDetailView({ card }: Props) {
                 {card.creatorPhotoUrl && (
                   <div className="w-full max-h-100 flex items-center justify-center bg-[#F5F4F2] overflow-hidden">
                     <img
-                      src={`https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
+                      src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
                       alt="Cover"
                       className="w-full h-auto object-contain"
                     />
@@ -500,7 +500,7 @@ export default function CardDetailView({ card }: Props) {
                             {sig.photoUrl && (
                               <div className="mt-3 rounded-xl overflow-hidden border border-[#E8DDD0] max-w-70">
                                 <img
-                                  src={`https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${sig.photoUrl}`}
+                                  src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${sig.photoUrl}`}
                                   alt={`Photo from ${sig.signerName}`}
                                   className="w-full h-auto object-cover max-h-105"
                                 />
