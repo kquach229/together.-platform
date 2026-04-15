@@ -250,39 +250,6 @@ export default function TermsOfService() {
           </Section>
         </div>
       </div>
-
-      {/* FOOTER */}
-      <footer className="border-t border-[#E8DDD0] px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="font-playfair text-[18px] tracking-tight no-underline text-[#1A1208]"
-        >
-          together<span className="text-terracotta">.</span>
-        </Link>
-        <div className="flex items-center gap-6">
-          <Link
-            href="/privacy"
-            className="text-xs text-[#8C7B6B] hover:text-[#1A1208] transition-colors no-underline"
-          >
-            Privacy policy
-          </Link>
-          <Link
-            href="/about"
-            className="text-xs text-[#8C7B6B] hover:text-[#1A1208] transition-colors no-underline"
-          >
-            About
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-xs text-[#8C7B6B] hover:text-[#1A1208] transition-colors no-underline"
-          >
-            Pricing
-          </Link>
-        </div>
-        <p className="text-xs text-[#C5B8AD]">
-          © {new Date().getFullYear()} Together
-        </p>
-      </footer>
     </div>
   );
 }
