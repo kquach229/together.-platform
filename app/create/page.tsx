@@ -125,24 +125,18 @@ export default function CreateCard() {
     setSubmitError(null);
 
     try {
-      let photoUrl: string | null = null;
+      let creatorPhotoUrl: string | null = null;
 
-      // ─────────────────────────────
-      // 1. UPLOAD FIRST (must succeed)
-      // ─────────────────────────────
+      // Step 1 — upload photo to S3 first (no cardId yet, uses temp/ prefix)
       if (photoFile) {
-        try {
-          setUploadProgress("Uploading cover photo…");
-          photoUrl = await uploadPhoto(photoFile);
-        } catch (err) {
-          setSubmitError("Photo upload failed. Card was not created.");
-          return; // 🚨 STOP HERE (prevents credit loss)
-        }
+        setUploadProgress("Uploading photo…");
+        const key = await uploadPhoto(photoFile); // returns "temp/abc123.jpg"
+
+        // Build the full public S3 URL from the key
+        creatorPhotoUrl = `${key}`;
       }
 
-      // ─────────────────────────────
-      // 2. CREATE CARD (only if upload succeeds)
-      // ─────────────────────────────
+      // Step 2 — create the card, passing the full URL
       setUploadProgress("Creating your card…");
 
       const createRes = await fetch("/api/cards", {
@@ -157,7 +151,7 @@ export default function CreateCard() {
           signingDeadline: deadline
             ? new Date(deadline).toISOString()
             : undefined,
-          photoUrl, // ✅ pass S3 key/url here
+          creatorPhotoUrl, // full URL or null
         }),
       });
 
@@ -170,9 +164,7 @@ export default function CreateCard() {
         return;
       }
 
-      const { id: cardId, signingToken: token } = createData.card;
-
-      setSigningToken(token);
+      setSigningToken(createData.card.signingToken);
       setStep(4);
     } catch (err) {
       console.error("Failed to create card:", err);

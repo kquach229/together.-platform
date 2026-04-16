@@ -16,6 +16,7 @@ const createCardSchema = z.object({
   theme: z.string().default("warm"),
   signingDeadline: z.string().datetime().optional(),
   scheduledDeliveryAt: z.string().datetime().optional(),
+  creatorPhotoUrl: z.string().optional(),
 });
 
 // ─── POST /api/cards ─────────────────────────────────────────
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
       theme,
       signingDeadline,
       scheduledDeliveryAt,
+      creatorPhotoUrl,
     } = parsed.data;
 
     const card = await prisma.$transaction(async (tx) => {
@@ -68,6 +70,7 @@ export async function POST(req: NextRequest) {
           openingMessage: openingMessage || null,
           theme,
           status: "collecting",
+          creatorPhotoUrl: creatorPhotoUrl || null,
           signingDeadline: signingDeadline ? new Date(signingDeadline) : null,
           scheduledDeliveryAt: scheduledDeliveryAt
             ? new Date(scheduledDeliveryAt)
