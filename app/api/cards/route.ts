@@ -16,7 +16,7 @@ const createCardSchema = z.object({
   theme: z.string().default("warm"),
   signingDeadline: z.string().datetime().optional(),
   scheduledDeliveryAt: z.string().datetime().optional(),
-  creatorPhotoUrl: z.string().optional(),
+  creatorPhotoUrl: z.string().optional().nullable(),
 });
 
 // ─── POST /api/cards ─────────────────────────────────────────
