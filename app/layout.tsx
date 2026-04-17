@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <link rel="icon" href="/public/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
       </Head>
       <body
         className={`${dmSans.variable} ${playfair.variable} antialiased bg-background`}
