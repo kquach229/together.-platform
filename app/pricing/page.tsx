@@ -392,7 +392,7 @@ export default function Pricing() {
           href="/create"
           className="inline-block bg-terracotta text-white px-10 py-4 rounded-full text-[15px] font-medium hover:bg-[#C4734A] transition-colors no-underline relative z-10"
         >
-          Create your first card →
+          Create your first card. It's on Us! →
         </a>
       </div>
     </div>

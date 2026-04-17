@@ -36,7 +36,7 @@ model User {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   clerkId              String?            @unique
-  lifetimeCardsCreated Int                @default(0)
+  lifetimeCardsCreated Int                @default(1)
   cardsRemaining       Int                @default(0)
   cards                Card[]
   cardPurchases        CardPurchase[]

@@ -363,7 +363,7 @@ export default function HowItWorks() {
               onClick={handleCreateCard}
               className="bg-terracotta text-white px-6 sm:px-8 py-3.5 rounded-full text-sm font-medium shadow-[0_6px_20px_rgba(212,132,90,0.3)] hover:bg-[#C4734A] transition-all border-none cursor-pointer font-dm-sans w-full sm:w-auto"
             >
-              Create your first card
+              Create Your First Card. It's on Us!
             </button>
           </div>
         </div>
@@ -580,7 +580,7 @@ export default function HowItWorks() {
             onClick={handleCreateCard}
             className="bg-[#FDF8F2] text-terracotta px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-[14px] sm:text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity font-dm-sans border-none cursor-pointer w-full sm:w-auto"
           >
-            Create your first card →
+            Create your first card. It's on Us! →
           </button>
         </div>
       </div>

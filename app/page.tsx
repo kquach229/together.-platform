@@ -111,7 +111,7 @@ export default function Home() {
                 onClick={handleCreateCard}
                 style={{ marginTop: 28, padding: 24 }}
               >
-                Create Your First Card
+                Create Your First Card. It's on Us!
                 <ArrowRight />
               </ReusableButton>
             </motion.div>
@@ -314,7 +314,7 @@ export default function Home() {
           viewport={{ once: true }}
         >
           <ReusableButton onClick={handleCreateCard}>
-            Get Started Free
+            Get Started Free. First Card is on Us!
             <ArrowRight />
           </ReusableButton>
         </motion.div>
