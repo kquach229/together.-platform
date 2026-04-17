@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: "What do signers pay?",
-    a: "Nothing, ever. Anyone with the signing link can add their message and a photo for free — no account, no download, no payment required.",
+    a: "Nothing, ever. Anyone with the signing link can add their message and a photo for free.",
   },
   {
     q: "Can I get a refund for unused cards?",
@@ -312,7 +312,7 @@ export default function Pricing() {
             {
               step: "3",
               title: "Collect messages",
-              body: "Share your signing link. Colleagues and friends add their messages and photos — no account required.",
+              body: "Share your signing link. Colleagues and friends add their messages and photos.",
             },
             {
               step: "4",
@@ -394,9 +394,6 @@ export default function Pricing() {
         >
           Create your first card →
         </a>
-        <p className="text-xs text-[#FDF8F2]/30 mt-4 relative z-10">
-          No account needed to sign. No credit card to start.
-        </p>
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ const values = [
   {
     emoji: "✨",
     title: "Simple on purpose",
-    body: "No accounts needed to sign. No apps to install. Just a link, a message, and the people who matter.",
+    body: "No apps to install. Just an account, a link, a message, and the people who matter.",
   },
   {
     emoji: "🌍",

@@ -582,9 +582,6 @@ export default function HowItWorks() {
           >
             Create your first card →
           </button>
-          <p className="text-xs text-white/50 mt-4">
-            No account needed to sign. No credit card to start.
-          </p>
         </div>
       </div>
     </div>

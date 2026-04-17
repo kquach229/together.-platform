@@ -323,9 +323,6 @@ export default function RecipientView() {
           <button className="bg-[#FDF8F2] text-terracotta px-10 py-4 rounded-full text-[15px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:opacity-90 transition-opacity font-dm-sans">
             Create your own card →
           </button>
-          <p className="text-xs text-white/50 mt-4">
-            No account needed to sign. No credit card to start.
-          </p>
         </div>
       </div>
     </div>
