@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import LogoComponent from "./components/LogoComponent";
+import Head from "next/head";
 
 const dmSans = localFont({
   src: "../public/dmsans.ttf",
@@ -29,6 +30,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Head>
+        <link rel="icon" href="/public/favicon.ico" sizes="any" />
+      </Head>
       <body
         className={`${dmSans.variable} ${playfair.variable} antialiased bg-background`}
       >
