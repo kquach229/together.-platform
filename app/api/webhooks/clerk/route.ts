@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
           clerkId: id,
           email: email_addresses[0].email_address,
           name: `${first_name} ${last_name}`,
-          lifetimeCardsCreated: 1,
+          cardsRemaining: 1,
         },
       });
     }
