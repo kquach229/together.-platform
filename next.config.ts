@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
+import withPWAInit from "next-pwa";
 
-const nextConfig = {
+const withPWA = require("next-pwa")({
+  dest: "public",
+
+  disable: process.env.NODE_ENV === "development",
+
+  buildExcludes: ["app-build-manifest.json"],
+});
+
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
@@ -11,6 +20,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
-// deploy again...
-// AGAIN
+export default withPWA(nextConfig);
