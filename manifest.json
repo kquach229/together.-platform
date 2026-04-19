@@ -5,7 +5,7 @@
   "start_url": "https://togethercards.vercel.app/",
   "display": "standalone",
   "description": "Your Digital UI Greeting Cards",
-  "lang": "eng",
+  "lang": "en-US",
   "dir": "auto",
   "theme_color": "#d4845a",
   "background_color": "#f5ead8",
