@@ -1,14 +1,13 @@
 {
   "name": "together.",
-
   "short_name": "together.",
   "start_url": "https://togethercards.vercel.app/",
   "display": "standalone",
-  "description": "Your Digital UI Greeting Cards",
+  "description": "Your Digital Greeting Cards",
   "lang": "en-US",
   "dir": "auto",
-  "theme_color": "#d4845a",
-  "background_color": "#f5ead8",
+  "theme_color": "#000000",
+  "background_color": "#000000",
   "orientation": "any",
   "icons": [
     {
@@ -34,10 +33,6 @@
   ],
   "related_applications": [
     {
-      "platform": "windows",
-      "url": " The URL to your app in that app store"
-    },
-    {
       "platform": "play",
       "url": "https://play.google.com/store/apps/details?id=together"
     },
@@ -51,7 +46,7 @@
     {
       "name": "together.",
       "url": "/shortcut",
-      "description": "A description of the functionality of this shortcut"
+      "description": "together. Shortcut"
     }
   ]
 }
