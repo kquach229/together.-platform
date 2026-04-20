@@ -3,7 +3,9 @@ import withPWAInit from "next-pwa";
 
 const withPWA = require("next-pwa")({
   dest: "public",
-
+  sw: "sw.js", // 👈 force correct name
+  register: true,
+  skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
 
   buildExcludes: ["app-build-manifest.json"],
