@@ -9,6 +9,8 @@ const withPWA = require("next-pwa")({
   buildExcludes: ["app-build-manifest.json"],
 });
 
+console.log("PWA CONFIG LOADED"); // 👈 add this
+
 const nextConfig: NextConfig = {
   turbopack: {},
   images: {
