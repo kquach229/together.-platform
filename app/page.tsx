@@ -205,7 +205,7 @@ export default function Home() {
             Three simple steps to a card everyone will love.
           </motion.p>
 
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {steps.map((step, i) => (
               <motion.div
                 key={i}
