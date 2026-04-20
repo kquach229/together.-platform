@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 const LAST_UPDATED = "April 13, 2025";
-const CONTACT_EMAIL = "legal@togather.so";
+const CONTACT_EMAIL = "legal@togathercards.com";
 
 export default function TermsOfService() {
   return (
