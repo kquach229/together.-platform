@@ -19,7 +19,7 @@ export function PageLoader({ label = "Loading…" }: PageLoaderProps) {
   return (
     <div className="min-h-screen bg-[#FDF8F2] flex flex-col items-center justify-center gap-6">
       <div className="font-playfair text-[28px] tracking-tight text-[#1A1208]">
-        togather<span className="text-terracotta">.</span>
+        Togather<span className="text-terracotta">.</span>
       </div>
 
       {/* Orbiting card squares */}

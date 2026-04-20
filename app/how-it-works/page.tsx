@@ -355,7 +355,7 @@ export default function HowItWorks() {
             in minutes.
           </h1>
           <p className="text-[16px] sm:text-[18px] text-muted-taupe font-light leading-[1.75] max-w-[500px] mx-auto mb-8 sm:mb-10">
-            togather. makes group cards effortless — for the person organising
+            Togather. makes group cards effortless — for the person organising
             and the people signing.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">

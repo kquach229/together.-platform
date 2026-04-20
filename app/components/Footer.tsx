@@ -33,7 +33,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-12 mb-12 ">
           <div>
             <div className="font-playfair text-2xl text-[#FDF8F2] mb-3">
-              togather<span className="text-terracotta">.</span>
+              Togather<span className="text-terracotta">.</span>
             </div>
             <p className="text-sm text-[#8A7F74] leading-[1.7] font-light max-w-[220px]">
               Group greeting cards that actually feel personal. For every

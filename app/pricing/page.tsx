@@ -257,7 +257,7 @@ export default function Pricing() {
         <p className="text-center text-sm text-[#8C7B6B] font-light mt-6">
           Need more than 10 cards?{" "}
           <a
-            href="mailto:hello@togather.com"
+            href="mailto:hello@togathercards.com"
             className="text-terracotta hover:underline no-underline"
           >
             Contact us

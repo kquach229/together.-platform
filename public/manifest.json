@@ -1,6 +1,6 @@
 {
-  "name": "togather.",
-  "short_name": "togather.",
+  "name": "Togather.",
+  "short_name": "Togather.",
   "start_url": "https://togathercards.com/",
   "display": "standalone",
   "description": "Your Digital Greeting Cards",
@@ -42,9 +42,9 @@
   "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "togather.",
+      "name": "Togather.",
       "url": "/shortcut",
-      "description": "togather. Shortcut"
+      "description": "Togather. Shortcut"
     }
   ]
 }

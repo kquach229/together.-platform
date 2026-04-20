@@ -86,7 +86,7 @@ export default function About() {
           deserves a real moment.
         </h1>
         <p className="text-[17px] text-[#8C7B6B] font-light leading-[1.75]">
-          togather. started with one question: why is it so hard to do something
+          Togather. started with one question: why is it so hard to do something
           thoughtful for the people you work with?
         </p>
       </section>
@@ -149,7 +149,7 @@ export default function About() {
             </p>
 
             <p className="text-[15px] text-[#8C7B6B] font-light leading-[1.85]">
-              togather. brings everything into one place so anyone can collect
+              Togather. brings everything into one place so anyone can collect
               messages and photos, collaborate easily, and deliver a shared
               digital card at the right time. It works for workplace moments
               like team farewells and promotions, as well as personal occasions

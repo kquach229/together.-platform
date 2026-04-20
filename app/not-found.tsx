@@ -13,7 +13,7 @@ export default function NotFound() {
           href="/"
           className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          togather<span className="text-terracotta">.</span>
+          Togather<span className="text-terracotta">.</span>
         </Link>
       </nav>
 
