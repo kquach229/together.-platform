@@ -199,7 +199,7 @@ export default function SignView({ card, signingToken }: Props) {
             href="/"
             className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
           >
-            together<span className="text-terracotta">.</span>
+            Togather<span className="text-terracotta">.</span>
           </a>
         </nav>
 
@@ -274,7 +274,7 @@ export default function SignView({ card, signingToken }: Props) {
           href="/"
           className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          together<span className="text-terracotta">.</span>
+          Togather<span className="text-terracotta">.</span>
         </a>
         <div className="text-sm text-[#8C7B6B]">
           Signing a card for{" "}

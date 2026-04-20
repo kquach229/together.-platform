@@ -60,7 +60,7 @@ const AppSideBar = ({ user }: Props) => {
       <aside className="fixed top-0 left-0 bottom-0 w-60 bg-[#1A1208] flex flex-col z-40 px-5 py-6">
         <SidebarHeader>
           <div className="font-playfair text-[20px] tracking-tight text-[#FDF8F2] mb-10">
-            together<span className="text-terracotta">.</span>
+            togather<span className="text-terracotta">.</span>
           </div>
         </SidebarHeader>
 

@@ -3,13 +3,13 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy — Together",
+  title: "Privacy Policy — Togather",
   description:
-    "Privacy Policy for Together, the group digital greeting card platform.",
+    "Privacy Policy for Togather, the group digital greeting card platform.",
 };
 
 const LAST_UPDATED = "April 13, 2025";
-const CONTACT_EMAIL = "privacy@together.so";
+const CONTACT_EMAIL = "privacy@togather.so";
 
 export default function PrivacyPolicy() {
   return (
@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
           href="/"
           className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          together<span className="text-terracotta">.</span>
+          Togather<span className="text-terracotta">.</span>
         </Link>
         <Link
           href="/create"
@@ -60,10 +60,10 @@ export default function PrivacyPolicy() {
         <div className="flex flex-col gap-10">
           <Section title="1. Who we are">
             <p>
-              Together is a digital greeting card platform. When we say
-              "Together", "we", "us", or "our" in this policy, we mean the
-              company that operates together.so. This policy explains how we
-              collect, use, and protect information about people who use our
+              Togather is a digital greeting card platform. When we say
+              "Togather", "we", "us", or "our" in this policy, we mean the
+              company that operates togathercards.com. This policy explains how
+              we collect, use, and protect information about people who use our
               service — including card creators, signers, and recipients.
             </p>
           </Section>
@@ -89,7 +89,7 @@ export default function PrivacyPolicy() {
             <Subsection title="Signers">
               <p>
                 When someone signs a card, they must be signed in with a
-                Together account. We collect the name and email address
+                Togather account. We collect the name and email address
                 associated with their account. These are stored as a snapshot on
                 the signature at the time of signing.
               </p>
@@ -121,7 +121,7 @@ export default function PrivacyPolicy() {
           <Section title="3. How we use your information">
             <p>We use the information we collect to:</p>
             <ul>
-              <li>Provide and operate the Together service</li>
+              <li>Provide and operate the Togather service</li>
               <li>Process payments and manage your card balance</li>
               <li>
                 Send transactional emails — card notifications, delivery
@@ -155,11 +155,11 @@ export default function PrivacyPolicy() {
               <li>
                 <strong className="font-medium">Legal requirements</strong> — we
                 may disclose information if required by law, subpoena, or to
-                protect the rights and safety of Together or its users.
+                protect the rights and safety of Togather or its users.
               </li>
               <li>
                 <strong className="font-medium">Business transfers</strong> — if
-                Together is acquired or merges with another company, your
+                Togather is acquired or merges with another company, your
                 information may be transferred as part of that transaction.
                 We'll notify you before this happens.
               </li>
@@ -196,7 +196,7 @@ export default function PrivacyPolicy() {
           <Section title="7. Cookies">
             <p>
               We use cookies and similar technologies to keep you logged in and
-              to understand how people use Together. We do not use third-party
+              to understand how people use Togather. We do not use third-party
               advertising cookies.
             </p>
             <p>
@@ -233,7 +233,7 @@ export default function PrivacyPolicy() {
 
           <Section title="9. Children's privacy">
             <p>
-              Together is not directed at children under 13. We do not knowingly
+              Togather is not directed at children under 13. We do not knowingly
               collect personal information from children under 13. If we learn
               that we have, we'll delete it promptly. If you believe a child has
               provided us with personal information, please contact us.
@@ -261,7 +261,7 @@ export default function PrivacyPolicy() {
 
           <Section title="11. Third-party services">
             <p>
-              Together integrates with the following third-party services, each
+              Togather integrates with the following third-party services, each
               with their own privacy policies:
             </p>
             <ul>

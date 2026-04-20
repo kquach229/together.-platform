@@ -9,7 +9,7 @@ export default function Loading() {
     <div className="font-dm-sans min-h-screen bg-[#FDF8F2] flex flex-col items-center justify-center gap-6">
       {/* Logo */}
       <div className="font-playfair text-[28px] tracking-tight text-[#1A1208] select-none">
-        together<span className="text-terracotta">.</span>
+        togather<span className="text-terracotta">.</span>
       </div>
 
       {/* Orbiting card squares */}

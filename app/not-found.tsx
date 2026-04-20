@@ -13,7 +13,7 @@ export default function NotFound() {
           href="/"
           className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          together<span className="text-terracotta">.</span>
+          togather<span className="text-terracotta">.</span>
         </Link>
       </nav>
 
@@ -86,7 +86,7 @@ export default function NotFound() {
       {/* FOOTER */}
       <div className="px-12 py-6 border-t border-[#E8DDD0] flex items-center justify-between">
         <p className="text-xs text-[#C5B8AD]">
-          © {new Date().getFullYear()} Together. All rights reserved.
+          © {new Date().getFullYear()} Togather. All rights reserved.
         </p>
         <div className="flex gap-5">
           {["Help centre", "Privacy policy"].map((l) => (

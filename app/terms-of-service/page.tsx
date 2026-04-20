@@ -3,13 +3,13 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms of Service — Together",
+  title: "Terms of Service — Togather",
   description:
-    "Terms of Service for Together, the group digital greeting card platform.",
+    "Terms of Service for Togather, the group digital greeting card platform.",
 };
 
 const LAST_UPDATED = "April 13, 2025";
-const CONTACT_EMAIL = "legal@together.so";
+const CONTACT_EMAIL = "legal@togather.so";
 
 export default function TermsOfService() {
   return (
@@ -20,7 +20,7 @@ export default function TermsOfService() {
           href="/"
           className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          together<span className="text-terracotta">.</span>
+          Together<span className="text-terracotta">.</span>
         </Link>
         <Link
           href="/create"
@@ -46,24 +46,24 @@ export default function TermsOfService() {
       {/* CONTENT */}
       <div className="max-w-[720px] mx-auto px-8 pb-24">
         <div className="bg-[#F5EAD8] border border-[#EDD5C5] rounded-2xl p-5 mb-10 text-sm text-[#8C7B6B] font-light leading-[1.75]">
-          Please read these Terms carefully before using Together. By creating
+          Please read these Terms carefully before using Togather. By creating
           an account or using our service, you agree to be bound by these Terms.
-          If you don't agree, please don't use Together.
+          If you don't agree, please don't use Togather.
         </div>
 
         <div className="flex flex-col gap-10">
           <Section title="1. Who we are">
             <p>
-              Together ("we", "us", "our") is a digital greeting card platform
+              Togather ("we", "us", "our") is a digital greeting card platform
               that lets people create group cards, collect messages, and deliver
               them to recipients. These Terms govern your use of our website and
-              services at together.so.
+              services at togathercards.com.
             </p>
           </Section>
 
           <Section title="2. Eligibility">
             <p>
-              You must be at least 13 years old to use Together. By using our
+              You must be at least 13 years old to use Togather. By using our
               service, you confirm that you meet this requirement. If you are
               under 18, you confirm that you have your parent or guardian's
               permission.
@@ -86,7 +86,7 @@ export default function TermsOfService() {
 
           <Section title="4. Card packs and payments">
             <p>
-              Together operates on a pay-as-you-go basis. Your first card is
+              Togather operates on a pay-as-you-go basis. Your first card is
               free. After that, cards are available in packs of 1, 5, or 10. You
               purchase packs using a valid payment method through our payment
               processor, Stripe.
@@ -116,7 +116,7 @@ export default function TermsOfService() {
 
           <Section title="5. Your content">
             <p>
-              You retain ownership of any content you submit to Together —
+              You retain ownership of any content you submit to Togather —
               including messages, photos, and opening notes ("Your Content"). By
               submitting content, you grant us a limited, non-exclusive licence
               to store, display, and deliver that content as part of the
@@ -144,7 +144,7 @@ export default function TermsOfService() {
           </Section>
 
           <Section title="6. Prohibited conduct">
-            <p>You agree not to use Together to:</p>
+            <p>You agree not to use Togather to:</p>
             <ul>
               <li>Harass, threaten, or harm any person</li>
               <li>
@@ -157,10 +157,10 @@ export default function TermsOfService() {
               </li>
               <li>
                 Use automated tools to scrape, crawl, or extract data from
-                Together
+                Togather
               </li>
               <li>
-                Use Together for any commercial purpose other than as expressly
+                Use Togather for any commercial purpose other than as expressly
                 permitted
               </li>
             </ul>
@@ -185,7 +185,7 @@ export default function TermsOfService() {
 
           <Section title="8. Intellectual property">
             <p>
-              The Together name, logo, design, and all associated intellectual
+              The Togather name, logo, design, and all associated intellectual
               property are owned by us. Nothing in these Terms grants you any
               right to use our branding or intellectual property without our
               prior written consent.
@@ -194,21 +194,21 @@ export default function TermsOfService() {
 
           <Section title="9. Availability and changes">
             <p>
-              We aim to keep Together available at all times but cannot
+              We aim to keep Togather available at all times but cannot
               guarantee uninterrupted access. We may update, modify, or
               discontinue features at any time.
             </p>
             <p>
               We may update these Terms from time to time. If we make material
               changes, we'll notify you by email or by displaying a notice in
-              the service. Your continued use of Together after changes take
+              the service. Your continued use of Togather after changes take
               effect means you accept the updated Terms.
             </p>
           </Section>
 
           <Section title="10. Disclaimers">
             <p>
-              Together is provided "as is" and "as available" without warranties
+              Togather is provided "as is" and "as available" without warranties
               of any kind, express or implied. We do not warrant that the
               service will be error-free, secure, or uninterrupted.
             </p>
@@ -216,7 +216,7 @@ export default function TermsOfService() {
 
           <Section title="11. Limitation of liability">
             <p>
-              To the fullest extent permitted by law, Together's liability to
+              To the fullest extent permitted by law, Togather's liability to
               you for any claim arising out of or related to these Terms or the
               service is limited to the amount you paid us in the 12 months
               preceding the claim.

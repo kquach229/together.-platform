@@ -22,7 +22,7 @@ const LogoComponent = (props: React.SVGProps<SVGSVGElement>) => (
       letterSpacing="-0.5px"
       fill="#1A1208"
     >
-      {"together"}
+      {"togather"}
     </text>
     <text
       x={105}

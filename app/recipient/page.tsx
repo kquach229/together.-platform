@@ -113,7 +113,7 @@ export default function RecipientView() {
       {/* ── NAV ── */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-12 h-16 bg-[rgba(253,248,242,0.92)] backdrop-blur-md border-b border-[#E8DDD0]">
         <span className="font-playfair text-[22px] tracking-tight">
-          together<span className="text-terracotta">.</span>
+          Togather<span className="text-terracotta">.</span>
         </span>
         <div className="flex items-center gap-3">
           <button

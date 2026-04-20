@@ -1,31 +1,29 @@
 {
-  "name": "together.",
-  "short_name": "together.",
-  "start_url": "https://togethercards.vercel.app/",
+  "name": "togather.",
+  "short_name": "togather.",
+  "start_url": "https://togathercards.com/",
   "display": "standalone",
   "description": "Your Digital Greeting Cards",
   "lang": "en-US",
   "dir": "auto",
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#d4845a",
+  "background_color": "#f5ead8",
   "orientation": "any",
   "icons": [
     {
-      "src": "https://www.pwabuilder.com/assets/icons/icon_512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
     },
     {
-      "src": "https://www.pwabuilder.com/assets/icons/icon_192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "screenshots": [
     {
-      "src": "https://www.pwabuilder.com/assets/screenshots/screen1.png",
+      "src": "screenshot.png",
       "sizes": "2880x1800",
       "type": "image/png",
       "description": "A screenshot of the home page"
@@ -34,19 +32,19 @@
   "related_applications": [
     {
       "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=together"
+      "url": "https://play.google.com/store/apps/details?id=togather"
     },
     {
       "platform": "itunes",
-      "url": "https://apps.apple.com/us/app/together"
+      "url": "https://apps.apple.com/us/app/togather"
     }
   ],
   "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "together.",
+      "name": "togather.",
       "url": "/shortcut",
-      "description": "together. Shortcut"
+      "description": "togather. Shortcut"
     }
   ]
 }

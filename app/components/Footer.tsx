@@ -33,7 +33,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-12 mb-12 ">
           <div>
             <div className="font-playfair text-2xl text-[#FDF8F2] mb-3">
-              together<span className="text-terracotta">.</span>
+              togather<span className="text-terracotta">.</span>
             </div>
             <p className="text-sm text-[#8A7F74] leading-[1.7] font-light max-w-[220px]">
               Group greeting cards that actually feel personal. For every
@@ -60,7 +60,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-[#2E2820] pt-6 flex justify-between items-center">
           <p className="text-xs text-[#6A635D]">
-            © 2026 Together. All rights reserved.
+            © 2026 Togather. All rights reserved.
           </p>
           <div className="flex gap-5">
             {["Twitter", "Instagram", "LinkedIn"].map((s) => (

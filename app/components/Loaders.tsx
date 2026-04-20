@@ -9,7 +9,7 @@ import React from "react";
 
 // ─── 1. PAGE LOADER ──────────────────────────────────────────
 // Used in loading.tsx files and full-page suspense boundaries.
-// Shows the together. logo with an orbiting card animation.
+// Shows the togather. logo with an orbiting card animation.
 
 interface PageLoaderProps {
   label?: string;
@@ -19,7 +19,7 @@ export function PageLoader({ label = "Loading…" }: PageLoaderProps) {
   return (
     <div className="min-h-screen bg-[#FDF8F2] flex flex-col items-center justify-center gap-6">
       <div className="font-playfair text-[28px] tracking-tight text-[#1A1208]">
-        together<span className="text-terracotta">.</span>
+        togather<span className="text-terracotta">.</span>
       </div>
 
       {/* Orbiting card squares */}
@@ -113,7 +113,7 @@ export function DotsLoader({ label }: DotsLoaderProps) {
 
 // ─── 3. SPINNER LOADER ───────────────────────────────────────
 // Used for API calls and data fetching states.
-// A pen emoji inside a spinning ring — on-brand for Together.
+// A pen emoji inside a spinning ring — on-brand for Togather.
 
 interface SpinnerLoaderProps {
   label?: string;

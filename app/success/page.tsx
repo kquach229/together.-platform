@@ -26,7 +26,7 @@ export default async function SuccessPage() {
           href="/"
           className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          together<span className="text-terracotta">.</span>
+          Togather<span className="text-terracotta">.</span>
         </Link>
       </nav>
 

@@ -195,7 +195,7 @@ export default function CreateCard() {
           href="/"
           className="font-playfair text-[20px] sm:text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          together<span className="text-terracotta">.</span>
+          togather<span className="text-terracotta">.</span>
         </a>
 
         <div className="flex flex-col xs:flex-row sm:flex-row sm:items-center gap-3">

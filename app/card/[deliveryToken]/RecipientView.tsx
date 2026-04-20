@@ -114,7 +114,7 @@ export default function RecipientView({ card }: Props) {
           href="/"
           className="font-playfair text-[22px] tracking-tight no-underline text-[#1A1208]"
         >
-          together<span className="text-terracotta">.</span>
+          togather<span className="text-terracotta">.</span>
         </a>
         <div className="flex items-center gap-3">
           <button

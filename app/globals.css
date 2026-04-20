@@ -126,7 +126,7 @@ body {
   background-color: rgba(26, 18, 8, 0.4);
 }
 
-/* Close button — match Together border style */
+/* Close button — match togather border style */
 [data-radix-dialog-close] {
   color: #8c7b6b;
   border-radius: 50%;

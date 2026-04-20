@@ -149,7 +149,7 @@ function InviteMockup() {
       </div>
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <div className="flex-1 px-3 py-2 border border-[#E8DDD0] rounded-lg text-xs font-mono text-muted-taupe bg-[#FAFAFA] truncate">
-          together.co/sign/abc-xyz
+          togather.co/sign/abc-xyz
         </div>
         <button
           onClick={() => {
@@ -355,7 +355,7 @@ export default function HowItWorks() {
             in minutes.
           </h1>
           <p className="text-[16px] sm:text-[18px] text-muted-taupe font-light leading-[1.75] max-w-[500px] mx-auto mb-8 sm:mb-10">
-            Together makes group cards effortless — for the person organising
+            togather. makes group cards effortless — for the person organising
             and the people signing.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">

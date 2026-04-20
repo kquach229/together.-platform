@@ -6,7 +6,7 @@ const values = [
   {
     emoji: "💌",
     title: "Moments deserve more than a mass email",
-    body: "A group card isn't just a formality — it's a record of who showed up. We built Together to make that easy, not an afterthought.",
+    body: "A group card isn't just a formality — it's a record of who showed up. We built Togather to make that easy, not an afterthought.",
   },
   {
     emoji: "🔒",
@@ -21,7 +21,7 @@ const values = [
   {
     emoji: "🌍",
     title: "Built for distributed teams",
-    body: "When your team is across six time zones, 'passing the card around' doesn't work. Together does.",
+    body: "When your team is across six time zones, 'passing the card around' doesn't work. Togather does.",
   },
 ];
 
@@ -86,7 +86,7 @@ export default function About() {
           deserves a real moment.
         </h1>
         <p className="text-[17px] text-[#8C7B6B] font-light leading-[1.75]">
-          Together started with one question: why is it so hard to do something
+          togather. started with one question: why is it so hard to do something
           thoughtful for the people you work with?
         </p>
       </section>
@@ -149,7 +149,7 @@ export default function About() {
             </p>
 
             <p className="text-[15px] text-[#8C7B6B] font-light leading-[1.85]">
-              Together brings everything into one place so anyone can collect
+              togather. brings everything into one place so anyone can collect
               messages and photos, collaborate easily, and deliver a shared
               digital card at the right time. It works for workplace moments
               like team farewells and promotions, as well as personal occasions
