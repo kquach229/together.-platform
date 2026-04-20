@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
       `Received webhook with ID ${id} and event type of ${eventType}`,
     );
 
+    // redeploy
     if (eventType === "user.created") {
       const { id, email_addresses, first_name, last_name } = evt.data;
       const user = await prisma.user.upsert({
