@@ -150,7 +150,7 @@ export default function CreateCard() {
           openingMessage: message || undefined,
           theme,
           signingDeadline: deadline
-            ? new Date(deadline).toISOString()
+            ? dateInputToISO(deadline, "end")
             : undefined,
           creatorPhotoUrl, // full URL or null
         }),
