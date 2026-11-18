@@ -72,9 +72,7 @@ export async function POST(req: NextRequest) {
           theme,
           status: "collecting",
           creatorPhotoUrl: creatorPhotoUrl || null,
-          signingDeadline: signingDeadline
-            ? dateInputToISO(signingDeadline, "end")
-            : undefined,
+          signingDeadline: signingDeadline ? new Date(signingDeadline) : null,
           scheduledDeliveryAt: scheduledDeliveryAt
             ? new Date(scheduledDeliveryAt)
             : null,

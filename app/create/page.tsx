@@ -718,7 +718,7 @@ export default function CreateCard() {
                   <div className="mt-3 flex items-center gap-2 text-xs text-muted-taupe">
                     <span>⏰</span>
                     <span>
-                      Signing closes // live preview
+                      Signing closes
                       {new Date(
                         dateInputToISO(deadline, "end"),
                       ).toLocaleDateString("en-US", {
