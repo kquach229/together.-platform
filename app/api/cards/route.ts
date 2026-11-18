@@ -1,3 +1,4 @@
+import { dateInputToISO } from "@/lib/helpers/dates";
 import { getUser } from "@/lib/helpers/getUser";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -71,7 +72,9 @@ export async function POST(req: NextRequest) {
           theme,
           status: "collecting",
           creatorPhotoUrl: creatorPhotoUrl || null,
-          signingDeadline: signingDeadline ? new Date(signingDeadline) : null,
+          signingDeadline: signingDeadline
+            ? dateInputToISO(signingDeadline, "end")
+            : undefined,
           scheduledDeliveryAt: scheduledDeliveryAt
             ? new Date(scheduledDeliveryAt)
             : null,

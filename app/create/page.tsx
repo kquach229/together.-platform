@@ -1,5 +1,6 @@
 "use client";
 
+import { dateInputToISO } from "@/lib/helpers/dates";
 import { getUser } from "@/lib/helpers/getUser";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
 import { CARD_THEMES } from "@/lib/theme";
@@ -717,8 +718,10 @@ export default function CreateCard() {
                   <div className="mt-3 flex items-center gap-2 text-xs text-muted-taupe">
                     <span>⏰</span>
                     <span>
-                      Signing closes{" "}
-                      {new Date(deadline).toLocaleDateString("en-US", {
+                      Signing closes // live preview
+                      {new Date(
+                        dateInputToISO(deadline, "end"),
+                      ).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                       })}
