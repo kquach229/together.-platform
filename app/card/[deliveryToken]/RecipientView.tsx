@@ -1,5 +1,6 @@
 "use client";
 
+import { imageUrl } from "@/lib/helpers/imageUrl";
 import { useState } from "react";
 
 const themes: Record<string, { from: string; to: string }> = {
@@ -239,7 +240,7 @@ export default function RecipientView({ card }: Props) {
       <div className="w-full h-[70vh] overflow-hidden">
         {card.creatorPhotoUrl && (
           <img
-            src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${card.creatorPhotoUrl}`}
+            src={imageUrl(card.creatorPhotoUrl)}
             alt="Cover"
             className="w-full h-full object-cover object-[center_30%] rounded-br-sm rounded-bl-sm"
           />
@@ -270,7 +271,7 @@ export default function RecipientView({ card }: Props) {
                     {sig.photoUrl && (
                       <div className="w-full overflow-hidden">
                         <img
-                          src={`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${sig.photoUrl}`}
+                          src={imageUrl(sig.photoUrl)}
                           alt={`Photo from ${sig.signerName}`}
                           className="w-full h-auto object-cover max-h-105"
                         />

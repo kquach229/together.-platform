@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
+import { deleteObject } from "@/lib/r2";
 
 // ─── Validation schema ───────────────────────────────────────
 const updateCardSchema = z.object({
@@ -280,6 +281,22 @@ export async function DELETE(
       );
     }
 
+    // Collect every image key BEFORE deleting — the cascade removes the
+    // signature rows, so we'd lose the keys afterwards.
+    const signatures = await prisma.signature.findMany({
+      where: { cardId },
+      select: { photoUrl: true },
+    });
+
+    const imageKeys = Array.from(
+      new Set(
+        [
+          result.card.creatorPhotoUrl,
+          ...signatures.map((s) => s.photoUrl),
+        ].filter((key): key is string => !!key),
+      ),
+    );
+
     await prisma.$transaction(async (tx) => {
       await tx.notification.create({
         data: {
@@ -298,6 +315,22 @@ export async function DELETE(
 
       await tx.card.delete({ where: { id: cardId } });
     });
+
+    // Only after the DB delete succeeds. allSettled so a storage hiccup
+    // never turns a successful card deletion into an error response.
+    if (imageKeys.length > 0) {
+      const outcomes = await Promise.allSettled(
+        imageKeys.map((key) => deleteObject(key)),
+      );
+      outcomes.forEach((outcome, i) => {
+        if (outcome.status === "rejected") {
+          console.error(
+            `[DELETE /api/cards/:id] failed to delete image ${imageKeys[i]}`,
+            outcome.reason,
+          );
+        }
+      });
+    }
 
     return NextResponse.json(
       {

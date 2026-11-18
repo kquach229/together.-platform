@@ -1,50 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client } from "@aws-sdk/client-s3";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-import { randomBytes } from "crypto";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { r2, R2_BUCKET } from "@/lib/r2";
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
-const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+const MAX_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   try {
-    const { contentType, cardId } = await req.json();
+    const { contentType, size } = await req.json();
 
-    const ext = contentType.split("/")[1];
-    const uid = randomBytes(16).toString("hex");
+    const ext = EXT[contentType];
+    if (!ext) {
+      return NextResponse.json(
+        { error: "Unsupported file type" },
+        { status: 422 },
+      );
+    }
+    if (typeof size !== "number" || size <= 0 || size > MAX_BYTES) {
+      return NextResponse.json(
+        { error: "File must be under 5MB" },
+        { status: 422 },
+      );
+    }
 
-    const key = cardId
-      ? `signatures/${cardId}/${uid}.${ext}`
-      : `cover-photos/${uid}.${ext}`;
+    const key = `uploads/${crypto.randomUUID()}.${ext}`;
 
-    const { url, fields } = await createPresignedPost(s3, {
-      Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: key,
-      Conditions: [
-        ["content-length-range", 0, MAX_SIZE_BYTES],
-        ["eq", "$Content-Type", contentType],
-      ],
-      Fields: {
-        "Content-Type": contentType,
-      },
-      Expires: 60,
-    });
+    const uploadUrl = await getSignedUrl(
+      r2,
+      new PutObjectCommand({
+        Bucket: R2_BUCKET,
+        Key: key,
+        ContentType: contentType,
+        ContentLength: size,
+      }),
+      { expiresIn: 60 },
+    );
 
-    return NextResponse.json({ url, fields, key });
+    return NextResponse.json({ uploadUrl, key });
   } catch (err) {
-    console.error("[UPLOAD ERROR]", err);
+    console.error("[POST /api/upload]", err);
     return NextResponse.json(
-      { error: "Failed to generate upload URL" },
+      { error: "Internal server error" },
       { status: 500 },
     );
   }
 }
-
-// redeploy
