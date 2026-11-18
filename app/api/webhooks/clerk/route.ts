@@ -7,20 +7,35 @@ export async function POST(req: NextRequest) {
     const evt = await verifyWebhook(req);
     const { id } = evt.data;
     const eventType = evt.type;
+
     console.log(
       `Received webhook with ID ${id} and event type of ${eventType}`,
     );
 
-    // redeploy
     if (eventType === "user.created") {
       const { id, email_addresses, first_name, last_name } = evt.data;
-      const user = await prisma.user.upsert({
+
+      const email = email_addresses?.[0]?.email_address ?? "";
+
+      const name =
+        [first_name, last_name].filter(Boolean).join(" ").trim() ||
+        email.split("@")[0];
+
+      console.log("Clerk user data:", {
+        id,
+        first_name,
+        last_name,
+        email,
+        name,
+      });
+
+      await prisma.user.upsert({
         where: { clerkId: id },
         update: {},
         create: {
           clerkId: id,
-          email: email_addresses[0].email_address,
-          name: `${first_name} ${last_name}`,
+          email,
+          name,
           cardsRemaining: 1,
         },
       });
