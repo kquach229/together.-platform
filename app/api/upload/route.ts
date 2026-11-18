@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         ContentType: contentType,
         ContentLength: size,
       }),
-      { expiresIn: 60 },
+      { expiresIn: 600 },
     );
 
     return NextResponse.json({ uploadUrl, key });
