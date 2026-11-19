@@ -8,7 +8,7 @@ import { set } from "date-fns";
 // ─── Types ───────────────────────────────────────────────────
 interface CardPackPrice {
   id: string;
-  packSize: "pack_1" | "pack_5" | "pack_10";
+  packSize: "pack_1" | "pack_3" | "pack_5" | "pack_10";
   cardsIncluded: number;
   amountCents: number;
   stripePriceId: string;
@@ -81,6 +81,7 @@ export default function Pricing() {
   // Static fallback prices while loading (matches your Stripe data)
   const fallback: Omit<CardPackPrice, "id" | "stripePriceId" | "active">[] = [
     { packSize: "pack_1", cardsIncluded: 1, amountCents: 299 },
+    { packSize: "pack_3", cardsIncluded: 3, amountCents: 1 },
     { packSize: "pack_5", cardsIncluded: 5, amountCents: 1199 },
     { packSize: "pack_10", cardsIncluded: 10, amountCents: 1999 },
   ];
