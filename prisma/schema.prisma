@@ -9,7 +9,7 @@ datasource db {
 
 
 enum CardPackSize {
-  pack_3
+  pack_21
   pack_1
   pack_5
   pack_10
