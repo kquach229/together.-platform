@@ -645,7 +645,7 @@ export default function SignView({ card, signingToken }: Props) {
                 <span className="font-medium text-[#1A1208]">
                   {card.recipientName}
                 </span>
-                . Only the card organiser can see who has signed.
+                .
               </p>
             </div>
 
