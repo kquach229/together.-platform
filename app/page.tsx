@@ -28,12 +28,61 @@ const steps = [
 ];
 
 const occasions = [
-  "🎂 Birthdays",
-  "💍 Weddings",
-  "👋 Farewells",
-  "🎉 Retirements",
-  "🍼 Baby Showers",
-  "💼 New Jobs",
+  // Personal celebrations
+  "Birthday",
+  "Anniversary",
+  "Wedding",
+  "Engagement",
+  "New Baby",
+  "Baby Shower",
+  "Bridal Shower",
+  "Gender Reveal",
+  "New Home",
+  "New Car",
+
+  // Career and achievements
+  "Farewell",
+  "Congratulations",
+  "Graduation",
+  "New Job",
+  "Promotion",
+  "Retirement",
+  "Work Anniversary",
+  "First Day",
+  "New Business",
+
+  // Appreciation and encouragement
+  "Thank You",
+  "Get Well Soon",
+  "Sympathy",
+  "Encouragement",
+  "Just Because",
+  "Miss You",
+  "Good Luck",
+  "Thinking of You",
+  "Apology",
+  "Welcome Back",
+
+  // Holidays
+  "Holiday",
+  "Christmas",
+  "New Year's",
+  "Valentine's Day",
+  "Easter",
+  "Halloween",
+  "Thanksgiving",
+  "Mother's Day",
+  "Father's Day",
+  "St. Patrick's Day",
+  "Fourth of July",
+  "Lunar New Year",
+  "Diwali",
+  "Hanukkah",
+  "Eid al-Fitr",
+  "Eid al-Adha",
+  "Ramadan",
+  "Passover",
+  "International Women's Day",
 ];
 
 // Reusable animation variants

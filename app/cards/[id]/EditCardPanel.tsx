@@ -18,18 +18,61 @@ const themes = [
 ];
 
 const occasions = [
+  // Personal celebrations
   "Birthday",
+  "Anniversary",
+  "Wedding",
+  "Engagement",
+  "New Baby",
+  "Baby Shower",
+  "Bridal Shower",
+  "Gender Reveal",
+  "New Home",
+  "New Car",
+
+  // Career and achievements
   "Farewell",
   "Congratulations",
-  "Wedding",
-  "New Baby",
-  "Get Well Soon",
   "Graduation",
-  "Thank You",
-  "Holiday",
+  "New Job",
+  "Promotion",
+  "Retirement",
   "Work Anniversary",
-  "Just Because",
+  "First Day",
+  "New Business",
+
+  // Appreciation and encouragement
+  "Thank You",
+  "Get Well Soon",
   "Sympathy",
+  "Encouragement",
+  "Just Because",
+  "Miss You",
+  "Good Luck",
+  "Thinking of You",
+  "Apology",
+  "Welcome Back",
+
+  // Holidays
+  "Holiday",
+  "Christmas",
+  "New Year's",
+  "Valentine's Day",
+  "Easter",
+  "Halloween",
+  "Thanksgiving",
+  "Mother's Day",
+  "Father's Day",
+  "St. Patrick's Day",
+  "Fourth of July",
+  "Lunar New Year",
+  "Diwali",
+  "Hanukkah",
+  "Eid al-Fitr",
+  "Eid al-Adha",
+  "Ramadan",
+  "Passover",
+  "International Women's Day",
 ];
 
 interface EditCardPanelProps {

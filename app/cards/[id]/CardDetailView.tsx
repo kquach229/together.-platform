@@ -3,11 +3,10 @@
 // app/dashboard/cards/[id]/CardDetailView.tsx
 // The creator's full view of their card — signatures, stats, actions.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DeleteCardDialog from "@/app/components/DeleteCardDialog";
 import EditCardPanel from "./EditCardPanel";
-import { UserAvatar } from "@clerk/nextjs";
 import { imageUrl } from "@/lib/helpers/imageUrl";
 
 // ─── Types ───────────────────────────────────────────────────
@@ -101,12 +100,6 @@ const statusConfig: Record<
     bg: "bg-[#EEF3EE]",
     text: "text-[#5A7D66]",
   },
-  archived: {
-    label: "Archived",
-    dot: "bg-[#C5B8AD]",
-    bg: "bg-[#F5F4F2]",
-    text: "text-[#8C7B6B]",
-  },
 };
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -149,20 +142,31 @@ export default function CardDetailView({ card }: Props) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [recipientLinkCopied, setRecipientLinkCopied] = useState(false);
+  const [signingUrl, setSigningUrl] = useState("");
+
+  useEffect(() => {
+    setSigningUrl(`${window.location.origin}/sign/${card.signingToken}`);
+  }, [card.signingToken]);
 
   const theme = themes[card.theme] ?? themes.warm;
   const isMidnight = card.theme === "midnight";
   const emoji = occasionEmojis[card.occasion] ?? "🎉";
   const status = statusConfig[card.status] ?? statusConfig.draft;
-  const signingUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/sign/${card.signingToken}`;
   const visibleSigs = signatures.filter((s) => !s.isHidden);
   const hiddenSigs = signatures.filter((s) => s.isHidden);
 
   // ── Copy signing link ───────────────────────────────────────
-  function handleCopyLink() {
-    navigator.clipboard.writeText(signingUrl).catch(() => {});
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2500);
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(signingUrl);
+      setLinkCopied(true);
+
+      setTimeout(() => {
+        setLinkCopied(false);
+      }, 2500);
+    } catch (error) {
+      console.error("Failed to copy signing link:", error);
+    }
   }
 
   const handleCopyRecipientLink = () => {
@@ -214,21 +218,6 @@ export default function CardDetailView({ card }: Props) {
     } finally {
       setIsDelivering(false);
       setShowDeliver(false);
-    }
-  }
-
-  // ── Archive card ────────────────────────────────────────────
-  async function handleArchive() {
-    setIsArchiving(true);
-    try {
-      await fetch(`/api/cards/${card.id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "archived" }),
-      });
-      router.push("/dashboard");
-    } finally {
-      setIsArchiving(false);
     }
   }
 
@@ -452,7 +441,7 @@ export default function CardDetailView({ card }: Props) {
                             className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium shrink-0 mt-0.5"
                             style={{ background: c.bg, color: c.text }}
                           >
-                            <UserAvatar />
+                            {getInitials(sig.signerName)}
                           </div>
 
                           {/* Content */}

@@ -13,13 +13,19 @@ const occasions = [
   { emoji: "🎊", label: "Congratulations" },
   { emoji: "💍", label: "Wedding" },
   { emoji: "🍼", label: "New Baby" },
-  { emoji: "🏥", label: "Get Well Soon" },
+  { emoji: "❤️‍🩹", label: "Get Well Soon" },
   { emoji: "🎓", label: "Graduation" },
   { emoji: "🙏", label: "Thank You" },
   { emoji: "🎄", label: "Holiday" },
-  { emoji: "💼", label: "Work Anniversary" },
+  { emoji: "🏆", label: "Work Anniversary" },
   { emoji: "🌟", label: "Just Because" },
-  { emoji: "💔", label: "Sympathy" },
+  { emoji: "🕊️", label: "Sympathy" },
+  { emoji: "💖", label: "Anniversary" },
+  { emoji: "🏡", label: "Housewarming" },
+  { emoji: "👶", label: "Baby Shower" },
+  { emoji: "🎖️", label: "Retirement" },
+  { emoji: "💪", label: "Encouragement" },
+  { emoji: "❤️", label: "Love & Appreciation" },
 ];
 
 const steps = [
@@ -106,11 +112,18 @@ export default function CreateCard() {
     ? `${window.location.origin}/sign/${signingToken}`
     : "Generating link…";
 
-  function handleCopy() {
+  async function handleCopy() {
     if (!signingToken) return;
-    navigator.clipboard.writeText(shareLink).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy signing link:", err);
+      setSubmitError("Unable to copy the link. Please copy it manually.");
+    }
   }
 
   function canProceed() {
@@ -121,6 +134,8 @@ export default function CreateCard() {
   }
 
   async function handleCreateCard() {
+    if (isSubmitting || signingToken) return;
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -213,7 +228,11 @@ export default function CreateCard() {
                 className="flex items-center flex-1 last:flex-none"
               >
                 <button
-                  onClick={() => s.num < step && setStep(s.num)}
+                  onClick={() => {
+                    if (!signingToken && s.num < step) {
+                      setStep(s.num);
+                    }
+                  }}
                   className={`flex items-center gap-2 text-sm font-medium transition-colors whitespace-nowrap ${
                     s.num === step
                       ? "text-terracotta"

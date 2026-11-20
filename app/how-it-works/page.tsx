@@ -10,8 +10,8 @@ const steps = [
     title: "Create your card in 60 seconds",
     desc: "Pick an occasion, give the card a recipient name, and choose a theme. That's it — your card is ready to share before you've finished your coffee.",
     detail: [
-      "12 occasions to choose from — birthdays, farewells, graduations, and more",
-      "5 built-in themes, 40+ premium themes with Plus",
+      "18 occasions to choose from — birthdays, weddings, graduations, and more",
+      "6 built-in themes, 40+ premium themes with Plus",
       "Optional opening message that appears at the top of the card",
       "Set a signing deadline so nobody misses it",
     ],
@@ -102,10 +102,22 @@ function CreateMockup() {
   const occasions = [
     { emoji: "🎂", label: "Birthday" },
     { emoji: "👋", label: "Farewell" },
-    { emoji: "🎊", label: "Congrats" },
+    { emoji: "🎊", label: "Congratulations" },
+    { emoji: "💍", label: "Wedding" },
     { emoji: "🍼", label: "New Baby" },
+    { emoji: "❤️‍🩹", label: "Get Well Soon" },
     { emoji: "🎓", label: "Graduation" },
     { emoji: "🙏", label: "Thank You" },
+    { emoji: "🎄", label: "Holiday" },
+    { emoji: "🏆", label: "Work Anniversary" },
+    { emoji: "🌟", label: "Just Because" },
+    { emoji: "🕊️", label: "Sympathy" },
+    { emoji: "💖", label: "Anniversary" },
+    { emoji: "🏡", label: "Housewarming" },
+    { emoji: "👶", label: "Baby Shower" },
+    { emoji: "🎖️", label: "Retirement" },
+    { emoji: "💪", label: "Encouragement" },
+    { emoji: "❤️", label: "Love & Appreciation" },
   ];
   return (
     <div className="bg-white rounded-2xl border border-[#E8DDD0] p-5 shadow-[0_8px_32px_rgba(26,18,8,0.07)]">

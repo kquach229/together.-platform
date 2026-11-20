@@ -59,37 +59,126 @@ function getInitials(name: string) {
 
 function getOccasionHeading(occasion: string, recipientName: string) {
   const headings: Record<string, string> = {
+    // Personal celebrations
     Birthday: `Happy Birthday, ${recipientName}!`,
-    Farewell: `Farewell, ${recipientName}!`,
-    Congratulations: `Congratulations, ${recipientName}!`,
+    Anniversary: `Happy Anniversary, ${recipientName}!`,
     Wedding: `Happy Wedding Day, ${recipientName}!`,
-    "New Baby": `Welcome to the world! For ${recipientName}`,
-    "Get Well Soon": `Get Well Soon, ${recipientName}!`,
-    Graduation: `Congratulations on your graduation, ${recipientName}!`,
-    "Thank You": `Thank you, ${recipientName}!`,
-    Holiday: `Happy Holidays, ${recipientName}!`,
+    Engagement: `Congratulations on Your Engagement, ${recipientName}!`,
+    "New Baby": `Welcome, ${recipientName}!`,
+    "Baby Shower": `Celebrating Your Little One, ${recipientName}!`,
+    "Bridal Shower": `Here's to the Bride-to-Be, ${recipientName}!`,
+    "Gender Reveal": `A Little Surprise Is on the Way, ${recipientName}!`,
+    "New Home": `Congratulations on Your New Home, ${recipientName}!`,
+    "New Car": `Enjoy Your New Ride, ${recipientName}!`,
+
+    // Career and achievements
+    Farewell: `Wishing You All the Best, ${recipientName}!`,
+    Congratulations: `Congratulations, ${recipientName}!`,
+    Graduation: `Congratulations on Your Graduation, ${recipientName}!`,
+    "New Job": `Congratulations on Your New Job, ${recipientName}!`,
+    Promotion: `Congratulations on Your Promotion, ${recipientName}!`,
+    Retirement: `Happy Retirement, ${recipientName}!`,
     "Work Anniversary": `Happy Work Anniversary, ${recipientName}!`,
-    "Just Because": `This one's for you, ${recipientName}!`,
-    Sympathy: `Thinking of you, ${recipientName}.`,
+    "First Day": `Wishing You a Great First Day, ${recipientName}!`,
+    "New Business": `Congratulations on Your New Venture, ${recipientName}!`,
+
+    // Appreciation and encouragement
+    "Thank You": `Thank You, ${recipientName}!`,
+    "Get Well Soon": `Get Well Soon, ${recipientName}!`,
+    Sympathy: `Thinking of You, ${recipientName}.`,
+    Encouragement: `You've Got This, ${recipientName}!`,
+    "Just Because": `This One's for You, ${recipientName}!`,
+    "Miss You": `Missing You, ${recipientName}!`,
+    "Good Luck": `Wishing You the Best of Luck, ${recipientName}!`,
+    "Thinking of You": `Thinking of You, ${recipientName}.`,
+    Apology: `I'm Sorry, ${recipientName}.`,
+    "Welcome Back": `Welcome Back, ${recipientName}!`,
+
+    // Major holidays
+    Holiday: `Happy Holidays, ${recipientName}!`,
+    Christmas: `Merry Christmas, ${recipientName}!`,
+    "New Year's": `Happy New Year, ${recipientName}!`,
+    "Valentine's Day": `Happy Valentine's Day, ${recipientName}!`,
+    Easter: `Happy Easter, ${recipientName}!`,
+    Halloween: `Happy Halloween, ${recipientName}!`,
+    Thanksgiving: `Happy Thanksgiving, ${recipientName}!`,
+    "Mother's Day": `Happy Mother's Day, ${recipientName}!`,
+    "Father's Day": `Happy Father's Day, ${recipientName}!`,
+    "St. Patrick's Day": `Happy St. Patrick's Day, ${recipientName}!`,
+    "Fourth of July": `Happy Independence Day, ${recipientName}!`,
+    "Lunar New Year": `Happy Lunar New Year, ${recipientName}!`,
+    Diwali: `Happy Diwali, ${recipientName}!`,
+    Hanukkah: `Happy Hanukkah, ${recipientName}!`,
+    "Eid al-Fitr": `Eid Mubarak, ${recipientName}!`,
+    "Eid al-Adha": `Eid Mubarak, ${recipientName}!`,
+    Ramadan: `Ramadan Mubarak, ${recipientName}!`,
+    Passover: `Happy Passover, ${recipientName}!`,
+    "International Women's Day": `Happy International Women's Day, ${recipientName}!`,
   };
-  return headings[occasion] ?? `${occasion}, ${recipientName}!`;
+
+  // Safe fallback for occasions not explicitly listed
+  return headings[occasion] ?? `Celebrating ${recipientName}!`;
 }
 
 function getOccasionEmoji(occasion: string) {
   const emojis: Record<string, string> = {
+    // Personal celebrations
     Birthday: "🎂",
+    Anniversary: "❤️",
+    Wedding: "💍",
+    Engagement: "💎",
+    "New Baby": "👶",
+    "Baby Shower": "🍼",
+    "Bridal Shower": "💐",
+    "Gender Reveal": "🎀",
+    "New Home": "🏡",
+    "New Car": "🚗",
+
+    // Career and achievements
     Farewell: "👋",
     Congratulations: "🎊",
-    Wedding: "💍",
-    "New Baby": "🍼",
-    "Get Well Soon": "🏥",
     Graduation: "🎓",
+    "New Job": "💼",
+    Promotion: "🚀",
+    Retirement: "🥂",
+    "Work Anniversary": "🏆",
+    "First Day": "🌟",
+    "New Business": "🎉",
+
+    // Appreciation and encouragement
     "Thank You": "🙏",
+    "Get Well Soon": "🌷",
+    Sympathy: "🕊️",
+    Encouragement: "💪",
+    "Just Because": "✨",
+    "Miss You": "💌",
+    "Good Luck": "🍀",
+    "Thinking of You": "💛",
+    Apology: "💐",
+    "Welcome Back": "🎈",
+
+    // Major holidays
     Holiday: "🎄",
-    "Work Anniversary": "💼",
-    "Just Because": "🌟",
-    Sympathy: "💔",
+    Christmas: "🎄",
+    "New Year's": "🥳",
+    "Valentine's Day": "❤️",
+    Easter: "🐰",
+    Halloween: "🎃",
+    Thanksgiving: "🦃",
+    "Mother's Day": "💐",
+    "Father's Day": "👔",
+    "St. Patrick's Day": "☘️",
+    "Fourth of July": "🇺🇸",
+    "Lunar New Year": "🧧",
+    Diwali: "🪔",
+    Hanukkah: "🕎",
+    "Eid al-Fitr": "🌙",
+    "Eid al-Adha": "🌙",
+    Ramadan: "🌙",
+    Passover: "🍷",
+    "International Women's Day": "💜",
   };
+
   return emojis[occasion] ?? "🎉";
 }
 
