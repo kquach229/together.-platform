@@ -685,18 +685,67 @@ export default function SignView({ card, signingToken }: Props) {
 
         {/* RIGHT: SIDEBAR */}
         <div className="sticky top-24">
-          {/* Signature count */}
+          {/* Already signed */}
           {card.signatures.length > 0 && (
-            <div className="bg-white border border-[#E8DDD0] rounded-xl p-4 mb-4 text-center">
-              <div className="text-2xl font-playfair text-[#1A1208]">
-                {card.signatures.length}
+            <>
+              <div className="text-[11px] font-medium tracking-[1.5px] uppercase text-[#8C7B6B] mb-3">
+                Already signed ({card.signatures.length})
               </div>
-              <div className="text-xs text-[#8C7B6B] mt-1">
-                {card.signatures.length === 1
-                  ? "Person has signed"
-                  : "People have signed"}
+
+              <div className="flex flex-col gap-2 mb-4">
+                {card.signatures.slice(0, 6).map((s, i) => {
+                  const c = bubbleColors[i % bubbleColors.length];
+
+                  const timeAgo = Math.max(
+                    0,
+                    Math.round(
+                      (Date.now() - new Date(s.createdAt).getTime()) / 60000,
+                    ),
+                  );
+
+                  const timeLabel =
+                    timeAgo < 60
+                      ? `${timeAgo}m ago`
+                      : timeAgo < 1440
+                        ? `${Math.round(timeAgo / 60)}h ago`
+                        : `${Math.round(timeAgo / 1440)}d ago`;
+
+                  return (
+                    <div
+                      key={s.id}
+                      className="flex items-center gap-3 bg-white border border-[#E8DDD0] rounded-xl p-3"
+                    >
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-medium shrink-0"
+                        style={{
+                          background: c.avatar,
+                          color: c.avatarText,
+                        }}
+                      >
+                        {getInitials(s.signerName)}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {s.signerName}
+                        </div>
+                        <div className="text-xs text-[#8C7B6B]">Signed</div>
+                      </div>
+
+                      <div className="text-[10px] text-[#8C7B6B] shrink-0">
+                        {timeLabel}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {card.signatures.length > 6 && (
+                  <p className="text-xs text-[#8C7B6B] text-center font-light pt-1">
+                    +{card.signatures.length - 6} more
+                  </p>
+                )}
               </div>
-            </div>
+            </>
           )}
 
           {/* Deadline */}
