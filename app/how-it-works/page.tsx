@@ -76,20 +76,16 @@ const steps = [
 
 const faqs = [
   {
-    q: "Do signers need to create an account?",
-    a: "No. Anyone with the signing link can add their message and photo without signing up. Only the card creator needs an account.",
-  },
-  {
     q: "Can the recipient see the card before I send it?",
     a: "Never. All messages are completely hidden until you choose to deliver the card. You're in full control of the timing.",
   },
   {
     q: "How many people can sign one card?",
-    a: "On the free plan, up to 10 signers per card. Plus and Team plans support unlimited signers.",
+    a: "There is no limit to how many people can sign a card. However, there is a signing deadline, and no signatures can be added after card has been delivered.",
   },
   {
     q: "What happens after I deliver the card?",
-    a: "The recipient gets a link to their card page, where they can read every message, view photos, and download a PDF keepsake.",
+    a: "The recipient gets a link to their card page, where they can read every message, view photos, and keep for memories.",
   },
   {
     q: "Can I edit a card after it's been delivered?",
@@ -173,24 +169,7 @@ function InviteMockup() {
           {copied ? "✓" : "Copy"}
         </button>
       </div>
-      <div className="text-[10px] font-medium tracking-[1.5px] uppercase text-muted-taupe mb-2">
-        Share via
-      </div>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {[
-          { icon: "💬", label: "Slack" },
-          { icon: "✉️", label: "Email" },
-          { icon: "📱", label: "WhatsApp" },
-        ].map((s) => (
-          <button
-            key={s.label}
-            className="flex-1 min-w-[70px] flex items-center justify-center gap-1.5 px-2 py-2 border border-[#E8DDD0] rounded-lg text-xs font-medium hover:border-terracotta hover:text-terracotta transition-all font-dm-sans bg-white cursor-pointer"
-          >
-            <span>{s.icon}</span>
-            {s.label}
-          </button>
-        ))}
-      </div>
+
       <div className="flex items-center gap-2 bg-[#F5EAD8] rounded-xl px-3 py-2.5">
         <span className="text-sm">🔒</span>
         <span className="text-[11px] text-muted-taupe font-light">

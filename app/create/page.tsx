@@ -564,27 +564,6 @@ export default function CreateCard() {
                   </p>
                 </div>
 
-                {/* Share options */}
-                <div className="text-xs font-medium text-muted-taupe uppercase tracking-[1.5px] mb-3">
-                  Share via
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-                  {[
-                    { icon: "✉️", label: "Email" },
-                    { icon: "💬", label: "Slack" },
-                    { icon: "📱", label: "WhatsApp" },
-                  ].map((s) => (
-                    <button
-                      key={s.label}
-                      className="flex items-center gap-2.5 px-4 py-3 border border-[#E8DDD0] rounded-xl bg-white text-sm font-medium hover:border-terracotta hover:text-terracotta transition-all"
-                    >
-                      <span className="text-base">{s.icon}</span>
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-
                 {/* What happens next */}
                 <div className="border border-[#E8DDD0] rounded-xl bg-white p-5">
                   <div className="text-xs font-medium text-muted-taupe uppercase tracking-[1.5px] mb-4">
@@ -736,7 +715,7 @@ export default function CreateCard() {
                   <div className="mt-3 flex items-center gap-2 text-xs text-muted-taupe">
                     <span>⏰</span>
                     <span>
-                      Signing closes
+                      Signing closes{" "}
                       {new Date(
                         dateInputToISO(deadline, "end"),
                       ).toLocaleDateString("en-US", {
