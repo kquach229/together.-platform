@@ -401,8 +401,7 @@ export default function CardDetailView({ card }: Props) {
                     </button>
                   </div>
                   <p className="text-xs text-[#8C7B6B] mt-2 font-light">
-                    Share this link with anyone you'd like to sign the card. No
-                    account needed.
+                    Share this link with anyone you'd like to sign the card
                   </p>
                 </div>
               )}

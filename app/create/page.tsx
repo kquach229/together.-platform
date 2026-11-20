@@ -1,7 +1,6 @@
 "use client";
 
 import { dateInputToISO } from "@/lib/helpers/dates";
-import { getUser } from "@/lib/helpers/getUser";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
 import { CARD_THEMES } from "@/lib/theme";
 

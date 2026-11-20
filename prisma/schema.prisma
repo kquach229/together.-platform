@@ -9,10 +9,13 @@ datasource db {
 
 
 enum CardPackSize {
-  pack_21
   pack_1
   pack_5
   pack_10
+  pack_21
+  test_pack_1
+  test_pack_5
+  test_pack_10
 }
 
 enum CardStatus {
