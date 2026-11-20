@@ -179,6 +179,9 @@ export default function CreateCard() {
         return;
       }
 
+      // Refresh Server Components so Navbar fetches the latest cardsRemaining
+      router.refresh();
+
       setSigningToken(createData.card.signingToken);
       setStep(4);
     } catch (err) {
