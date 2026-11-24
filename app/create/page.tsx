@@ -1,6 +1,7 @@
 "use client";
 
 import { dateInputToISO } from "@/lib/helpers/dates";
+import { getGreeting } from "@/lib/helpers/greeting";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
 import { CARD_THEMES } from "@/lib/theme";
 
@@ -681,7 +682,7 @@ export default function CreateCard() {
                       : occasion === "Sympathy"
                         ? "Thinking of You"
                         : occasion}
-                  {recipientName ? `, ${recipientName}!` : "…"}
+                  {getGreeting(occasion, recipientName)}
                 </div>
 
                 {message && (

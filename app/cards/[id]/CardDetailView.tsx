@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import DeleteCardDialog from "@/app/components/DeleteCardDialog";
 import EditCardPanel from "./EditCardPanel";
 import { imageUrl } from "@/lib/helpers/imageUrl";
+import { getGreeting } from "@/lib/helpers/greeting";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Signature {
@@ -294,9 +295,7 @@ export default function CardDetailView({ card }: Props) {
                     className="font-playfair text-[32px] tracking-tight mb-2"
                     style={{ color: isMidnight ? "#FDF8F2" : "#1A1208" }}
                   >
-                    {card.occasion === "Birthday"
-                      ? `Happy Birthday, ${card.recipientName}!`
-                      : `${card.occasion}, ${card.recipientName}!`}
+                    {getGreeting(card.occasion, card.recipientName)}
                   </h1>
                   {card.openingMessage && (
                     <p

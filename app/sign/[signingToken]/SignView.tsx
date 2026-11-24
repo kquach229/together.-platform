@@ -1,5 +1,6 @@
 "use client";
 
+import { getGreeting } from "@/lib/helpers/greeting";
 import { imageUrl } from "@/lib/helpers/imageUrl";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
 import { useEffect, useRef, useState } from "react";
@@ -418,9 +419,7 @@ export default function SignView({ card, signingToken }: Props) {
                 color: card.theme === "midnight" ? "#FDF8F2" : "#1A1208",
               }}
             >
-              {card.occasion === "Birthday"
-                ? `Happy Birthday, ${card.recipientName}!`
-                : `${card.occasion}, ${card.recipientName}!`}
+              {getGreeting(card.occasion, card.recipientName)}
             </h1>
 
             <p className="text-sm text-[#8C7B6B] font-light">

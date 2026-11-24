@@ -2,6 +2,7 @@
 
 import { imageUrl } from "@/lib/helpers/imageUrl";
 import { useState } from "react";
+import { getGreeting } from "@/lib/helpers/greeting";
 
 const themes: Record<string, { from: string; to: string }> = {
   warm: { from: "#FEF3ED", to: "#F5EAD8" },
@@ -55,69 +56,6 @@ function getInitials(name: string) {
     .join("")
     .toUpperCase()
     .slice(0, 2);
-}
-
-function getOccasionHeading(occasion: string, recipientName: string) {
-  const headings: Record<string, string> = {
-    // Personal celebrations
-    Birthday: `Happy Birthday, ${recipientName}!`,
-    Anniversary: `Happy Anniversary, ${recipientName}!`,
-    Wedding: `Happy Wedding Day, ${recipientName}!`,
-    Engagement: `Congratulations on Your Engagement, ${recipientName}!`,
-    "New Baby": `Welcome, ${recipientName}!`,
-    "Baby Shower": `Celebrating Your Little One, ${recipientName}!`,
-    "Bridal Shower": `Here's to the Bride-to-Be, ${recipientName}!`,
-    "Gender Reveal": `A Little Surprise Is on the Way, ${recipientName}!`,
-    "New Home": `Congratulations on Your New Home, ${recipientName}!`,
-    "New Car": `Enjoy Your New Ride, ${recipientName}!`,
-
-    // Career and achievements
-    Farewell: `Wishing You All the Best, ${recipientName}!`,
-    Congratulations: `Congratulations, ${recipientName}!`,
-    Graduation: `Congratulations on Your Graduation, ${recipientName}!`,
-    "New Job": `Congratulations on Your New Job, ${recipientName}!`,
-    Promotion: `Congratulations on Your Promotion, ${recipientName}!`,
-    Retirement: `Happy Retirement, ${recipientName}!`,
-    "Work Anniversary": `Happy Work Anniversary, ${recipientName}!`,
-    "First Day": `Wishing You a Great First Day, ${recipientName}!`,
-    "New Business": `Congratulations on Your New Venture, ${recipientName}!`,
-
-    // Appreciation and encouragement
-    "Thank You": `Thank You, ${recipientName}!`,
-    "Get Well Soon": `Get Well Soon, ${recipientName}!`,
-    Sympathy: `Thinking of You, ${recipientName}.`,
-    Encouragement: `You've Got This, ${recipientName}!`,
-    "Just Because": `This One's for You, ${recipientName}!`,
-    "Miss You": `Missing You, ${recipientName}!`,
-    "Good Luck": `Wishing You the Best of Luck, ${recipientName}!`,
-    "Thinking of You": `Thinking of You, ${recipientName}.`,
-    Apology: `I'm Sorry, ${recipientName}.`,
-    "Welcome Back": `Welcome Back, ${recipientName}!`,
-
-    // Major holidays
-    Holiday: `Happy Holidays, ${recipientName}!`,
-    Christmas: `Merry Christmas, ${recipientName}!`,
-    "New Year's": `Happy New Year, ${recipientName}!`,
-    "Valentine's Day": `Happy Valentine's Day, ${recipientName}!`,
-    Easter: `Happy Easter, ${recipientName}!`,
-    Halloween: `Happy Halloween, ${recipientName}!`,
-    Thanksgiving: `Happy Thanksgiving, ${recipientName}!`,
-    "Mother's Day": `Happy Mother's Day, ${recipientName}!`,
-    "Father's Day": `Happy Father's Day, ${recipientName}!`,
-    "St. Patrick's Day": `Happy St. Patrick's Day, ${recipientName}!`,
-    "Fourth of July": `Happy Independence Day, ${recipientName}!`,
-    "Lunar New Year": `Happy Lunar New Year, ${recipientName}!`,
-    Diwali: `Happy Diwali, ${recipientName}!`,
-    Hanukkah: `Happy Hanukkah, ${recipientName}!`,
-    "Eid al-Fitr": `Eid Mubarak, ${recipientName}!`,
-    "Eid al-Adha": `Eid Mubarak, ${recipientName}!`,
-    Ramadan: `Ramadan Mubarak, ${recipientName}!`,
-    Passover: `Happy Passover, ${recipientName}!`,
-    "International Women's Day": `Happy International Women's Day, ${recipientName}!`,
-  };
-
-  // Safe fallback for occasions not explicitly listed
-  return headings[occasion] ?? `Celebrating ${recipientName}!`;
 }
 
 function getOccasionEmoji(occasion: string) {
@@ -187,7 +125,7 @@ export default function RecipientView({ card }: Props) {
 
   const theme = themes[card.theme] ?? themes.warm;
   const isMidnight = card.theme === "midnight";
-  const heading = getOccasionHeading(card.occasion, card.recipientName);
+  const heading = getGreeting(card.occasion, card.recipientName);
   const emoji = getOccasionEmoji(card.occasion);
   const photoCount = card.signatures.filter((s) => s.photoUrl).length;
 
