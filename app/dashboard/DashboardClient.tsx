@@ -4,6 +4,7 @@ import { useState } from "react";
 import CardGridItem from "../components/CardGridItem";
 import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
+import { getTheme } from "@/lib/theme";
 
 type CardStatus = "collecting" | "delivered";
 
@@ -129,10 +130,8 @@ export default function Dashboard({ user }: { user: User }) {
     };
   };
 
-  // Normalize cards and provide a fallback for missing/invalid themes.
   const normalizedCards: NormalizedCard[] = (cards ?? []).map((card: any) => {
-    const cardTheme =
-      CARD_THEMES[card.theme as keyof typeof CARD_THEMES] ?? CARD_THEMES.warm;
+    const cardTheme = getTheme(card.theme);
 
     return {
       id: card.id,
