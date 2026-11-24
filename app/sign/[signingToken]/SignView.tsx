@@ -1,10 +1,10 @@
 "use client";
 
-import { getGreeting } from "@/lib/helpers/greeting";
+import { getGreeting, getOccasionEmoji } from "@/lib/helpers/greeting";
 import { imageUrl } from "@/lib/helpers/imageUrl";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
-import { useEffect, useRef, useState } from "react";
 import { getTheme } from "@/lib/theme";
+import { useEffect, useRef, useState } from "react";
 
 const bubbleColors = [
   { avatar: "#F5EAD8", avatarText: "#C4734A" },
@@ -28,27 +28,6 @@ const quickEmojis = [
   "👏",
   "💐",
 ];
-
-const occasionEmojis: Record<string, string> = {
-  Birthday: "🎂",
-  Farewell: "👋",
-  Congratulations: "🎊",
-  Wedding: "💍",
-  "New Baby": "🍼",
-  "Get Well Soon": "❤️‍🩹",
-  Graduation: "🎓",
-  "Thank You": "🙏",
-  Holiday: "🎄",
-  "Work Anniversary": "🏆",
-  "Just Because": "🌟",
-  Sympathy: "🕊️",
-  Anniversary: "💖",
-  Housewarming: "🏡",
-  "Baby Shower": "👶",
-  Retirement: "🎖️",
-  Encouragement: "💪",
-  "Love & Appreciation": "❤️",
-};
 
 function daysUntil(date: Date) {
   const diff = new Date(date).getTime() - Date.now();
@@ -105,7 +84,7 @@ export default function SignView({ card, signingToken }: Props) {
   const MAX_NAME_LENGTH = 100;
 
   const theme = getTheme(card.theme);
-  const emoji = occasionEmojis[card.occasion] ?? "🎉";
+  const emoji = getOccasionEmoji(card.occasion);
   const deadline = card.signingDeadline ? new Date(card.signingDeadline) : null;
   const daysLeft = deadline ? daysUntil(deadline) : null;
 
@@ -396,25 +375,57 @@ export default function SignView({ card, signingToken }: Props) {
         <div>
           {/* Card banner */}
           <div
-            className="text-[10px] font-medium tracking-[2px] uppercase mb-2"
-            style={{ color: theme.accent }}
+            className="rounded-2xl p-6 mb-8 text-center"
+            style={{
+              background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
+            }}
           >
-            {emoji} {card.occasion}
+            <div
+              className="text-[10px] font-medium tracking-[2px] uppercase mb-2"
+              style={{ color: theme.accent }}
+            >
+              {emoji} {card.occasion}
+            </div>
+
+            <h1
+              className="font-playfair text-[26px] tracking-tight mb-1"
+              style={{ color: theme.heading }}
+            >
+              {getGreeting(card.occasion, card.recipientName)}
+            </h1>
+
+            <p className="text-sm font-light" style={{ color: theme.muted }}>
+              Organised by{" "}
+              <span className="font-medium" style={{ color: theme.strong }}>
+                {card.creator.name}
+              </span>
+            </p>
+
+            {card.creatorPhotoUrl && (
+              <div className="w-full max-h-100 overflow-hidden mt-5">
+                <img
+                  src={imageUrl(card.creatorPhotoUrl)}
+                  alt="Card cover"
+                  className="w-full h-full object-contain rounded-sm"
+                />
+              </div>
+            )}
+
+            {/* Signer count only — names remain private */}
+            {card.signatures.length > 0 && (
+              <div className="flex items-center justify-center gap-3 mt-4">
+                <span className="text-xs" style={{ color: theme.muted }}>
+                  <span className="font-medium" style={{ color: theme.strong }}>
+                    {card.signatures.length}{" "}
+                    {card.signatures.length === 1
+                      ? "person has"
+                      : "people have"}
+                  </span>{" "}
+                  already signed
+                </span>
+              </div>
+            )}
           </div>
-
-          <h1
-            className="font-playfair text-[26px] tracking-tight mb-1"
-            style={{ color: theme.heading }}
-          >
-            {getGreeting(card.occasion, card.recipientName)}
-          </h1>
-
-          <p className="text-sm font-light" style={{ color: theme.muted }}>
-            Organised by{" "}
-            <span className="font-medium" style={{ color: theme.strong }}>
-              {card.creator.name}
-            </span>
-          </p>
 
           {/* Form fields */}
           <div className="flex flex-col gap-6">
@@ -648,13 +659,9 @@ export default function SignView({ card, signingToken }: Props) {
           {/* Already signed */}
           {card.signatures.length > 0 && (
             <>
-              <span className="text-xs" style={{ color: theme.muted }}>
-                <span className="font-medium" style={{ color: theme.strong }}>
-                  {card.signatures.length}{" "}
-                  {card.signatures.length === 1 ? "person has" : "people have"}
-                </span>{" "}
-                already signed
-              </span>
+              <div className="text-[11px] font-medium tracking-[1.5px] uppercase text-[#8C7B6B] mb-3">
+                Already signed ({card.signatures.length})
+              </div>
 
               <div className="flex flex-col gap-2 mb-4">
                 {card.signatures.slice(0, 6).map((s, i) => {

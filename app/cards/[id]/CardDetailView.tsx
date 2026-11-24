@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 import DeleteCardDialog from "@/app/components/DeleteCardDialog";
 import EditCardPanel from "./EditCardPanel";
 import { imageUrl } from "@/lib/helpers/imageUrl";
-import { getGreeting } from "@/lib/helpers/greeting";
+import { getGreeting, getOccasionEmoji } from "@/lib/helpers/greeting";
 import { getTheme } from "@/lib/theme";
+
 // ─── Types ───────────────────────────────────────────────────
 interface Signature {
   id: string;
@@ -47,15 +48,6 @@ interface Props {
 }
 
 // ─── Constants ───────────────────────────────────────────────
-const themes: Record<string, { from: string; to: string }> = {
-  warm: { from: "#FEF3ED", to: "#F5EAD8" },
-  sage: { from: "#EEF3EE", to: "#D4E8D4" },
-  lavender: { from: "#F0EBF8", to: "#E2D4F0" },
-  sky: { from: "#E6F1FB", to: "#C8DFF5" },
-  parchment: { from: "#FDF8F2", to: "#EDE0CE" },
-  midnight: { from: "#1A1208", to: "#2E2820" },
-};
-
 const avatarColors = [
   { bg: "#F5EAD8", text: "#C4734A" },
   { bg: "#EEF3EE", text: "#5A7D66" },
@@ -63,21 +55,6 @@ const avatarColors = [
   { bg: "#E6F1FB", text: "#185FA5" },
   { bg: "#FAE8DE", text: "#993C1D" },
 ];
-
-const occasionEmojis: Record<string, string> = {
-  Birthday: "🎂",
-  Farewell: "👋",
-  Congratulations: "🎊",
-  Wedding: "💍",
-  "New Baby": "🍼",
-  "Get Well Soon": "🏥",
-  Graduation: "🎓",
-  "Thank You": "🙏",
-  Holiday: "🎄",
-  "Work Anniversary": "💼",
-  "Just Because": "🌟",
-  Sympathy: "💔",
-};
 
 const statusConfig: Record<
   string,
@@ -150,7 +127,7 @@ export default function CardDetailView({ card }: Props) {
   }, [card.signingToken]);
 
   const theme = getTheme(card.theme);
-  const emoji = occasionEmojis[card.occasion] ?? "🎉";
+  const emoji = getOccasionEmoji(card.occasion);
   const status = statusConfig[card.status] ?? statusConfig.draft;
   const visibleSigs = signatures.filter((s) => !s.isHidden);
   const hiddenSigs = signatures.filter((s) => s.isHidden);
@@ -282,25 +259,32 @@ export default function CardDetailView({ card }: Props) {
               {/* Card preview banner */}
               <div className="rounded-2xl overflow-hidden border border-[#E8DDD0] shadow-[0_4px_24px_rgba(26,18,8,0.06)]">
                 <div
-                  className="text-[10px] font-medium tracking-[2px] uppercase mb-2"
-                  style={{ color: theme.accent }}
+                  className="p-8 text-center"
+                  style={{
+                    background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
+                  }}
                 >
-                  {emoji} {card.occasion}
-                </div>
-                <h1
-                  className="font-playfair text-[32px] tracking-tight mb-2"
-                  style={{ color: theme.heading }}
-                >
-                  {getGreeting(card.occasion, card.recipientName)}
-                </h1>
-                {card.openingMessage && (
-                  <p
-                    className="text-sm font-light leading-[1.75] italic max-w-[480px] mx-auto"
-                    style={{ color: theme.body }}
+                  <div
+                    className="text-[10px] font-medium tracking-[2px] uppercase mb-2"
+                    style={{ color: theme.accent }}
                   >
-                    "{card.openingMessage}"
-                  </p>
-                )}
+                    {emoji} {card.occasion}
+                  </div>
+                  <h1
+                    className="font-playfair text-[32px] tracking-tight mb-2"
+                    style={{ color: theme.heading }}
+                  >
+                    {getGreeting(card.occasion, card.recipientName)}
+                  </h1>
+                  {card.openingMessage && (
+                    <p
+                      className="text-sm font-light leading-[1.75] italic max-w-[480px] mx-auto"
+                      style={{ color: theme.body }}
+                    >
+                      "{card.openingMessage}"
+                    </p>
+                  )}
+                </div>
 
                 {/* Cover photo preview */}
                 {card.creatorPhotoUrl && (
