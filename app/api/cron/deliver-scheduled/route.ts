@@ -49,17 +49,31 @@ export async function GET(req: NextRequest) {
       take: BATCH_SIZE,
     });
 
-    const emailStart = Date.now();
+    for (const card of due) {
+      // Claim atomically so overlapping runs can't deliver the same card twice.
+      const claimed = await prisma.card.updateMany({
+        where: { id: card.id, status: "collecting" },
+        data: { status: "delivered", deliveredAt: now },
+      });
+      if (claimed.count === 0) continue;
 
-    for (const { id } of pending) {
-      if (Date.now() - emailStart > EMAIL_TIME_BUDGET_MS) break; // rest go next run
+      summary.delivered++;
 
-      const result = await sendDeliveryEmailForCard(id);
-      if (result === "sent") summary.emailed++;
-      else if (result === "failed") summary.failed++;
-      else summary.skipped++;
-
-      await sleep(EMAIL_DELAY_MS);
+      try {
+        await prisma.notification.create({
+          data: {
+            userId: card.creatorId,
+            cardId: card.id,
+            type: "card_delivered",
+            payload: {
+              cardTitle: `${card.occasion} card for ${card.recipientName}`,
+              scheduled: true,
+            },
+          },
+        });
+      } catch (err) {
+        console.error(`⚠️ Notification failed for card ${card.id}:`, err);
+      }
     }
 
     // ── 2. Email recipients (new deliveries + retries) ─────────
@@ -77,11 +91,17 @@ export async function GET(req: NextRequest) {
       take: BATCH_SIZE,
     });
 
+    const emailStart = Date.now();
+
     for (const { id } of pending) {
+      if (Date.now() - emailStart > EMAIL_TIME_BUDGET_MS) break; // rest go next run
+
       const result = await sendDeliveryEmailForCard(id);
       if (result === "sent") summary.emailed++;
       else if (result === "failed") summary.failed++;
       else summary.skipped++;
+
+      await sleep(EMAIL_DELAY_MS);
     }
 
     console.log("📬 deliver-scheduled:", summary);
