@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { deleteObject } from "@/lib/r2";
+import { after } from "next/server";
+import { sendDeliveryEmailForCard } from "@/lib/email";
 
 // ─── Validation schema ───────────────────────────────────────
 const updateCardSchema = z.object({
@@ -192,6 +194,13 @@ export async function PATCH(
         updatedAt: true,
       },
     });
+
+    // Queue the recipient email right after the card is marked delivered.
+    // Runs after the response is sent, so it doesn't slow down the click.
+    // If it fails, the daily cron retries it (deliveryEmailSentAt stays null).
+    if (status === "delivered") {
+      after(() => sendDeliveryEmailForCard(cardId));
+    }
 
     const isNewCard = card.createdAt.getTime() > Date.now() - 60000;
 

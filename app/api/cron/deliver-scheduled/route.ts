@@ -13,6 +13,10 @@ export const maxDuration = 60;
 
 const BATCH_SIZE = 50;
 const RETRY_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+const EMAIL_DELAY_MS = 600; // stay under Resend's rate limit
+const EMAIL_TIME_BUDGET_MS = 50_000; // leave headroom under maxDuration
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function GET(req: NextRequest) {
   // Vercel sends "Authorization: Bearer <CRON_SECRET>". Reject everything else,
@@ -45,31 +49,17 @@ export async function GET(req: NextRequest) {
       take: BATCH_SIZE,
     });
 
-    for (const card of due) {
-      // Claim atomically so overlapping runs can't deliver the same card twice.
-      const claimed = await prisma.card.updateMany({
-        where: { id: card.id, status: "collecting" },
-        data: { status: "delivered", deliveredAt: now },
-      });
-      if (claimed.count === 0) continue;
+    const emailStart = Date.now();
 
-      summary.delivered++;
+    for (const { id } of pending) {
+      if (Date.now() - emailStart > EMAIL_TIME_BUDGET_MS) break; // rest go next run
 
-      try {
-        await prisma.notification.create({
-          data: {
-            userId: card.creatorId,
-            cardId: card.id,
-            type: "card_delivered",
-            payload: {
-              cardTitle: `${card.occasion} card for ${card.recipientName}`,
-              scheduled: true,
-            },
-          },
-        });
-      } catch (err) {
-        console.error(`⚠️ Notification failed for card ${card.id}:`, err);
-      }
+      const result = await sendDeliveryEmailForCard(id);
+      if (result === "sent") summary.emailed++;
+      else if (result === "failed") summary.failed++;
+      else summary.skipped++;
+
+      await sleep(EMAIL_DELAY_MS);
     }
 
     // ── 2. Email recipients (new deliveries + retries) ─────────

@@ -7,7 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 enum CardPackSize {
   pack_1
   pack_5
@@ -30,17 +29,16 @@ enum NotificationType {
   card_received
 }
 
-
 model User {
-  id                   String             @id @default(uuid())
-  email                String             @unique
+  id                   String         @id @default(uuid())
+  email                String         @unique
   name                 String
-  stripeCustomerId     String?            @unique
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  clerkId              String?            @unique
-  lifetimeCardsCreated Int                @default(0)
-  cardsRemaining       Int                @default(1)
+  stripeCustomerId     String?        @unique
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  clerkId              String?        @unique
+  lifetimeCardsCreated Int            @default(0)
+  cardsRemaining       Int            @default(1)
   cards                Card[]
   cardPurchases        CardPurchase[]
   notifications        Notification[]
@@ -48,27 +46,31 @@ model User {
 }
 
 model Card {
-  id                  String             @id @default(uuid())
+  id                  String         @id @default(uuid())
   occasion            String
   recipientName       String
   recipientEmail      String?
   openingMessage      String?
   signingDeadline     DateTime?
-  theme               String             @default("warm")
-  status              String             @default("collecting")
+  theme               String         @default("warm")
+  status              String         @default("collecting")
   creatorId           String
   scheduledDeliveryAt DateTime?
   deliveredAt         DateTime?
-  signerCount         Int                @default(0)
-  signingToken        String             @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex'::text)")) @map("signing_token")
-  deliveryToken       String             @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex'::text)")) @map("delivery_token")
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
+  deliveryEmailSentAt DateTime?
+  signerCount         Int            @default(0)
+  signingToken        String         @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex'::text)")) @map("signing_token")
+  deliveryToken       String         @unique @default(dbgenerated("encode(gen_random_bytes(16), 'hex'::text)")) @map("delivery_token")
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
   creatorPhotoUrl     String?
-  creator             User               @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creator             User           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   views               CardView[]
   notifications       Notification[]
   signatures          Signature[]
+
+  @@index([status, scheduledDeliveryAt])
+  @@index([status, deliveryEmailSentAt, deliveredAt])
 }
 
 model Signature {
@@ -117,16 +119,16 @@ model StripeEvent {
 }
 
 model CardPurchase {
-  id                    String             @id @default(uuid())
+  id                    String       @id @default(uuid())
   userId                String
   packSize              CardPackSize
   cardsAdded            Int
   amountCents           Int
-  currency              String             @default("usd")
-  stripePaymentIntentId String             @unique
-  stripeSessionId       String?            @unique
-  createdAt             DateTime           @default(now())
-  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency              String       @default("usd")
+  stripePaymentIntentId String       @unique
+  stripeSessionId       String?      @unique
+  createdAt             DateTime     @default(now())
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CardPackPrice {
@@ -141,4 +143,3 @@ model CardPackPrice {
 
   @@unique([packSize, currency])
 }
-
