@@ -9,7 +9,7 @@ import DeleteCardDialog from "@/app/components/DeleteCardDialog";
 import EditCardPanel from "./EditCardPanel";
 import { imageUrl } from "@/lib/helpers/imageUrl";
 import { getGreeting } from "@/lib/helpers/greeting";
-
+import { getTheme } from "@/lib/theme";
 // ─── Types ───────────────────────────────────────────────────
 interface Signature {
   id: string;
@@ -149,8 +149,7 @@ export default function CardDetailView({ card }: Props) {
     setSigningUrl(`${window.location.origin}/sign/${card.signingToken}`);
   }, [card.signingToken]);
 
-  const theme = themes[card.theme] ?? themes.warm;
-  const isMidnight = card.theme === "midnight";
+  const theme = getTheme(card.theme);
   const emoji = occasionEmojis[card.occasion] ?? "🎉";
   const status = statusConfig[card.status] ?? statusConfig.draft;
   const visibleSigs = signatures.filter((s) => !s.isHidden);
@@ -283,33 +282,25 @@ export default function CardDetailView({ card }: Props) {
               {/* Card preview banner */}
               <div className="rounded-2xl overflow-hidden border border-[#E8DDD0] shadow-[0_4px_24px_rgba(26,18,8,0.06)]">
                 <div
-                  className="p-8 text-center"
-                  style={{
-                    background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
-                  }}
+                  className="text-[10px] font-medium tracking-[2px] uppercase mb-2"
+                  style={{ color: theme.accent }}
                 >
-                  <div className="text-[10px] font-medium tracking-[2px] uppercase text-terracotta mb-2">
-                    {emoji} {card.occasion}
-                  </div>
-                  <h1
-                    className="font-playfair text-[32px] tracking-tight mb-2"
-                    style={{ color: isMidnight ? "#FDF8F2" : "#1A1208" }}
-                  >
-                    {getGreeting(card.occasion, card.recipientName)}
-                  </h1>
-                  {card.openingMessage && (
-                    <p
-                      className="text-sm font-light leading-[1.75] italic max-w-[480px] mx-auto"
-                      style={{
-                        color: isMidnight
-                          ? "rgba(253,248,242,0.75)"
-                          : "#3A2F27",
-                      }}
-                    >
-                      "{card.openingMessage}"
-                    </p>
-                  )}
+                  {emoji} {card.occasion}
                 </div>
+                <h1
+                  className="font-playfair text-[32px] tracking-tight mb-2"
+                  style={{ color: theme.heading }}
+                >
+                  {getGreeting(card.occasion, card.recipientName)}
+                </h1>
+                {card.openingMessage && (
+                  <p
+                    className="text-sm font-light leading-[1.75] italic max-w-[480px] mx-auto"
+                    style={{ color: theme.body }}
+                  >
+                    "{card.openingMessage}"
+                  </p>
+                )}
 
                 {/* Cover photo preview */}
                 {card.creatorPhotoUrl && (
@@ -602,9 +593,7 @@ export default function CardDetailView({ card }: Props) {
                     { label: "Occasion", value: card.occasion },
                     {
                       label: "Theme",
-                      value:
-                        card.theme.charAt(0).toUpperCase() +
-                        card.theme.slice(1),
+                      value: theme.label,
                     },
                     { label: "Created", value: formatDate(card.createdAt) },
                     ...(card.signingDeadline
