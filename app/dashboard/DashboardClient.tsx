@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import CardGridItem from "../components/CardGridItem";
-
 import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
 
@@ -33,7 +32,7 @@ const mapActivity = (type: string, payload: any, createdAt?: string) => {
     case "new_signature":
       return {
         icon: "🖊",
-        text: `${payload.signerName} signed ${payload.cardTitle}`,
+        text: `${payload?.signerName ?? "Someone"} signed ${payload?.cardTitle ?? "a card"}`,
         time: formatTimeAgo(createdAt),
         color: "#E6F1FB",
       };
@@ -41,7 +40,7 @@ const mapActivity = (type: string, payload: any, createdAt?: string) => {
     case "card_edited":
       return {
         icon: "📝",
-        text: payload.title,
+        text: payload?.title ?? "Card edited",
         time: formatTimeAgo(createdAt),
         color: "#FDECEC",
       };
@@ -49,7 +48,7 @@ const mapActivity = (type: string, payload: any, createdAt?: string) => {
     case "create_card":
       return {
         icon: "＋",
-        text: payload.title,
+        text: payload?.title ?? "Card created",
         time: formatTimeAgo(createdAt),
         color: "#FEF3ED",
       };
@@ -57,7 +56,7 @@ const mapActivity = (type: string, payload: any, createdAt?: string) => {
     case "card_delivered":
       return {
         icon: "🎉",
-        text: payload.cardTitle + " was delivered",
+        text: `${payload?.cardTitle ?? "Card"} was delivered`,
         time: formatTimeAgo(createdAt),
         color: "#F0EBF8",
       };
@@ -71,10 +70,14 @@ function formatTimeAgo(date?: string) {
   if (!date) return "";
 
   const diff = Date.now() - new Date(date).getTime();
+
+  if (!Number.isFinite(diff)) return "";
+
   const mins = Math.floor(diff / 60000);
 
   if (mins < 60) return `${mins}m ago`;
   if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
+
   return `${Math.floor(mins / 1440)}d ago`;
 }
 
@@ -108,6 +111,7 @@ export default function Dashboard({ user }: { user: User }) {
     .filter(Boolean);
 
   const { cards, signatures } = user;
+
   type NormalizedCard = {
     id: string;
     occasion: string;
@@ -116,35 +120,41 @@ export default function Dashboard({ user }: { user: User }) {
     signers: number;
     cardTheme: string;
     signingDeadline: string | null;
+    creatorPhotoUrl?: string | null;
     deliveredOn: string | null;
     createdAt: string;
-
     theme: {
       from: string;
       to: string;
     };
   };
 
-  const normalizedCards: NormalizedCard[] = (cards ?? []).map((card: any) => ({
-    id: card.id,
-    occasion: card.occasion,
-    recipient: card.recipientName,
-    status: card.status as CardStatus,
-    signers: card.signerCount,
-    cardTheme: card.theme,
-    signingDeadline: card.signingDeadline,
-    creatorPhotoUrl: card.creatorPhotoUrl,
-    deliveredOn: card.deliveredAt
-      ? new Date(card.deliveredAt).toLocaleDateString()
-      : null,
+  // Normalize cards and provide a fallback for missing/invalid themes.
+  const normalizedCards: NormalizedCard[] = (cards ?? []).map((card: any) => {
+    const cardTheme =
+      CARD_THEMES[card.theme as keyof typeof CARD_THEMES] ?? CARD_THEMES.warm;
 
-    createdAt: card.createdAt,
+    return {
+      id: card.id,
+      occasion: card.occasion ?? "",
+      recipient: card.recipientName ?? "",
+      status: card.status as CardStatus,
+      signers: card.signerCount ?? 0,
+      cardTheme: card.theme ?? "warm",
+      signingDeadline: card.signingDeadline ?? null,
+      creatorPhotoUrl: card.creatorPhotoUrl ?? null,
+      deliveredOn: card.deliveredAt
+        ? new Date(card.deliveredAt).toLocaleDateString()
+        : null,
 
-    theme: {
-      from: CARD_THEMES[card.theme as keyof typeof CARD_THEMES].from,
-      to: CARD_THEMES[card.theme as keyof typeof CARD_THEMES].to,
-    },
-  }));
+      createdAt: card.createdAt,
+
+      theme: {
+        from: cardTheme.from,
+        to: cardTheme.to,
+      },
+    };
+  });
 
   const stats = [
     { label: "Current cards", value: cards?.length ?? "0", sub: "" },
@@ -153,13 +163,16 @@ export default function Dashboard({ user }: { user: User }) {
       value: signatures?.length ?? "0",
       sub: "Across all cards",
     },
-
     {
       label: "Lifetime Cards Created",
-      value: user.lifetimeCardsCreated,
+      value: user.lifetimeCardsCreated ?? 0,
       sub: "This account",
     },
-    { label: "Cards Remaining", value: user.cardsRemaining, sub: "" },
+    {
+      label: "Cards Remaining",
+      value: user.cardsRemaining ?? 0,
+      sub: "",
+    },
   ];
 
   const filtered = normalizedCards.filter((card) => {
@@ -167,23 +180,27 @@ export default function Dashboard({ user }: { user: User }) {
       activeTab === "All" ||
       (activeTab === "Collecting" && card.status === "collecting") ||
       (activeTab === "Delivered" && card.status === "delivered");
+
     const matchSearch =
       card.recipient.toLowerCase().includes(search.toLowerCase()) ||
       card.occasion.toLowerCase().includes(search.toLowerCase());
+
     return matchTab && matchSearch;
   });
 
   const router = useRouter();
+
+  const disableCreate = (user.cardsRemaining ?? 0) < 1;
 
   const handleCreateCard = () => {
     if (disableCreate) return;
 
     router.push("/create");
   };
-  const disableCreate = (user.cardsRemaining ?? 0) < 1;
+
   return (
     <div className="font-dm-sans bg-[#F5F0E8] text-[#1A1208] min-h-screen flex">
-      {/* ── MAIN ── */}
+      {/* MAIN */}
       <div className="flex-1 min-h-screen">
         {/* Top bar */}
         <div className="sticky top-0 z-30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 lg:px-8 py-4 sm:py-0 sm:h-16 bg-[rgba(245,240,232,0.95)] backdrop-blur-md border-b border-[#E8DDD0]">
@@ -196,6 +213,7 @@ export default function Dashboard({ user }: { user: User }) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-taupe text-sm pointer-events-none">
                 🔍
               </span>
+
               <input
                 type="text"
                 value={search}
@@ -208,7 +226,10 @@ export default function Dashboard({ user }: { user: User }) {
             <button
               disabled={disableCreate}
               onClick={handleCreateCard}
-              className={`flex items-center justify-center gap-2 bg-terracotta text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#C4734A] transition-colors shadow-[0_4px_12px_rgba(212,132,90,0.25)] font-dm-sans border-none cursor-pointer whitespace-nowrap ${disableCreate && "cursor-not-allowed opacity-50 hover:bg-terracotta"}`}
+              className={`flex items-center justify-center gap-2 bg-terracotta text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#C4734A] transition-colors shadow-[0_4px_12px_rgba(212,132,90,0.25)] font-dm-sans border-none cursor-pointer whitespace-nowrap ${
+                disableCreate &&
+                "cursor-not-allowed opacity-50 hover:bg-terracotta"
+              }`}
             >
               <span>＋</span> New card
             </button>
@@ -226,9 +247,11 @@ export default function Dashboard({ user }: { user: User }) {
                 <div className="text-xs text-muted-taupe font-medium mb-1">
                   {s.label}
                 </div>
+
                 <div className="font-playfair text-[30px] sm:text-[36px] tracking-[-1px] leading-tight">
                   {s.value}
                 </div>
+
                 <div className="text-[11px] text-muted-taupe font-light mt-1">
                   {s.sub}
                 </div>
@@ -251,19 +274,16 @@ export default function Dashboard({ user }: { user: User }) {
                     }`}
                   >
                     {t}
+
                     {t !== "All" && (
                       <span className="ml-1.5 text-[10px] opacity-60">
                         {t === "Collecting"
                           ? cards?.filter(
                               (card: any) => card.status === "collecting",
                             ).length
-                          : t === "Delivered"
-                            ? cards?.filter(
-                                (card: any) => card.status === "delivered",
-                              ).length
-                            : cards?.filter(
-                                (card: any) => card.status === "draft",
-                              ).length}
+                          : cards?.filter(
+                              (card: any) => card.status === "delivered",
+                            ).length}
                       </span>
                     )}
                   </button>
@@ -288,6 +308,7 @@ export default function Dashboard({ user }: { user: User }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
               {filtered.map((card) => {
                 const status = statusConfig[card.status as CardStatus];
+
                 return (
                   <CardGridItem
                     key={card.id}
@@ -302,11 +323,15 @@ export default function Dashboard({ user }: { user: User }) {
               <button
                 onClick={handleCreateCard}
                 disabled={disableCreate}
-                className={`border-2 border-dashed border-[#E8DDD0] rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-terracotta hover:bg-[#FEF3ED]/30 transition-all group cursor-pointer bg-transparent min-h-[200px] ${disableCreate && "cursor-not-allowed opacity-50 hover:border-[#E8DDD0] hover:bg-transparent"}`}
+                className={`border-2 border-dashed border-[#E8DDD0] rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-terracotta hover:bg-[#FEF3ED]/30 transition-all group cursor-pointer bg-transparent min-h-[200px] ${
+                  disableCreate &&
+                  "cursor-not-allowed opacity-50 hover:border-[#E8DDD0] hover:bg-transparent"
+                }`}
               >
                 <div className="w-12 h-12 rounded-full border-2 border-dashed border-[#E8DDD0] group-hover:border-terracotta flex items-center justify-center text-xl text-muted-taupe group-hover:text-terracotta transition-all">
                   ＋
                 </div>
+
                 <span className="text-sm font-medium text-muted-taupe group-hover:text-terracotta transition-colors">
                   New card
                 </span>
@@ -319,6 +344,7 @@ export default function Dashboard({ user }: { user: User }) {
             <h2 className="font-playfair text-[18px] sm:text-[20px] tracking-tight mb-4">
               Recent activity
             </h2>
+
             <div className="bg-white border border-[#E8DDD0] rounded-2xl overflow-hidden">
               {activity.map((a, i) => (
                 <div
