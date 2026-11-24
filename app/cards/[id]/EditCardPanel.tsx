@@ -16,18 +16,12 @@ import {
   isPresetOccasion,
   normalizeCustomOccasion,
 } from "@/lib/helpers/greeting";
-
-const themes = [
-  { id: "warm", label: "Warm", from: "#FEF3ED", to: "#F5EAD8" },
-  { id: "sage", label: "Sage", from: "#EEF3EE", to: "#D4E8D4" },
-  { id: "lavender", label: "Lavender", from: "#F0EBF8", to: "#E2D4F0" },
-  { id: "sky", label: "Sky", from: "#E6F1FB", to: "#C8DFF5" },
-  { id: "parchment", label: "Parchment", from: "#FDF8F2", to: "#EDE0CE" },
-  { id: "midnight", label: "Midnight", from: "#1A1208", to: "#2E2820" },
-];
+import { CARD_THEMES, THEME_IDS, getTheme } from "@/lib/theme";
 
 // Value used by the <select> for the "Custom…" option
 const CUSTOM_VALUE = "__custom__";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface EditCardPanelProps {
   cardId: string;
@@ -75,7 +69,10 @@ export default function EditCardPanel({
   const [openingMessage, setOpeningMessage] = useState(
     initial.openingMessage ?? "",
   );
-  const [theme, setTheme] = useState(initial.theme);
+  // Older cards may use ids that no longer exist (e.g. "parchment"); getTheme
+  // maps them to the current id.
+  const initialThemeId = getTheme(initial.theme).id;
+  const [theme, setTheme] = useState(initialThemeId);
   const [signingDeadline, setSigningDeadline] = useState(
     toDateInputValue(initial.signingDeadline),
   );
@@ -91,12 +88,19 @@ export default function EditCardPanel({
     ? normalizeCustomOccasion(customText)
     : presetOccasion;
 
+  const trimmedEmail = recipientEmail.trim();
+  const emailInvalid = trimmedEmail.length > 0 && !EMAIL_RE.test(trimmedEmail);
+  const deliveryBeforeDeadline =
+    !!signingDeadline &&
+    !!scheduledDelivery &&
+    scheduledDelivery < signingDeadline;
+
   const hasChanges =
     finalOccasion !== initial.occasion ||
     recipientName !== initial.recipientName ||
-    recipientEmail !== (initial.recipientEmail ?? "") ||
+    trimmedEmail !== (initial.recipientEmail ?? "") ||
     openingMessage !== (initial.openingMessage ?? "") ||
-    theme !== initial.theme ||
+    theme !== initialThemeId ||
     signingDeadline !== toDateInputValue(initial.signingDeadline) ||
     scheduledDelivery !== toDateInputValue(initial.scheduledDeliveryAt);
 
@@ -109,6 +113,10 @@ export default function EditCardPanel({
       setError("Recipient name is required.");
       return;
     }
+    if (emailInvalid) {
+      setError("Please enter a valid recipient email address.");
+      return;
+    }
     setError(null);
     setIsSaving(true);
 
@@ -119,7 +127,7 @@ export default function EditCardPanel({
         body: JSON.stringify({
           occasion: finalOccasion,
           recipientName: recipientName.trim(),
-          recipientEmail: recipientEmail.trim() || "",
+          recipientEmail: trimmedEmail,
           openingMessage: openingMessage.trim() || null,
           theme,
           signingDeadline: signingDeadline
@@ -239,6 +247,34 @@ export default function EditCardPanel({
             />
           </div>
 
+          {/* Recipient email */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Recipient's email
+              <span className="text-[#8C7B6B] font-light ml-2">(optional)</span>
+            </label>
+            <input
+              type="email"
+              value={recipientEmail}
+              onChange={(e) => setRecipientEmail(e.target.value)}
+              placeholder="sarah@example.com"
+              className={`w-full px-4 py-3 border rounded-xl text-sm bg-white outline-none transition-colors font-dm-sans placeholder:text-[#C5B8AD] ${
+                emailInvalid
+                  ? "border-red-400"
+                  : "border-[#E8DDD0] focus:border-terracotta"
+              }`}
+            />
+            {emailInvalid ? (
+              <p className="text-xs text-red-500 mt-1.5">
+                Please enter a valid email address.
+              </p>
+            ) : (
+              <p className="text-xs text-[#8C7B6B] mt-1.5 font-light">
+                We'll email them a link to the card when it's delivered.
+              </p>
+            )}
+          </div>
+
           {/* Opening message */}
           <div>
             <label className="block text-sm font-medium mb-2">
@@ -262,35 +298,36 @@ export default function EditCardPanel({
           <div>
             <label className="block text-sm font-medium mb-3">Theme</label>
             <div className="grid grid-cols-3 gap-2.5">
-              {themes.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTheme(t.id)}
-                  className={`relative rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                    theme === t.id
-                      ? "border-terracotta shadow-[0_2px_12px_rgba(212,132,90,0.2)]"
-                      : "border-[#E8DDD0] hover:border-[#C5B8AD]"
-                  }`}
-                >
-                  <div
-                    className="h-14 w-full"
-                    style={{
-                      background: `linear-gradient(135deg, ${t.from}, ${t.to})`,
-                    }}
-                  />
-                  <div
-                    className={`px-2 py-1.5 text-xs font-medium text-left ${t.id === "midnight" ? "bg-[#1A1208] text-[#FDF8F2]" : "bg-white text-[#1A1208]"}`}
+              {THEME_IDS.map((id) => {
+                const t = CARD_THEMES[id];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setTheme(id)}
+                    className={`relative rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                      theme === id
+                        ? "border-terracotta shadow-[0_2px_12px_rgba(212,132,90,0.2)]"
+                        : "border-[#E8DDD0] hover:border-[#C5B8AD]"
+                    }`}
                   >
-                    {t.label}
-                  </div>
-                  {theme === t.id && (
-                    <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-terracotta flex items-center justify-center text-white text-[8px]">
-                      ✓
+                    <div
+                      className="h-14 w-full"
+                      style={{
+                        background: `linear-gradient(135deg, ${t.from}, ${t.to})`,
+                      }}
+                    />
+                    <div className="px-2 py-1.5 text-xs font-medium text-left bg-white text-[#1A1208]">
+                      {t.label}
                     </div>
-                  )}
-                </button>
-              ))}
+                    {theme === id && (
+                      <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-terracotta flex items-center justify-center text-white text-[8px]">
+                        ✓
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -330,8 +367,16 @@ export default function EditCardPanel({
               className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans text-[#1A1208]"
             />
             <p className="text-xs text-[#8C7B6B] mt-1.5 font-light">
-              The card will be automatically delivered on this date.
+              {trimmedEmail
+                ? "The card will be delivered on this date and emailed to the recipient."
+                : "The card will be delivered on this date. Add the recipient's email above so we can send it to them."}
             </p>
+            {deliveryBeforeDeadline && (
+              <p className="text-xs text-[#B4531F] mt-1.5">
+                Heads up: signing stops once the card is delivered, which is
+                before your signing deadline.
+              </p>
+            )}
             {scheduledDelivery && (
               <button
                 type="button"

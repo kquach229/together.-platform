@@ -4,7 +4,7 @@ import OccasionPicker from "@/app/components/OccasionPicker";
 import { dateInputToISO } from "@/lib/helpers/dates";
 import { getGreeting, getOccasionEmoji } from "@/lib/helpers/greeting";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
-import { CARD_THEMES } from "@/lib/theme";
+import { CARD_THEMES, THEME_IDS, getTheme, type ThemeId } from "@/lib/theme";
 
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
@@ -16,15 +16,14 @@ const steps = [
   { num: 4, label: "Share" },
 ];
 
-const themes = [
-  "warm",
-  "lavender",
-  "sage",
-  "sky",
-  "neutral",
-  "midnight",
-] as const;
-type Theme = (typeof themes)[number];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Local-time YYYY-MM-DD, used as the minimum for the delivery date input
+function todayInputValue() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 interface User {
   plan: "free" | "plus" | "pro";
@@ -42,7 +41,8 @@ export default function CreateCard() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [message, setMessage] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [theme, setTheme] = useState<Theme>("warm");
+  const [scheduledDelivery, setScheduledDelivery] = useState("");
+  const [theme, setTheme] = useState<ThemeId>("warm");
   const [coverPhotoPreview, setCoverPhotoPreview] = useState<string | null>(
     null,
   );
@@ -53,6 +53,12 @@ export default function CreateCard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const activeTheme = getTheme(theme);
+  const trimmedEmail = recipientEmail.trim();
+  const emailInvalid = trimmedEmail.length > 0 && !EMAIL_RE.test(trimmedEmail);
+  const deliveryBeforeDeadline =
+    !!deadline && !!scheduledDelivery && scheduledDelivery < deadline;
 
   const disableCardCreation =
     user?.plan === "free" && user?.lifetimeCardsCreated > 0;
@@ -108,7 +114,7 @@ export default function CreateCard() {
 
   function canProceed() {
     if (step === 1) return occasion.trim().length > 0;
-    if (step === 2) return recipientName.trim().length > 0;
+    if (step === 2) return recipientName.trim().length > 0 && !emailInvalid;
     if (step === 3) return !!theme;
     return true;
   }
@@ -122,16 +128,15 @@ export default function CreateCard() {
     try {
       let creatorPhotoUrl: string | null = null;
 
-      // Step 1 — upload photo to S3 first (no cardId yet, uses temp/ prefix)
+      // Step 1 — upload photo to storage first (no cardId yet)
       if (photoFile) {
         setUploadProgress("Uploading photo…");
-        const key = await uploadPhoto(photoFile); // returns "temp/abc123.jpg"
+        const key = await uploadPhoto(photoFile);
 
-        // Build the full public S3 URL from the key
         creatorPhotoUrl = `${key}`;
       }
 
-      // Step 2 — create the card, passing the full URL
+      // Step 2 — create the card
       setUploadProgress("Creating your card…");
 
       const createRes = await fetch("/api/cards", {
@@ -140,13 +145,16 @@ export default function CreateCard() {
         body: JSON.stringify({
           occasion,
           recipientName,
-          recipientEmail: recipientEmail || undefined,
+          recipientEmail: trimmedEmail || undefined,
           openingMessage: message || undefined,
           theme,
           signingDeadline: deadline
             ? dateInputToISO(deadline, "end")
             : undefined,
-          creatorPhotoUrl, // full URL or null
+          scheduledDeliveryAt: scheduledDelivery
+            ? dateInputToISO(scheduledDelivery, "start")
+            : undefined,
+          creatorPhotoUrl,
         }),
       });
 
@@ -299,6 +307,35 @@ export default function CreateCard() {
 
                   <div>
                     <label className="block text-sm font-medium mb-2">
+                      Recipient's email
+                      <span className="text-muted-taupe font-light ml-2">
+                        (optional)
+                      </span>
+                    </label>
+                    <input
+                      type="email"
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
+                      placeholder="sarah@example.com"
+                      className={`w-full px-4 py-3 border rounded-xl text-sm bg-white outline-none transition-colors font-dm-sans placeholder:text-[#C5B8AD] ${
+                        emailInvalid
+                          ? "border-red-400"
+                          : "border-[#E8DDD0] focus:border-terracotta"
+                      }`}
+                    />
+                    {emailInvalid ? (
+                      <p className="text-xs text-red-500 mt-1.5">
+                        Please enter a valid email address.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-taupe mt-1.5 font-light">
+                        We'll email them a link to the card when it's delivered.
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
                       Your opening message
                       <span className="text-muted-taupe font-light ml-2">
                         (optional)
@@ -337,21 +374,32 @@ export default function CreateCard() {
                     </p>
                   </div>
 
-                  {/* <div>
+                  <div>
                     <label className="block text-sm font-medium mb-2">
-                      Recipient's email
+                      Scheduled delivery
                       <span className="text-muted-taupe font-light ml-2">
-                        (optional — for scheduled delivery)
+                        (optional)
                       </span>
                     </label>
                     <input
-                      type="email"
-                      value={recipientEmail}
-                      onChange={(e) => setRecipientEmail(e.target.value)}
-                      placeholder="sarah@example.com"
-                      className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD]"
+                      type="date"
+                      value={scheduledDelivery}
+                      min={todayInputValue()}
+                      onChange={(e) => setScheduledDelivery(e.target.value)}
+                      className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans text-[#1A1208]"
                     />
-                  </div> */}
+                    <p className="text-xs text-muted-taupe mt-1.5 font-light">
+                      {trimmedEmail
+                        ? "We'll deliver the card on this date and email it to the recipient."
+                        : "We'll deliver the card on this date. Add the recipient's email above so we can send it to them."}
+                    </p>
+                    {deliveryBeforeDeadline && (
+                      <p className="text-xs text-[#B4531F] mt-1.5">
+                        Heads up: signing stops once the card is delivered,
+                        which is before your signing deadline.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -367,38 +415,36 @@ export default function CreateCard() {
                 </p>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {themes.map((cardTheme) => (
-                    <button
-                      key={cardTheme}
-                      onClick={() => setTheme(cardTheme)}
-                      className={`relative rounded-xl overflow-hidden border-2 transition-all ${
-                        cardTheme === theme
-                          ? "border-terracotta shadow-[0_2px_16px_rgba(212,132,90,0.2)]"
-                          : "border-[#E8DDD0] hover:border-[#C5B8AD]"
-                      }`}
-                    >
-                      <div
-                        className="h-24 w-full"
-                        style={{
-                          background: `linear-gradient(135deg, ${CARD_THEMES[cardTheme].from}, ${CARD_THEMES[cardTheme].to})`,
-                        }}
-                      />
-                      <div
-                        className={`px-3 py-2 text-xs font-medium text-left capitalize ${
-                          cardTheme === "warm"
-                            ? "bg-[#1A1208] text-[#FDF8F2]"
-                            : "bg-white text-[#1A1208]"
+                  {THEME_IDS.map((id) => {
+                    const t = CARD_THEMES[id];
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setTheme(id)}
+                        className={`relative rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                          id === theme
+                            ? "border-terracotta shadow-[0_2px_16px_rgba(212,132,90,0.2)]"
+                            : "border-[#E8DDD0] hover:border-[#C5B8AD]"
                         }`}
                       >
-                        {cardTheme}
-                      </div>
-                      {cardTheme === theme && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-terracotta flex items-center justify-center text-white text-[9px]">
-                          ✓
+                        <div
+                          className="h-20 w-full"
+                          style={{
+                            background: `linear-gradient(135deg, ${t.from}, ${t.to})`,
+                          }}
+                        />
+                        <div className="px-3 py-2 text-xs font-medium text-left bg-white text-[#1A1208]">
+                          {t.label}
                         </div>
-                      )}
-                    </button>
-                  ))}
+                        {id === theme && (
+                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-terracotta flex items-center justify-center text-white text-[9px]">
+                            ✓
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {/* Cover photo upload */}
@@ -549,7 +595,11 @@ export default function CreateCard() {
                       {
                         icon: "📬",
                         title: "You deliver it",
-                        desc: "When you're ready, send the card link to the recipient.",
+                        desc: trimmedEmail
+                          ? scheduledDelivery
+                            ? `We'll deliver the card on the date you chose and email ${recipientName.trim()} a link.`
+                            : `When you're ready, deliver it and we'll email ${recipientName.trim()} a link.`
+                          : "When you're ready, send the card link to the recipient.",
                       },
                     ].map((item) => (
                       <div key={item.title} className="flex gap-3 items-start">
@@ -619,31 +669,27 @@ export default function CreateCard() {
               <div
                 className="p-5"
                 style={{
-                  background: `linear-gradient(135deg, ${CARD_THEMES[theme].from}, ${CARD_THEMES[theme].to})`,
+                  background: `linear-gradient(135deg, ${activeTheme.from}, ${activeTheme.to})`,
                 }}
               >
                 <div
                   className="text-[10px] font-medium tracking-[1.5px] uppercase mb-1"
-                  style={{ color: "#D4845A" }}
+                  style={{ color: activeTheme.accent }}
                 >
                   {getOccasionEmoji(occasion)} {occasion}
                 </div>
 
                 <div
                   className="font-playfair text-xl tracking-tight"
-                  style={{
-                    color: theme === "midnight" ? "#FDF8F2" : "#1A1208",
-                  }}
+                  style={{ color: activeTheme.heading }}
                 >
                   {getGreeting(occasion, recipientName)}
                 </div>
 
                 {message && (
                   <p
-                    className="text-xs mt-2 leading-relaxed opacity-80"
-                    style={{
-                      color: theme === "midnight" ? "#FDF8F2" : "#3A2F27",
-                    }}
+                    className="text-xs mt-2 leading-relaxed"
+                    style={{ color: activeTheme.body }}
                   >
                     {message}
                   </p>
@@ -675,6 +721,21 @@ export default function CreateCard() {
                       Signing closes{" "}
                       {new Date(
                         dateInputToISO(deadline, "end"),
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                )}
+
+                {scheduledDelivery && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-taupe">
+                    <span>📬</span>
+                    <span>
+                      Delivers{" "}
+                      {new Date(
+                        dateInputToISO(scheduledDelivery, "start"),
                       ).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",

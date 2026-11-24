@@ -1,17 +1,9 @@
 "use client";
 
+import { getGreeting, getOccasionEmoji } from "@/lib/helpers/greeting";
 import { imageUrl } from "@/lib/helpers/imageUrl";
+import { getTheme } from "@/lib/theme";
 import { useState } from "react";
-import { getGreeting } from "@/lib/helpers/greeting";
-
-const themes: Record<string, { from: string; to: string }> = {
-  warm: { from: "#FEF3ED", to: "#F5EAD8" },
-  sage: { from: "#EEF3EE", to: "#D4E8D4" },
-  lavender: { from: "#F0EBF8", to: "#E2D4F0" },
-  sky: { from: "#E6F1FB", to: "#C8DFF5" },
-  parchment: { from: "#FDF8F2", to: "#EDE0CE" },
-  midnight: { from: "#1A1208", to: "#2E2820" },
-};
 
 // Bubble background colours — cycle through these for variety
 const bubbleColors = [
@@ -58,73 +50,10 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-function getOccasionEmoji(occasion: string) {
-  const emojis: Record<string, string> = {
-    // Personal celebrations
-    Birthday: "🎂",
-    Anniversary: "❤️",
-    Wedding: "💍",
-    Engagement: "💎",
-    "New Baby": "👶",
-    "Baby Shower": "🍼",
-    "Bridal Shower": "💐",
-    "Gender Reveal": "🎀",
-    "New Home": "🏡",
-    "New Car": "🚗",
-
-    // Career and achievements
-    Farewell: "👋",
-    Congratulations: "🎊",
-    Graduation: "🎓",
-    "New Job": "💼",
-    Promotion: "🚀",
-    Retirement: "🥂",
-    "Work Anniversary": "🏆",
-    "First Day": "🌟",
-    "New Business": "🎉",
-
-    // Appreciation and encouragement
-    "Thank You": "🙏",
-    "Get Well Soon": "🌷",
-    Sympathy: "🕊️",
-    Encouragement: "💪",
-    "Just Because": "✨",
-    "Miss You": "💌",
-    "Good Luck": "🍀",
-    "Thinking of You": "💛",
-    Apology: "💐",
-    "Welcome Back": "🎈",
-
-    // Major holidays
-    Holiday: "🎄",
-    Christmas: "🎄",
-    "New Year's": "🥳",
-    "Valentine's Day": "❤️",
-    Easter: "🐰",
-    Halloween: "🎃",
-    Thanksgiving: "🦃",
-    "Mother's Day": "💐",
-    "Father's Day": "👔",
-    "St. Patrick's Day": "☘️",
-    "Fourth of July": "🇺🇸",
-    "Lunar New Year": "🧧",
-    Diwali: "🪔",
-    Hanukkah: "🕎",
-    "Eid al-Fitr": "🌙",
-    "Eid al-Adha": "🌙",
-    Ramadan: "🌙",
-    Passover: "🍷",
-    "International Women's Day": "💜",
-  };
-
-  return emojis[occasion] ?? "🎉";
-}
-
 export default function RecipientView({ card }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const theme = themes[card.theme] ?? themes.warm;
-  const isMidnight = card.theme === "midnight";
+  const theme = getTheme(card.theme);
   const heading = getGreeting(card.occasion, card.recipientName);
   const emoji = getOccasionEmoji(card.occasion);
   const photoCount = card.signatures.filter((s) => s.photoUrl).length;
@@ -172,8 +101,16 @@ export default function RecipientView({ card }: Props) {
         }}
       >
         {/* Decorative orbs */}
-        <div className="absolute w-64 h-64 rounded-full bg-white/30 -top-12 -left-12 pointer-events-none" />
-        <div className="absolute w-48 h-48 rounded-full bg-white/20 -bottom-8 -right-8 pointer-events-none" />
+        <div
+          className={`absolute w-64 h-64 rounded-full -top-12 -left-12 pointer-events-none ${
+            theme.dark ? "bg-white/10" : "bg-white/30"
+          }`}
+        />
+        <div
+          className={`absolute w-48 h-48 rounded-full -bottom-8 -right-8 pointer-events-none ${
+            theme.dark ? "bg-white/5" : "bg-white/20"
+          }`}
+        />
 
         <div className="relative z-10 max-w-[680px] mx-auto">
           {/* Confetti row */}
@@ -185,10 +122,10 @@ export default function RecipientView({ card }: Props) {
           <div
             className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[2px] uppercase border rounded-full px-4 py-2 mb-5"
             style={{
-              color: isMidnight ? "#D4845A" : "#D4845A",
-              borderColor: isMidnight ? "#3A2F27" : "#EDD5C5",
-              background: isMidnight
-                ? "rgba(255,255,255,0.05)"
+              color: theme.accent,
+              borderColor: theme.dark ? "rgba(255,255,255,0.18)" : "#EDD5C5",
+              background: theme.dark
+                ? "rgba(255,255,255,0.06)"
                 : "rgba(255,255,255,0.6)",
             }}
           >
@@ -199,7 +136,7 @@ export default function RecipientView({ card }: Props) {
           {/* Main heading */}
           <h1
             className="font-playfair text-[clamp(36px,5vw,64px)] leading-[1.05] tracking-[-2px] mb-4"
-            style={{ color: isMidnight ? "#FDF8F2" : "#1A1208" }}
+            style={{ color: theme.heading }}
           >
             {heading}
           </h1>
@@ -208,16 +145,12 @@ export default function RecipientView({ card }: Props) {
           {card.openingMessage && (
             <p
               className="text-[16px] font-light leading-[1.8] max-w-[520px] mx-auto mb-6 italic"
-              style={{
-                color: isMidnight ? "rgba(253,248,242,0.8)" : "#3A2F27",
-              }}
+              style={{ color: theme.body }}
             >
               "{card.openingMessage}"
               <span
                 className="block not-italic text-sm mt-1 font-medium"
-                style={{
-                  color: isMidnight ? "rgba(253,248,242,0.6)" : "#8C7B6B",
-                }}
+                style={{ color: theme.muted }}
               >
                 — {card.creator.name}
               </span>
@@ -250,11 +183,13 @@ export default function RecipientView({ card }: Props) {
                 key={m.label}
                 className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium border"
                 style={{
-                  background: isMidnight
+                  background: theme.dark
                     ? "rgba(255,255,255,0.08)"
                     : "rgba(255,255,255,0.7)",
-                  borderColor: isMidnight ? "#3A2F27" : "#E8DDD0",
-                  color: isMidnight ? "#FDF8F2" : "#1A1208",
+                  borderColor: theme.dark
+                    ? "rgba(255,255,255,0.18)"
+                    : "#E8DDD0",
+                  color: theme.strong,
                 }}
               >
                 <span>{m.icon}</span>
@@ -264,15 +199,16 @@ export default function RecipientView({ card }: Props) {
           </div>
         </div>
       </div>
-      <div className="w-full h-[70vh] overflow-hidden">
-        {card.creatorPhotoUrl && (
+
+      {card.creatorPhotoUrl && (
+        <div className="w-full h-[70vh] overflow-hidden">
           <img
             src={imageUrl(card.creatorPhotoUrl)}
             alt="Cover"
             className="w-full h-full object-cover object-[center_30%] rounded-br-sm rounded-bl-sm"
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* MESSAGES */}
       <section className="max-w-[1060px] mx-auto px-12 py-16">
