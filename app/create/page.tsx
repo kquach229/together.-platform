@@ -1,33 +1,13 @@
 "use client";
 
+import OccasionPicker from "@/app/components/OccasionPicker";
 import { dateInputToISO } from "@/lib/helpers/dates";
-import { getGreeting } from "@/lib/helpers/greeting";
+import { getGreeting, getOccasionEmoji } from "@/lib/helpers/greeting";
 import { uploadPhoto } from "@/lib/helpers/uploadPhoto";
 import { CARD_THEMES } from "@/lib/theme";
 
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-
-const occasions = [
-  { emoji: "🎂", label: "Birthday" },
-  { emoji: "👋", label: "Farewell" },
-  { emoji: "🎊", label: "Congratulations" },
-  { emoji: "💍", label: "Wedding" },
-  { emoji: "🍼", label: "New Baby" },
-  { emoji: "❤️‍🩹", label: "Get Well Soon" },
-  { emoji: "🎓", label: "Graduation" },
-  { emoji: "🙏", label: "Thank You" },
-  { emoji: "🎄", label: "Holiday" },
-  { emoji: "🏆", label: "Work Anniversary" },
-  { emoji: "🌟", label: "Just Because" },
-  { emoji: "🕊️", label: "Sympathy" },
-  { emoji: "💖", label: "Anniversary" },
-  { emoji: "🏡", label: "Housewarming" },
-  { emoji: "👶", label: "Baby Shower" },
-  { emoji: "🎖️", label: "Retirement" },
-  { emoji: "💪", label: "Encouragement" },
-  { emoji: "❤️", label: "Love & Appreciation" },
-];
 
 const steps = [
   { num: 1, label: "Occasion" },
@@ -58,7 +38,6 @@ export default function CreateCard() {
   const [user, setUser] = useState<User | null>(null);
   const [step, setStep] = useState(1);
   const [occasion, setOccasion] = useState("Birthday");
-  const [occasionEmoji, setOccasionEmoji] = useState("🎂");
   const [recipientName, setRecipientName] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -128,7 +107,7 @@ export default function CreateCard() {
   }
 
   function canProceed() {
-    if (step === 1) return !!occasion;
+    if (step === 1) return occasion.trim().length > 0;
     if (step === 2) return recipientName.trim().length > 0;
     if (step === 3) return !!theme;
     return true;
@@ -285,30 +264,11 @@ export default function CreateCard() {
                   What's the occasion?
                 </h2>
                 <p className="text-sm text-muted-taupe font-light mb-8">
-                  Pick the one that fits best — you can always change it later.
+                  Pick the one that fits best, or write your own. You can always
+                  change it later.
                 </p>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-                  {occasions.map((o) => (
-                    <button
-                      key={o.label}
-                      onClick={() => {
-                        setOccasion(o.label);
-                        setOccasionEmoji(o.emoji);
-                      }}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all font-dm-sans ${
-                        occasion === o.label
-                          ? "border-terracotta bg-[#FEF3ED] shadow-[0_2px_12px_rgba(212,132,90,0.15)]"
-                          : "border-[#E8DDD0] bg-white hover:border-terracotta hover:bg-[#FEF3ED]/40"
-                      }`}
-                    >
-                      <span className="text-2xl">{o.emoji}</span>
-                      <span className="text-xs font-medium text-[#1A1208] leading-relaxed">
-                        {o.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                <OccasionPicker value={occasion} onChange={setOccasion} />
               </div>
             )}
 
@@ -666,7 +626,7 @@ export default function CreateCard() {
                   className="text-[10px] font-medium tracking-[1.5px] uppercase mb-1"
                   style={{ color: "#D4845A" }}
                 >
-                  {occasionEmoji} {occasion}
+                  {getOccasionEmoji(occasion)} {occasion}
                 </div>
 
                 <div
@@ -675,13 +635,6 @@ export default function CreateCard() {
                     color: theme === "midnight" ? "#FDF8F2" : "#1A1208",
                   }}
                 >
-                  {occasion === "Birthday"
-                    ? "Happy Birthday"
-                    : occasion === "Get Well Soon"
-                      ? "Get Well Soon"
-                      : occasion === "Sympathy"
-                        ? "Thinking of You"
-                        : occasion}
                   {getGreeting(occasion, recipientName)}
                 </div>
 

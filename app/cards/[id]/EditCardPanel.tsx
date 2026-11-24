@@ -7,6 +7,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { dateInputToISO } from "@/lib/helpers/dates";
+import {
+  MAX_CUSTOM_OCCASION_LENGTH,
+  OCCASIONS,
+  OCCASION_GROUPS,
+  getGreeting,
+  isPresetOccasion,
+  normalizeCustomOccasion,
+} from "@/lib/helpers/greeting";
 
 const themes = [
   { id: "warm", label: "Warm", from: "#FEF3ED", to: "#F5EAD8" },
@@ -17,63 +26,8 @@ const themes = [
   { id: "midnight", label: "Midnight", from: "#1A1208", to: "#2E2820" },
 ];
 
-const occasions = [
-  // Personal celebrations
-  "Birthday",
-  "Anniversary",
-  "Wedding",
-  "Engagement",
-  "New Baby",
-  "Baby Shower",
-  "Bridal Shower",
-  "Gender Reveal",
-  "New Home",
-  "New Car",
-
-  // Career and achievements
-  "Farewell",
-  "Congratulations",
-  "Graduation",
-  "New Job",
-  "Promotion",
-  "Retirement",
-  "Work Anniversary",
-  "First Day",
-  "New Business",
-
-  // Appreciation and encouragement
-  "Thank You",
-  "Get Well Soon",
-  "Sympathy",
-  "Encouragement",
-  "Just Because",
-  "Miss You",
-  "Good Luck",
-  "Thinking of You",
-  "Apology",
-  "Welcome Back",
-
-  // Holidays
-  "Holiday",
-  "Christmas",
-  "New Year's",
-  "Valentine's Day",
-  "Easter",
-  "Halloween",
-  "Thanksgiving",
-  "Mother's Day",
-  "Father's Day",
-  "St. Patrick's Day",
-  "Fourth of July",
-  "Lunar New Year",
-  "Diwali",
-  "Hanukkah",
-  "Eid al-Fitr",
-  "Eid al-Adha",
-  "Ramadan",
-  "Passover",
-  "International Women's Day",
-];
+// Value used by the <select> for the "Custom…" option
+const CUSTOM_VALUE = "__custom__";
 
 interface EditCardPanelProps {
   cardId: string;
@@ -89,9 +43,12 @@ interface EditCardPanelProps {
   onClose: () => void;
 }
 
+// Local-time YYYY-MM-DD, so the date input matches what the user picked.
 function toDateInputValue(date: Date | null): string {
   if (!date) return "";
-  return new Date(date).toISOString().slice(0, 10);
+  const d = new Date(date);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 export default function EditCardPanel({
@@ -101,7 +58,16 @@ export default function EditCardPanel({
 }: EditCardPanelProps) {
   const router = useRouter();
 
-  const [occasion, setOccasion] = useState(initial.occasion);
+  // Occasion: either a preset label, or free text ("custom")
+  const startsCustom = !isPresetOccasion(initial.occasion);
+  const [customMode, setCustomMode] = useState(startsCustom);
+  const [presetOccasion, setPresetOccasion] = useState(
+    startsCustom ? OCCASIONS[0].label : initial.occasion,
+  );
+  const [customText, setCustomText] = useState(
+    startsCustom ? initial.occasion : "",
+  );
+
   const [recipientName, setRecipientName] = useState(initial.recipientName);
   const [recipientEmail, setRecipientEmail] = useState(
     initial.recipientEmail ?? "",
@@ -120,8 +86,13 @@ export default function EditCardPanel({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The occasion string that will actually be saved
+  const finalOccasion = customMode
+    ? normalizeCustomOccasion(customText)
+    : presetOccasion;
+
   const hasChanges =
-    occasion !== initial.occasion ||
+    finalOccasion !== initial.occasion ||
     recipientName !== initial.recipientName ||
     recipientEmail !== (initial.recipientEmail ?? "") ||
     openingMessage !== (initial.openingMessage ?? "") ||
@@ -130,6 +101,10 @@ export default function EditCardPanel({
     scheduledDelivery !== toDateInputValue(initial.scheduledDeliveryAt);
 
   async function handleSave() {
+    if (!finalOccasion) {
+      setError("Please choose an occasion or write your own.");
+      return;
+    }
     if (!recipientName.trim()) {
       setError("Recipient name is required.");
       return;
@@ -142,16 +117,16 @@ export default function EditCardPanel({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          occasion,
+          occasion: finalOccasion,
           recipientName: recipientName.trim(),
           recipientEmail: recipientEmail.trim() || "",
           openingMessage: openingMessage.trim() || null,
           theme,
           signingDeadline: signingDeadline
-            ? new Date(signingDeadline).toISOString()
+            ? dateInputToISO(signingDeadline, "end")
             : null,
           scheduledDeliveryAt: scheduledDelivery
-            ? new Date(scheduledDelivery).toISOString()
+            ? dateInputToISO(scheduledDelivery, "start")
             : null,
         }),
       });
@@ -182,7 +157,7 @@ export default function EditCardPanel({
       />
 
       {/* Panel */}
-      <div className="fixed top-0 right-0 bottom-0 w-[480px] bg-[#FDF8F2] z-50 flex flex-col shadow-[0_0_40px_rgba(26,18,8,0.15)] overflow-hidden">
+      <div className="fixed top-0 right-0 bottom-0 w-[480px] max-w-full bg-[#FDF8F2] z-50 flex flex-col shadow-[0_0_40px_rgba(26,18,8,0.15)] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#E8DDD0]">
           <h2 className="font-playfair text-[22px] tracking-tight">
@@ -202,16 +177,52 @@ export default function EditCardPanel({
           <div>
             <label className="block text-sm font-medium mb-2">Occasion</label>
             <select
-              value={occasion}
-              onChange={(e) => setOccasion(e.target.value)}
+              value={customMode ? CUSTOM_VALUE : presetOccasion}
+              onChange={(e) => {
+                if (e.target.value === CUSTOM_VALUE) {
+                  setCustomMode(true);
+                } else {
+                  setCustomMode(false);
+                  setPresetOccasion(e.target.value);
+                }
+              }}
               className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans"
             >
-              {occasions.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
+              {OCCASION_GROUPS.map((group) => (
+                <optgroup key={group} label={group}>
+                  {OCCASIONS.filter((o) => o.group === group).map((o) => (
+                    <option key={o.label} value={o.label}>
+                      {o.emoji} {o.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
+              <option value={CUSTOM_VALUE}>✨ Something else…</option>
             </select>
+
+            {customMode && (
+              <input
+                type="text"
+                value={customText}
+                maxLength={MAX_CUSTOM_OCCASION_LENGTH}
+                onChange={(e) => setCustomText(e.target.value)}
+                placeholder="e.g. Happy Friendship Day"
+                className="w-full mt-3 px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD]"
+              />
+            )}
+
+            <p className="text-xs text-[#8C7B6B] mt-1.5 font-light">
+              {finalOccasion ? (
+                <>
+                  Heading:{" "}
+                  <span className="font-medium text-[#1A1208]">
+                    {getGreeting(finalOccasion, recipientName || "Sarah")}
+                  </span>
+                </>
+              ) : (
+                "Type the heading you'd like. We'll add the recipient's name after it."
+              )}
+            </p>
           </div>
 
           {/* Recipient name */}

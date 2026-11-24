@@ -8,11 +8,6 @@ import * as z from "zod";
 const createCardSchema = z.object({
   occasion: z.string().min(1, "Occasion is required"),
   recipientName: z.string().min(1, "Recipient name is required"),
-  recipientEmail: z
-    .string()
-    .email("Invalid email")
-    .optional()
-    .or(z.literal("")),
   openingMessage: z.string().max(500).optional(),
   theme: z.string().default("warm"),
   signingDeadline: z.string().datetime().optional(),
