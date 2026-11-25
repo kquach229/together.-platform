@@ -14,7 +14,6 @@ const updateCardSchema = z.object({
   openingMessage: z.string().max(500).optional(),
   theme: z.string().optional(),
   signingDeadline: z.string().datetime().optional().nullable(),
-  scheduledDeliveryAt: z.string().datetime().optional().nullable(),
   status: z.enum(["collecting", "delivered", "archived"]).optional(),
   creatorPhotoUrl: z.string().optional(),
 });
@@ -134,7 +133,6 @@ export async function PATCH(
       openingMessage,
       theme,
       signingDeadline,
-      scheduledDeliveryAt,
       status,
       creatorPhotoUrl,
     } = parsed.data;
@@ -166,11 +164,6 @@ export async function PATCH(
         ...(signingDeadline !== undefined && {
           signingDeadline: signingDeadline ? new Date(signingDeadline) : null,
         }),
-        ...(scheduledDeliveryAt !== undefined && {
-          scheduledDeliveryAt: scheduledDeliveryAt
-            ? new Date(scheduledDeliveryAt)
-            : null,
-        }),
         ...(status && { status }),
         ...(deliveredAt && { deliveredAt }),
         ...(creatorPhotoUrl !== undefined && { creatorPhotoUrl }),
@@ -187,7 +180,6 @@ export async function PATCH(
         deliveryToken: true,
         signerCount: true,
         signingDeadline: true,
-        scheduledDeliveryAt: true,
         creatorPhotoUrl: true,
         deliveredAt: true,
         updatedAt: true,

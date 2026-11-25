@@ -36,7 +36,6 @@ export async function GET(req: NextRequest) {
     const due = await prisma.card.findMany({
       where: {
         status: "collecting",
-        scheduledDeliveryAt: { lte: now },
         signerCount: { gt: 0 },
       },
       select: {
@@ -45,7 +44,6 @@ export async function GET(req: NextRequest) {
         occasion: true,
         recipientName: true,
       },
-      orderBy: { scheduledDeliveryAt: "asc" },
       take: BATCH_SIZE,
     });
 

@@ -33,7 +33,6 @@ interface Card {
   deliveryToken: string;
   signerCount: number;
   signingDeadline: Date | null;
-  scheduledDeliveryAt: Date | null;
   deliveredAt: Date | null;
   createdAt: Date;
   creator: { name: string };
@@ -210,7 +209,6 @@ export default function CardDetailView({ card }: Props) {
             openingMessage: card.openingMessage,
             theme: card.theme,
             signingDeadline: card.signingDeadline,
-            scheduledDeliveryAt: card.scheduledDeliveryAt,
           }}
           onClose={() => setShowEdit(false)}
         />
@@ -579,14 +577,6 @@ export default function CardDetailView({ card }: Props) {
                           {
                             label: "Deadline",
                             value: formatDate(card.signingDeadline),
-                          },
-                        ]
-                      : []),
-                    ...(card.scheduledDeliveryAt
-                      ? [
-                          {
-                            label: "Scheduled",
-                            value: formatDate(card.scheduledDeliveryAt),
                           },
                         ]
                       : []),

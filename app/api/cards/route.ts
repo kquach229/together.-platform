@@ -16,7 +16,6 @@ const createCardSchema = z.object({
   openingMessage: z.string().max(500).optional(),
   theme: z.string().default("warm"),
   signingDeadline: z.string().datetime().optional(),
-  scheduledDeliveryAt: z.string().datetime().optional(),
   creatorPhotoUrl: z.string().optional().nullable(),
 });
 
@@ -46,7 +45,6 @@ export async function POST(req: NextRequest) {
       openingMessage,
       theme,
       signingDeadline,
-      scheduledDeliveryAt,
       creatorPhotoUrl,
     } = parsed.data;
 
@@ -73,9 +71,6 @@ export async function POST(req: NextRequest) {
           status: "collecting",
           creatorPhotoUrl: creatorPhotoUrl || null,
           signingDeadline: signingDeadline ? new Date(signingDeadline) : null,
-          scheduledDeliveryAt: scheduledDeliveryAt
-            ? new Date(scheduledDeliveryAt)
-            : null,
         },
         select: {
           id: true,
@@ -88,7 +83,6 @@ export async function POST(req: NextRequest) {
           signingToken: true,
           deliveryToken: true,
           signingDeadline: true,
-          scheduledDeliveryAt: true,
           signerCount: true,
           createdAt: true,
         },

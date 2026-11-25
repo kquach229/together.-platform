@@ -38,7 +38,6 @@ export default async function CardDetailPage({ params }: Props) {
       deliveryToken: true,
       signerCount: true,
       signingDeadline: true,
-      scheduledDeliveryAt: true,
       deliveredAt: true,
       createdAt: true,
       creatorId: true,

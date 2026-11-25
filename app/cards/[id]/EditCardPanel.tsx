@@ -32,7 +32,6 @@ interface EditCardPanelProps {
     openingMessage: string | null;
     theme: string;
     signingDeadline: Date | null;
-    scheduledDeliveryAt: Date | null;
   };
   onClose: () => void;
 }
@@ -76,9 +75,6 @@ export default function EditCardPanel({
   const [signingDeadline, setSigningDeadline] = useState(
     toDateInputValue(initial.signingDeadline),
   );
-  const [scheduledDelivery, setScheduledDelivery] = useState(
-    toDateInputValue(initial.scheduledDeliveryAt),
-  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,10 +86,6 @@ export default function EditCardPanel({
 
   const trimmedEmail = recipientEmail.trim();
   const emailInvalid = trimmedEmail.length > 0 && !EMAIL_RE.test(trimmedEmail);
-  const deliveryBeforeDeadline =
-    !!signingDeadline &&
-    !!scheduledDelivery &&
-    scheduledDelivery < signingDeadline;
 
   const hasChanges =
     finalOccasion !== initial.occasion ||
@@ -101,8 +93,7 @@ export default function EditCardPanel({
     trimmedEmail !== (initial.recipientEmail ?? "") ||
     openingMessage !== (initial.openingMessage ?? "") ||
     theme !== initialThemeId ||
-    signingDeadline !== toDateInputValue(initial.signingDeadline) ||
-    scheduledDelivery !== toDateInputValue(initial.scheduledDeliveryAt);
+    signingDeadline !== toDateInputValue(initial.signingDeadline);
 
   async function handleSave() {
     if (!finalOccasion) {
@@ -132,9 +123,6 @@ export default function EditCardPanel({
           theme,
           signingDeadline: signingDeadline
             ? dateInputToISO(signingDeadline, "end")
-            : null,
-          scheduledDeliveryAt: scheduledDelivery
-            ? dateInputToISO(scheduledDelivery, "start")
             : null,
         }),
       });
@@ -350,40 +338,6 @@ export default function EditCardPanel({
                 className="text-xs text-[#8C7B6B] hover:text-terracotta mt-1.5 bg-transparent border-none cursor-pointer p-0 font-dm-sans"
               >
                 Remove deadline
-              </button>
-            )}
-          </div>
-
-          {/* Scheduled delivery */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Scheduled delivery
-              <span className="text-[#8C7B6B] font-light ml-2">(optional)</span>
-            </label>
-            <input
-              type="date"
-              value={scheduledDelivery}
-              onChange={(e) => setScheduledDelivery(e.target.value)}
-              className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans text-[#1A1208]"
-            />
-            <p className="text-xs text-[#8C7B6B] mt-1.5 font-light">
-              {trimmedEmail
-                ? "The card will be delivered on this date and emailed to the recipient."
-                : "The card will be delivered on this date. Add the recipient's email above so we can send it to them."}
-            </p>
-            {deliveryBeforeDeadline && (
-              <p className="text-xs text-[#B4531F] mt-1.5">
-                Heads up: signing stops once the card is delivered, which is
-                before your signing deadline.
-              </p>
-            )}
-            {scheduledDelivery && (
-              <button
-                type="button"
-                onClick={() => setScheduledDelivery("")}
-                className="text-xs text-[#8C7B6B] hover:text-terracotta mt-1 bg-transparent border-none cursor-pointer p-0 font-dm-sans"
-              >
-                Remove scheduled delivery
               </button>
             )}
           </div>

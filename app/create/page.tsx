@@ -17,7 +17,7 @@ const steps = [
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Local-time YYYY-MM-DDTHH:mm, used as the minimum for datetime-local inputs.
+// Local-time YYYY-MM-DDTHH:mm, used as the minimum for the datetime-local input.
 // This format sorts lexicographically, so plain string comparison works.
 function nowInputValue() {
   const d = new Date();
@@ -55,7 +55,6 @@ export default function CreateCard() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [message, setMessage] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [scheduledDelivery, setScheduledDelivery] = useState("");
   const [theme, setTheme] = useState<ThemeId>("warm");
   const [coverPhotoPreview, setCoverPhotoPreview] = useState<string | null>(
     null,
@@ -72,14 +71,8 @@ export default function CreateCard() {
   const trimmedEmail = recipientEmail.trim();
   const emailInvalid = trimmedEmail.length > 0 && !EMAIL_RE.test(trimmedEmail);
 
-  // Email is only collected (and required) when delivery is scheduled
-  const emailMissing = !!scheduledDelivery && trimmedEmail.length === 0;
-
   const now = nowInputValue();
   const deadlinePast = !!deadline && deadline < now;
-  const deliveryPast = !!scheduledDelivery && scheduledDelivery < now;
-  const deliveryBeforeDeadline =
-    !!deadline && !!scheduledDelivery && scheduledDelivery < deadline;
 
   const disableCardCreation =
     user?.plan === "free" && user?.lifetimeCardsCreated > 0;
@@ -115,12 +108,6 @@ export default function CreateCard() {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  function handleScheduledDeliveryChange(value: string) {
-    setScheduledDelivery(value);
-    // Clear the email when delivery is unscheduled so a hidden value is never submitted
-    if (!value) setRecipientEmail("");
-  }
-
   const shareLink = signingToken
     ? `${window.location.origin}/sign/${signingToken}`
     : "Generating link…";
@@ -142,13 +129,7 @@ export default function CreateCard() {
   function canProceed() {
     if (step === 1) return occasion.trim().length > 0;
     if (step === 2)
-      return (
-        recipientName.trim().length > 0 &&
-        !emailInvalid &&
-        !emailMissing &&
-        !deadlinePast &&
-        !deliveryPast
-      );
+      return recipientName.trim().length > 0 && !emailInvalid && !deadlinePast;
     if (step === 3) return !!theme;
     return true;
   }
@@ -179,14 +160,10 @@ export default function CreateCard() {
         body: JSON.stringify({
           occasion,
           recipientName,
-          recipientEmail:
-            scheduledDelivery && trimmedEmail ? trimmedEmail : undefined,
+          recipientEmail: trimmedEmail || undefined,
           openingMessage: message || undefined,
           theme,
           signingDeadline: deadline ? inputToISO(deadline) : undefined,
-          scheduledDeliveryAt: scheduledDelivery
-            ? inputToISO(scheduledDelivery)
-            : undefined,
           creatorPhotoUrl,
         }),
       });
@@ -340,6 +317,35 @@ export default function CreateCard() {
 
                   <div>
                     <label className="block text-sm font-medium mb-2">
+                      Recipient's email
+                      <span className="text-muted-taupe font-light ml-2">
+                        (optional)
+                      </span>
+                    </label>
+                    <input
+                      type="email"
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
+                      placeholder="sarah@example.com"
+                      className={`w-full px-4 py-3 border rounded-xl text-sm bg-white outline-none transition-colors font-dm-sans placeholder:text-[#C5B8AD] ${
+                        emailInvalid
+                          ? "border-red-400"
+                          : "border-[#E8DDD0] focus:border-terracotta"
+                      }`}
+                    />
+                    {emailInvalid ? (
+                      <p className="text-xs text-red-500 mt-1.5">
+                        Please enter a valid email address.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-taupe mt-1.5 font-light">
+                        We'll email them a link to the card when you deliver it.
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
                       Your opening message
                       <span className="text-muted-taupe font-light ml-2">
                         (optional)
@@ -388,75 +394,6 @@ export default function CreateCard() {
                       </p>
                     )}
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Scheduled delivery
-                      <span className="text-muted-taupe font-light ml-2">
-                        (optional)
-                      </span>
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={scheduledDelivery}
-                      min={now}
-                      onChange={(e) =>
-                        handleScheduledDeliveryChange(e.target.value)
-                      }
-                      className={`w-full px-4 py-3 border rounded-xl text-sm bg-white outline-none transition-colors font-dm-sans text-[#1A1208] ${
-                        deliveryPast
-                          ? "border-red-400"
-                          : "border-[#E8DDD0] focus:border-terracotta"
-                      }`}
-                    />
-                    {deliveryPast ? (
-                      <p className="text-xs text-red-500 mt-1.5">
-                        The delivery time can't be in the past.
-                      </p>
-                    ) : (
-                      <p className="text-xs text-muted-taupe mt-1.5 font-light">
-                        We'll deliver the card at this time and email it to the
-                        recipient.
-                      </p>
-                    )}
-                    {deliveryBeforeDeadline && (
-                      <p className="text-xs text-[#B4531F] mt-1.5">
-                        Heads up: signing stops once the card is delivered,
-                        which is before your signing deadline.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Recipient email — only shown when delivery is scheduled */}
-                  {scheduledDelivery && (
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Recipient's email{" "}
-                        <span className="text-terracotta">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        value={recipientEmail}
-                        onChange={(e) => setRecipientEmail(e.target.value)}
-                        placeholder="sarah@example.com"
-                        className={`w-full px-4 py-3 border rounded-xl text-sm bg-white outline-none transition-colors font-dm-sans placeholder:text-[#C5B8AD] ${
-                          emailInvalid
-                            ? "border-red-400"
-                            : "border-[#E8DDD0] focus:border-terracotta"
-                        }`}
-                      />
-                      {emailInvalid ? (
-                        <p className="text-xs text-red-500 mt-1.5">
-                          Please enter a valid email address.
-                        </p>
-                      ) : (
-                        <p className="text-xs text-muted-taupe mt-1.5 font-light">
-                          Required so we can email them a link when the card is
-                          delivered.
-                        </p>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
             )}
@@ -652,9 +589,9 @@ export default function CreateCard() {
                       {
                         icon: "📬",
                         title: "You deliver it",
-                        desc: scheduledDelivery
-                          ? `We'll deliver the card at the time you chose and email ${recipientName.trim()} a link.`
-                          : "When you're ready, send the card link to the recipient.",
+                        desc: trimmedEmail
+                          ? `When you're ready, deliver the card and we'll email ${recipientName.trim()} a link right then. You can also copy the recipient link and send it yourself.`
+                          : "When you're ready, deliver the card and copy the recipient link to send it yourself.",
                       },
                     ].map((item) => (
                       <div key={item.title} className="flex gap-3 items-start">
@@ -773,13 +710,6 @@ export default function CreateCard() {
                   <div className="mt-3 flex items-center gap-2 text-xs text-muted-taupe">
                     <span>⏰</span>
                     <span>Signing closes {formatPreviewDate(deadline)}</span>
-                  </div>
-                )}
-
-                {scheduledDelivery && (
-                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-taupe">
-                    <span>📬</span>
-                    <span>Delivers {formatPreviewDate(scheduledDelivery)}</span>
                   </div>
                 )}
               </div>

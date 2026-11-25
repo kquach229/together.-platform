@@ -55,7 +55,6 @@ model Card {
   theme               String         @default("warm")
   status              String         @default("collecting")
   creatorId           String
-  scheduledDeliveryAt DateTime?
   deliveredAt         DateTime?
   deliveryEmailSentAt DateTime?
   signerCount         Int            @default(0)
@@ -68,8 +67,6 @@ model Card {
   views               CardView[]
   notifications       Notification[]
   signatures          Signature[]
-
-  @@index([status, scheduledDeliveryAt])
   @@index([status, deliveryEmailSentAt, deliveredAt])
 }
 
