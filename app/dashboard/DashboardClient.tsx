@@ -5,6 +5,7 @@ import CardGridItem from "../components/CardGridItem";
 import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
 import { getTheme } from "@/lib/theme";
+import StatusLegend from "../components/StatusLengend";
 
 type CardStatus = "collecting" | "delivered";
 
@@ -236,6 +237,7 @@ export default function Dashboard({ user }: { user: User }) {
         </div>
 
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <StatusLegend />
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             {stats.map((s) => (
