@@ -15,7 +15,6 @@ import { getTheme } from "@/lib/theme";
 interface Signature {
   id: string;
   signerName: string;
-  signerEmail: string | null;
   message: string;
   photoUrl: string | null;
   isHidden: boolean;
@@ -425,11 +424,6 @@ export default function CardDetailView({ card }: Props) {
                                 <span className="text-sm font-medium">
                                   {sig.signerName}
                                 </span>
-                                {sig.signerEmail && (
-                                  <span className="text-xs text-[#8C7B6B] ml-2">
-                                    {sig.signerEmail}
-                                  </span>
-                                )}
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-xs text-[#8C7B6B]">

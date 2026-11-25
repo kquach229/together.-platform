@@ -79,7 +79,6 @@ model Signature {
   isHidden    Boolean  @default(false)
   cardId      String
   signerName  String
-  signerEmail String?
   message     String
   photoUrl    String?
   createdAt   DateTime @default(now())

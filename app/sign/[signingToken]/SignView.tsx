@@ -66,7 +66,6 @@ export default function SignView({ card, signingToken }: Props) {
 
   // Form state
   const [signerName, setSignerName] = useState("");
-  const [signerEmail, setSignerEmail] = useState("");
   const [message, setMessage] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -184,13 +183,6 @@ export default function SignView({ card, signingToken }: Props) {
       errs.message = `Message must be ${MAX_CHARS} characters or less.`;
     }
 
-    if (
-      signerEmail.trim() &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signerEmail.trim())
-    ) {
-      errs.signerEmail = "Please enter a valid email address.";
-    }
-
     return errs;
   }
 
@@ -244,7 +236,6 @@ export default function SignView({ card, signingToken }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           signerName: signerName.trim(),
-          signerEmail: signerEmail.trim() || undefined,
           message: message.trim(),
           photoUrl: photoUrl || undefined,
         }),
@@ -327,7 +318,6 @@ export default function SignView({ card, signingToken }: Props) {
               onClick={() => {
                 setScreen("form");
                 setSignerName("");
-                setSignerEmail("");
                 setMessage("");
                 setErrors({});
                 setLinkCopyError("");
@@ -526,25 +516,6 @@ export default function SignView({ card, signingToken }: Props) {
                   (optional)
                 </span>
               </label>
-
-              <input
-                type="email"
-                value={signerEmail}
-                onChange={(e) => {
-                  setSignerEmail(e.target.value);
-                  setErrors((prev) => ({ ...prev, signerEmail: "" }));
-                }}
-                placeholder="you@example.com"
-                className={`w-full px-4 py-3 border rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans placeholder:text-[#C5B8AD] ${
-                  errors.signerEmail ? "border-red-400" : "border-[#E8DDD0]"
-                }`}
-              />
-
-              {errors.signerEmail && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.signerEmail}
-                </p>
-              )}
 
               <p className="text-xs text-[#8C7B6B] mt-1.5 font-light">
                 We'll let you know when the card is delivered.

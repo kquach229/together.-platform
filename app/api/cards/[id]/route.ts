@@ -62,7 +62,6 @@ export async function GET(
           select: {
             id: true,
             signerName: true,
-            signerEmail: true,
             message: true,
             photoUrl: true,
             isHidden: true,

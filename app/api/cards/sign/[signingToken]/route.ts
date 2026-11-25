@@ -10,7 +10,6 @@ import { getUser } from "@/lib/helpers/getUser";
 // ─── Validation schema ───────────────────────────────────────
 const signCardSchema = z.object({
   signerName: z.string().min(1, "Name is required").max(100),
-  signerEmail: z.string().email("Invalid email").optional().or(z.literal("")),
   message: z
     .string()
     .min(1, "Message is required")
@@ -136,7 +135,7 @@ export async function POST(
       );
     }
 
-    const { signerName, signerEmail, message, photoUrl } = parsed.data;
+    const { signerName, message, photoUrl } = parsed.data;
     const user = await getUser();
 
     // 5. Get IP for audit trail
@@ -168,7 +167,6 @@ export async function POST(
         cardId: card.id,
         userId: user?.id,
         signerName,
-        signerEmail: signerEmail || null,
         message,
         photoUrl: photoUrl || null,
       },

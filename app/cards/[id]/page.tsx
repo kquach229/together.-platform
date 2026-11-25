@@ -49,7 +49,6 @@ export default async function CardDetailPage({ params }: Props) {
         select: {
           id: true,
           signerName: true,
-          signerEmail: true,
           message: true,
           photoUrl: true,
           isHidden: true,
