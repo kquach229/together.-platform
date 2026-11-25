@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import CardGridItem from "../components/CardGridItem";
 import { useRouter } from "next/navigation";
 import { CARD_THEMES } from "@/lib/theme";
 import { getTheme } from "@/lib/theme";
-import StatusLegend from "../components/StatusLengend";
 
 type CardStatus = "collecting" | "delivered";
 
@@ -26,6 +25,81 @@ const statusConfig: Record<
     text: "text-[#5A7D66]",
   },
 };
+
+const statusDescriptions: Record<CardStatus, string> = {
+  collecting:
+    "Open for signatures. Share the signing link. You can still edit the card and hide messages until you deliver it.",
+  delivered:
+    "Finalized, and signing is closed. If you added the recipient's email, we emailed them the link when you delivered. If not, copy the recipient link from the card page and send it yourself.",
+};
+
+function StatusInfo() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("touchstart", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("touchstart", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="group flex items-center self-stretch">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="What do the statuses mean?"
+        aria-expanded={open}
+        aria-controls="status-info"
+        className="w-6 h-6 rounded-full border border-[#E8DDD0] bg-white text-[11px] font-medium text-muted-taupe hover:border-terracotta hover:text-terracotta focus-visible:border-terracotta transition-colors cursor-pointer font-dm-sans shrink-0"
+      >
+        i
+      </button>
+
+      {/* pt-2 (not margin) keeps hover continuous between the button and the popover */}
+      <div
+        id="status-info"
+        role="tooltip"
+        className={`${
+          open ? "block" : "hidden"
+        } group-hover:block group-focus-within:block absolute left-0 top-full pt-2 z-40 w-[min(22rem,calc(100vw-2rem))]`}
+      >
+        <div className="bg-white border border-[#E8DDD0] rounded-xl shadow-lg p-4 flex flex-col gap-3">
+          {(Object.keys(statusConfig) as CardStatus[]).map((key) => {
+            const s = statusConfig[key];
+            return (
+              <div key={key} className="flex flex-col items-start gap-1.5">
+                <div
+                  className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${s.bg} ${s.text}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                  {s.label}
+                </div>
+                <p className="text-xs text-muted-taupe font-light leading-relaxed">
+                  {statusDescriptions[key]}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const tabs = ["All", "Collecting", "Delivered"];
 
@@ -237,7 +311,6 @@ export default function Dashboard({ user }: { user: User }) {
         </div>
 
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <StatusLegend />
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             {stats.map((s) => (
@@ -262,34 +335,38 @@ export default function Dashboard({ user }: { user: User }) {
 
           {/* Tabs + count */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-            <div className="overflow-x-auto">
-              <div className="flex gap-1 bg-white border border-[#E8DDD0] rounded-full p-1 w-max min-w-full sm:min-w-0">
-                {tabs.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setActiveTab(t)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all font-dm-sans border-none cursor-pointer whitespace-nowrap ${
-                      activeTab === t
-                        ? "bg-[#1A1208] text-[#FDF8F2]"
-                        : "text-muted-taupe hover:text-[#1A1208] bg-transparent"
-                    }`}
-                  >
-                    {t}
+            <div className="relative flex items-center gap-2">
+              <div className="overflow-x-auto min-w-0">
+                <div className="flex gap-1 bg-white border border-[#E8DDD0] rounded-full p-1 w-max min-w-full sm:min-w-0">
+                  {tabs.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setActiveTab(t)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all font-dm-sans border-none cursor-pointer whitespace-nowrap ${
+                        activeTab === t
+                          ? "bg-[#1A1208] text-[#FDF8F2]"
+                          : "text-muted-taupe hover:text-[#1A1208] bg-transparent"
+                      }`}
+                    >
+                      {t}
 
-                    {t !== "All" && (
-                      <span className="ml-1.5 text-[10px] opacity-60">
-                        {t === "Collecting"
-                          ? cards?.filter(
-                              (card: any) => card.status === "collecting",
-                            ).length
-                          : cards?.filter(
-                              (card: any) => card.status === "delivered",
-                            ).length}
-                      </span>
-                    )}
-                  </button>
-                ))}
+                      {t !== "All" && (
+                        <span className="ml-1.5 text-[10px] opacity-60">
+                          {t === "Collecting"
+                            ? cards?.filter(
+                                (card: any) => card.status === "collecting",
+                              ).length
+                            : cards?.filter(
+                                (card: any) => card.status === "delivered",
+                              ).length}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              <StatusInfo />
             </div>
 
             <div className="text-xs text-muted-taupe">
