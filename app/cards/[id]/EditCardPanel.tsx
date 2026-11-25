@@ -3,11 +3,10 @@
 // components/EditCardPanel.tsx
 // Slide-in edit panel for the card creator.
 // Allows editing occasion, recipient name/email, opening message,
-// theme, signing deadline, and scheduled delivery.
+// theme, and signing deadline.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { dateInputToISO } from "@/lib/helpers/dates";
 import {
   MAX_CUSTOM_OCCASION_LENGTH,
   OCCASIONS,
@@ -36,12 +35,13 @@ interface EditCardPanelProps {
   onClose: () => void;
 }
 
-// Local-time YYYY-MM-DD, so the date input matches what the user picked.
-function toDateInputValue(date: Date | null): string {
+// Local-time YYYY-MM-DDTHH:mm for datetime-local inputs.
+// This format sorts lexicographically, so plain string comparison works.
+function toDateTimeInputValue(date: Date | null): string {
   if (!date) return "";
   const d = new Date(date);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export default function EditCardPanel({
@@ -72,9 +72,9 @@ export default function EditCardPanel({
   // maps them to the current id.
   const initialThemeId = getTheme(initial.theme).id;
   const [theme, setTheme] = useState(initialThemeId);
-  const [signingDeadline, setSigningDeadline] = useState(
-    toDateInputValue(initial.signingDeadline),
-  );
+
+  const initialDeadline = toDateTimeInputValue(initial.signingDeadline);
+  const [signingDeadline, setSigningDeadline] = useState(initialDeadline);
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,13 +87,21 @@ export default function EditCardPanel({
   const trimmedEmail = recipientEmail.trim();
   const emailInvalid = trimmedEmail.length > 0 && !EMAIL_RE.test(trimmedEmail);
 
+  // Only block past deadlines the user actually changed, so an old deadline
+  // doesn't stop them from saving unrelated edits.
+  const now = toDateTimeInputValue(new Date());
+  const deadlinePast =
+    !!signingDeadline &&
+    signingDeadline !== initialDeadline &&
+    signingDeadline < now;
+
   const hasChanges =
     finalOccasion !== initial.occasion ||
     recipientName !== initial.recipientName ||
     trimmedEmail !== (initial.recipientEmail ?? "") ||
     openingMessage !== (initial.openingMessage ?? "") ||
     theme !== initialThemeId ||
-    signingDeadline !== toDateInputValue(initial.signingDeadline);
+    signingDeadline !== initialDeadline;
 
   async function handleSave() {
     if (!finalOccasion) {
@@ -108,8 +116,22 @@ export default function EditCardPanel({
       setError("Please enter a valid recipient email address.");
       return;
     }
+    if (deadlinePast) {
+      setError("The signing deadline can't be in the past.");
+      return;
+    }
     setError(null);
     setIsSaving(true);
+
+    // If the deadline wasn't touched, resend the original so its exact time
+    // isn't rounded to the minute.
+    let deadlineISO: string | null = null;
+    if (signingDeadline) {
+      deadlineISO =
+        signingDeadline === initialDeadline && initial.signingDeadline
+          ? new Date(initial.signingDeadline).toISOString()
+          : new Date(signingDeadline).toISOString();
+    }
 
     try {
       const res = await fetch(`/api/cards/${cardId}`, {
@@ -118,12 +140,11 @@ export default function EditCardPanel({
         body: JSON.stringify({
           occasion: finalOccasion,
           recipientName: recipientName.trim(),
-          recipientEmail: trimmedEmail,
+          // null clears the email; the server should accept null here
+          recipientEmail: trimmedEmail || null,
           openingMessage: openingMessage.trim() || null,
           theme,
-          signingDeadline: signingDeadline
-            ? dateInputToISO(signingDeadline, "end")
-            : null,
+          signingDeadline: deadlineISO,
         }),
       });
 
@@ -258,7 +279,9 @@ export default function EditCardPanel({
               </p>
             ) : (
               <p className="text-xs text-[#8C7B6B] mt-1.5 font-light">
-                We'll email them a link to the card when it's delivered.
+                {trimmedEmail
+                  ? "We'll email them a link to the card as soon as you deliver it."
+                  : "Add their email and we'll send them the link when you deliver the card. Otherwise, you'll copy the link and send it yourself."}
               </p>
             )}
           </div>
@@ -326,11 +349,21 @@ export default function EditCardPanel({
               <span className="text-[#8C7B6B] font-light ml-2">(optional)</span>
             </label>
             <input
-              type="date"
+              type="datetime-local"
               value={signingDeadline}
+              min={now}
               onChange={(e) => setSigningDeadline(e.target.value)}
-              className="w-full px-4 py-3 border border-[#E8DDD0] rounded-xl text-sm bg-white outline-none focus:border-terracotta transition-colors font-dm-sans text-[#1A1208]"
+              className={`w-full px-4 py-3 border rounded-xl text-sm bg-white outline-none transition-colors font-dm-sans text-[#1A1208] ${
+                deadlinePast
+                  ? "border-red-400"
+                  : "border-[#E8DDD0] focus:border-terracotta"
+              }`}
             />
+            {deadlinePast && (
+              <p className="text-xs text-red-500 mt-1.5">
+                The deadline can't be in the past.
+              </p>
+            )}
             {signingDeadline && (
               <button
                 type="button"
@@ -361,9 +394,9 @@ export default function EditCardPanel({
           <button
             type="button"
             onClick={handleSave}
-            disabled={isSaving || !hasChanges}
+            disabled={isSaving || !hasChanges || deadlinePast || emailInvalid}
             className={`flex-1 py-3 rounded-full text-sm font-medium transition-all font-dm-sans border-none ${
-              isSaving || !hasChanges
+              isSaving || !hasChanges || deadlinePast || emailInvalid
                 ? "bg-[#E8DDD0] text-[#C5B8AD] cursor-not-allowed"
                 : "bg-terracotta text-white hover:bg-[#C4734A] cursor-pointer shadow-[0_4px_16px_rgba(212,132,90,0.25)]"
             }`}
