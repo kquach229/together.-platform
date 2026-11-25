@@ -39,7 +39,7 @@ const faqs = [
   },
   {
     q: "What's included with every card?",
-    a: "Unlimited signers, photo uploads, all themes, scheduled delivery, PDF download, and permanent storage. Every card gets everything — there are no feature tiers.",
+    a: "Unlimited signers, photo uploads, all themes, scheduled delivery, and permanent storage. Every card gets everything — there are no feature tiers.",
   },
 ];
 
@@ -48,7 +48,6 @@ const features = [
   { emoji: "📷", label: "Photo uploads" },
   { emoji: "🎨", label: "All themes" },
   { emoji: "📬", label: "Scheduled delivery" },
-  { emoji: "📄", label: "PDF download" },
   { emoji: "🔒", label: "Permanent storage" },
 ];
 

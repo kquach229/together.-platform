@@ -64,7 +64,6 @@ const steps = [
       "Deliver instantly or schedule for a specific date and time",
       "Send via email directly or share the card link yourself",
       "Recipient sees all messages together in one beautiful page",
-      "Recipients can download the card as a PDF keepsake",
     ],
     emoji: "🎁",
     color: { from: "#E6F1FB", to: "#C8DFF5" },
