@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Image } from "lucide-react";
 import DeliverCardDialog from "./DeliverCardDialog";
+import { getTheme } from "@/lib/theme";
 
 interface CardGridItemProps {
   card: any;
@@ -32,6 +33,7 @@ const CardGridItem = ({
 }: CardGridItemProps) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openDeliverDialog, setOpenDeliverDialog] = useState(false);
+  const theme = getTheme(card.cardTheme);
   const router = useRouter();
 
   const actions = {
@@ -55,13 +57,15 @@ const CardGridItem = ({
           background: `linear-gradient(135deg,${card.theme.from},${card.theme.to})`,
         }}
       >
-        <div className="absolute top-3 left-4 text-[10px] font-medium tracking-[1.5px] uppercase text-[#C4734A]">
+        <div
+          style={{ color: theme.accent }}
+          className="absolute top-3 left-4 text-[10px] font-medium tracking-[1.5px] uppercase text-[#C4734A]"
+        >
           {card.emoji} {card.occasion}
         </div>
         <div
-          className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight ${
-            card.cardTheme === "midnight" ? "text-white" : "text-[#1A1208]"
-          }`}
+          style={{ color: theme.heading }}
+          className={`absolute bottom-3 left-4 font-playfair text-[18px] tracking-tight`}
         >
           {card.recipient}
         </div>
